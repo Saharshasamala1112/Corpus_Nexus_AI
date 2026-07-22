@@ -4,10 +4,10 @@
   "scripts": {
     "prepare": "husky"
   },
-  "devDependencies": {
-    "husky": "^9.1.0"
-  },
   "dependencies": {
     "axios": "^1.18.1"
+  },
+  "devDependencies": {
+    "husky": "^9.1.0"
   }
 }
