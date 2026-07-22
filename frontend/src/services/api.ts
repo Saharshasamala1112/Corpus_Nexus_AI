@@ -148,3 +148,79 @@ export async function getKnowledgeStatus(): Promise<KnowledgeStatusResponse> {
   const { data } = await client.get('/knowledge/status')
   return data
 }
+
+// ---------------------------------------------------------------------------
+// Explorer compatibility helpers
+// ---------------------------------------------------------------------------
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
+
+function getHeaders(): Record<string, string> {
+  const token = localStorage.getItem('token')
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+  }
+
+  return headers
+}
+
+async function apiFetch<T = unknown>(url: string, options: RequestInit = {}): Promise<T> {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...getHeaders(),
+      ...(options.headers || {}),
+    } as HeadersInit,
+  })
+
+  if (response.status === 401) {
+    localStorage.removeItem('token')
+    localStorage.removeItem('username')
+    localStorage.removeItem('phone')
+    window.location.href = '/login'
+    return Promise.reject(new Error('Unauthorized'))
+  }
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error((data as { detail?: string }).detail || 'API Error')
+  }
+
+  return data as T
+}
+
+export async function getProfile(): Promise<unknown> {
+  return apiFetch(`${API_URL}/profile`)
+}
+
+export async function searchRecords(query: string): Promise<unknown[]> {
+  return apiFetch(`${API_URL}/search?q=${encodeURIComponent(query)}`)
+}
+
+export async function getLanguages(): Promise<unknown[]> {
+  return apiFetch(`${API_URL}/languages`)
+}
+
+export async function getCategories(): Promise<unknown[]> {
+  return apiFetch(`${API_URL}/categories`)
+}
+
+export async function getRecords(): Promise<unknown[]> {
+  return apiFetch(`${API_URL}/records`)
+}
+
+export async function getRecord(id: string): Promise<unknown> {
+  return apiFetch(`${API_URL}/records/${id}`)
+}
+
+export async function askAssistant(record: unknown, question: string): Promise<unknown> {
+  return apiFetch(`${API_URL}/assistant/ask`, {
+    method: 'POST',
+    body: JSON.stringify({ record, question }),
+  })
+}

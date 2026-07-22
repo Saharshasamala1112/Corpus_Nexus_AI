@@ -1,0 +1,38 @@
+.result-card{
+
+    background:white;
+
+    border-radius:12px;
+
+    padding:20px;
+
+    margin:20px 0;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+
+    cursor:pointer;
+
+    transition:.3s;
+}
+
+.result-card:hover{
+
+    transform:translateY(-5px);
+
+    box-shadow:0 10px 25px rgba(0,0,0,.15);
+
+}
+
+.result-card h3{
+
+    color:#2563eb;
+
+    margin-bottom:10px;
+
+}
+
+.result-card p{
+
+    color:#555;
+
+}

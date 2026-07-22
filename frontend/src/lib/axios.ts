@@ -2,8 +2,10 @@ import axios from "axios";
 import { API_BASE_URL } from "../config/constants";
 import { getToken, removeToken } from "../utils/token";
 
+export const API_BASE = API_BASE_URL || "http://localhost:8000/api/v1";
+
 const api = axios.create({
-  baseURL: API_BASE_URL || "http://localhost:8000/api/v1",
+  baseURL: API_BASE,
   timeout: 120000,
   headers: {
     "Content-Type": "application/json",

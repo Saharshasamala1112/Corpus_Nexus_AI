@@ -105,47 +105,38 @@ def create_app() -> FastAPI:
     register_exception_handlers(app)
     app.include_router(api_v1_router)
 
+    @app.get("/health", tags=["health"])
+    async def root_health():
+        from app.database.session import engine as db_engine
+        from app.vectorstore import get_vector_store
+
+        checks: dict[str, HealthCheckResult] = {}
+
+        try:
+            async with db_engine.connect() as conn:
+                await conn.execute(text("SELECT 1"))
+            checks["database"] = HealthCheckResult(status="healthy")
+        except Exception as exc:
+            checks["database"] = HealthCheckResult(status="unhealthy", detail=str(exc))
+
+        try:
+            vs = get_vector_store()
+            vs_count = vs.count()
+            checks["vector_store"] = HealthCheckResult(
+                status="healthy", detail=f"{vs_count} documents indexed"
+            )
+        except Exception as exc:
+            checks["vector_store"] = HealthCheckResult(status="unhealthy", detail=str(exc))
+
+        all_healthy = all(c.status == "healthy" for c in checks.values())
+        return HealthResponse(
+            status="healthy" if all_healthy else "degraded",
+            version=settings.APP_VERSION,
+            service=settings.APP_NAME,
+            checks=checks,
+        )
+
     return app
 
 
 app = create_app()
-
-
-# ---------------------------------------------------------------------------
-# Root-level health endpoint (outside /api prefix for load balancers)
-# ---------------------------------------------------------------------------
-
-
-@app.get("/health", tags=["health"])
-async def root_health():
-    from app.database.session import engine as db_engine
-    from app.vectorstore import get_vector_store
-
-    checks: dict[str, HealthCheckResult] = {}
-
-    # Database check
-    try:
-        async with db_engine.connect() as conn:
-            await conn.execute(text("SELECT 1"))
-        checks["database"] = HealthCheckResult(status="healthy")
-    except Exception as exc:
-        checks["database"] = HealthCheckResult(status="unhealthy", detail=str(exc))
-
-    # Vector store check
-    try:
-        vs = get_vector_store()
-        vs_count = vs.count()
-        checks["vector_store"] = HealthCheckResult(
-            status="healthy", detail=f"{vs_count} documents indexed"
-        )
-    except Exception as exc:
-        checks["vector_store"] = HealthCheckResult(status="unhealthy", detail=str(exc))
-
-    settings = get_settings()
-    all_healthy = all(c.status == "healthy" for c in checks.values())
-    return HealthResponse(
-        status="healthy" if all_healthy else "degraded",
-        version=settings.APP_VERSION,
-        service=settings.APP_NAME,
-        checks=checks,
-    )

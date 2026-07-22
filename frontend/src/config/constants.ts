@@ -1,3 +1,1 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL;
-
-export const TOKEN_KEY = "corpus_token";
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";

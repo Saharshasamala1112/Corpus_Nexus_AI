@@ -86,12 +86,15 @@ function AIAssistantPage() {
           controller.signal
         )) {
           switch (event.type) {
-            case 'meta':
-              if (event.conversation_id && event.conversation_id !== convId) {
-                resolvedConversationId = event.conversation_id
-                setActiveConversation(event.conversation_id)
+            case 'meta': {
+              const conversationId =
+                typeof event.conversation_id === 'string' ? event.conversation_id : undefined
+              if (conversationId && conversationId !== convId) {
+                resolvedConversationId = conversationId
+                setActiveConversation(conversationId)
               }
               break
+            }
             case 'content':
               updateMessage(convId, assistantMessage.id, event.content as string)
               break

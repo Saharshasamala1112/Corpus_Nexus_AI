@@ -9,6 +9,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+        extra="ignore",
     )
 
     # Application
@@ -91,6 +92,10 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "json"
+
+    # Explorer compatibility
+    corpus_api_base_url: str = "http://127.0.0.1:8000"
+    corpus_api_token: str = ""
 
 
 @lru_cache
