@@ -1,22 +1,37 @@
-import axios from 'axios'
+import axios from "axios";
+import { API_BASE_URL } from "../config/constants";
+import { getToken, removeToken } from "../utils/token";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'
-
-const client = axios.create({
-  baseURL: API_BASE,
+const api = axios.create({
+  baseURL: API_BASE_URL || "http://localhost:8000/api/v1",
   timeout: 120000,
-  headers: { 'Content-Type': 'application/json' },
-})
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-client.interceptors.response.use(
+// Attach JWT token automatically
+api.interceptors.request.use((config) => {
+  const token = getToken();
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+// Handle unauthorized responses
+api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 429) {
-      console.warn('Rate limit exceeded, retrying...')
+    if (error.response?.status === 401) {
+      removeToken();
+      window.location.href = "/login";
     }
-    return Promise.reject(error)
-  }
-)
 
-export default client
-export { API_BASE }
+    return Promise.reject(error);
+  }
+);
+
+export default api;
