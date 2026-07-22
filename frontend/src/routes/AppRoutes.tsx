@@ -6,6 +6,8 @@ import Login from '@/pages/explorer/login'
 import Profile from '@/pages/explorer/profile'
 import Search from '@/pages/explorer/Search'
 import RecordDetails from '@/pages/explorer/RecordDetails'
+import OnboardingPage from '@/pages/onboarding'
+import TaskDetails from '@/pages/onboarding/TaskDetails'
 
 function AppRoutes() {
   return (
@@ -17,6 +19,8 @@ function AppRoutes() {
         <Route path="profile" element={<Profile />} />
         <Route path="search" element={<Search />} />
         <Route path="record/:id" element={<RecordDetails />} />
+        <Route path="onboarding" element={<OnboardingPage />} />
+        <Route path="onboarding/:id" element={<TaskDetails />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
