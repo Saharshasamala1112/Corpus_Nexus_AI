@@ -39,6 +39,13 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     LLM_MODEL: str = "gpt-4o"
 
+    # RAG / Knowledge
+    EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
+    VECTOR_STORE_TYPE: str = "in_memory"
+    CHUNK_SIZE: int = 800
+    CHUNK_OVERLAP: int = 150
+    TOP_K: int = 5
+
     # Logging
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "json"
