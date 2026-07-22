@@ -35,9 +35,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # LLM (placeholder)
+    # LLM
     OPENAI_API_KEY: str = ""
     LLM_MODEL: str = "gpt-4o"
+    LLM_TEMPERATURE: float = 0.1
+    LLM_MAX_TOKENS: int = 4096
 
     # RAG / Knowledge
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
@@ -45,6 +47,7 @@ class Settings(BaseSettings):
     CHUNK_SIZE: int = 800
     CHUNK_OVERLAP: int = 150
     TOP_K: int = 5
+    MIN_RELEVANCE_SCORE: float = 0.0
 
     # Logging
     LOG_LEVEL: str = "INFO"

@@ -1,10 +1,7 @@
-from typing import Any
-
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_async_session
-from app.dependencies.services import get_db_session
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.schemas.common import (
     HealthResponse,
@@ -16,7 +13,7 @@ from app.schemas.conversation import (
     ConversationListResponse,
     ConversationResponse,
 )
-from app.services.chat_service import ChatService
+from app.services.chat import RAGChatService
 from app.services.conversation_service import ConversationService
 from app.core.config import get_settings
 from app.core.logging import get_logger
@@ -32,13 +29,15 @@ router = APIRouter(prefix="/assistant", tags=["assistant"])
 
 async def _get_chat_service(
     session: AsyncSession = Depends(get_async_session),
-) -> ChatService:
+) -> RAGChatService:
     from app.repositories.conversation_repository import ConversationRepository
     from app.repositories.message_repository import MessageRepository
+    from app.generation import GenerationPipeline
 
-    return ChatService(
+    return RAGChatService(
         conversation_repo=ConversationRepository(session),
         message_repo=MessageRepository(session),
+        generation_pipeline=GenerationPipeline(),
     )
 
 
@@ -73,7 +72,7 @@ async def health_check() -> HealthResponse:
 @router.post("/chat", response_model=ChatResponse, summary="Send a chat message")
 async def chat(
     request: ChatRequest,
-    service: ChatService = Depends(_get_chat_service),
+    service: RAGChatService = Depends(_get_chat_service),
 ) -> ChatResponse:
     logger.info("Chat request: conversation_id=%s model=%s", request.conversation_id, request.model)
     return await service.send_message(request)

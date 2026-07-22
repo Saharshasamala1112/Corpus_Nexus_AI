@@ -17,7 +17,26 @@ class ChatRequest(BaseModel):
     model: str = Field(default="gpt-4o", description="Model to use for generation")
 
 
+class SourceReference(BaseModel):
+    filename: str
+    file_path: str
+    section: str
+
+
+class RetrievedDocument(BaseModel):
+    id: str
+    file_path: str
+    filename: str
+    score: float
+    document_type: str
+    language: str
+    chunk_index: int
+
+
 class ChatResponse(BaseModel):
     message: ChatMessage
     conversation_id: str
     model: str
+    confidence_score: float = 0.0
+    sources_used: list[str] = Field(default_factory=list)
+    retrieved_documents: list[RetrievedDocument] = Field(default_factory=list)
