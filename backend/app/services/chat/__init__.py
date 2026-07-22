@@ -4,7 +4,7 @@ from app.core.logging import get_logger
 from app.generation import GenerationPipeline, GeneratedResponse
 from app.repositories.conversation_repository import ConversationRepository
 from app.repositories.message_repository import MessageRepository
-from app.schemas.chat import ChatMessage, ChatRequest, ChatResponse
+from app.schemas.chat import ChatMessage, ChatRequest, ChatResponse, RetrievedDocument
 
 logger = get_logger("chat.service")
 
@@ -74,6 +74,11 @@ class RAGChatService:
             message=ChatMessage(role="assistant", content=assistant_content),
             conversation_id=conversation_id,
             model=request.model,
+            confidence_score=generation_result.confidence_score,
+            sources_used=generation_result.sources_used,
+            retrieved_documents=[
+                RetrievedDocument(**doc) for doc in generation_result.retrieved_documents
+            ],
         )
 
     def _format_response(self, query: str, result: GeneratedResponse) -> str:
