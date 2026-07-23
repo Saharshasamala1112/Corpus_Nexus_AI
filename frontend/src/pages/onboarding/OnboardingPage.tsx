@@ -4,7 +4,9 @@ import { onboardingTasks } from "./data/onboardingTasks";
 
 function OnboardingPage() {
     const completedTasks = 0;
+
     const pendingTasks = onboardingTasks.length - completedTasks;
+
     const progress = Math.round(
         (completedTasks / onboardingTasks.length) * 100
     );
@@ -40,8 +42,7 @@ function OnboardingPage() {
                             </h2>
 
                             <p className="mt-1 text-sm text-zinc-400">
-                                Work through the setup tasks to prepare your
-                                workspace.
+                                Work through the setup tasks to prepare your workspace.
                             </p>
                         </div>
 
@@ -54,6 +55,7 @@ function OnboardingPage() {
                         {onboardingTasks.map((task) => (
                             <TaskCard
                                 key={task.id}
+                                id={task.id}
                                 title={task.title}
                                 status={task.status}
                             />
