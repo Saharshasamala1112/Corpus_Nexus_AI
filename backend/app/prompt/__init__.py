@@ -170,7 +170,9 @@ def build_general_user_prompt(query: str) -> str:
     )
 
 
-def build_user_prompt(query: str, context_block: str = "", mode: RoutingMode = RoutingMode.RAG) -> str:
+def build_user_prompt(
+    query: str, context_block: str = "", mode: RoutingMode = RoutingMode.RAG
+) -> str:
     if mode == RoutingMode.GENERAL:
         return build_general_user_prompt(query)
     elif mode == RoutingMode.HYBRID:

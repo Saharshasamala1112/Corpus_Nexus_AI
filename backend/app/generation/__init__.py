@@ -50,7 +50,9 @@ class GenerationPipeline:
         query = sanitize_query(query)
         logger.info(
             "Generation pipeline started: query='%s' top_k=%d mode=%s",
-            query[:50], top_k, mode.value,
+            query[:50],
+            top_k,
+            mode.value,
         )
 
         if query == "I don't have enough information":
@@ -169,7 +171,9 @@ class GenerationPipeline:
 
         logger.info(
             "Generation complete: mode=%s confidence=%.2f sources=%d tokens=%s",
-            mode.value, confidence, len(sources_used),
+            mode.value,
+            confidence,
+            len(sources_used),
             llm_response.usage.get("total_tokens", "?"),
         )
 

@@ -34,18 +34,64 @@ _GREETING_PATTERNS: list[re.Pattern] = [
 ]
 
 _GENERAL_TOPIC_KEYWORDS: list[str] = [
-    "python", "javascript", "typescript", "react", "angular", "vue",
-    "docker", "kubernetes", "k8s", "aws", "azure", "gcp",
-    "api", "rest", "graphql", "microservices", "architecture",
-    "algorithm", "data structure", "design pattern", "oop", "functional programming",
-    "sql", "nosql", "mongodb", "postgresql", "redis", "mysql",
-    "git", "ci/cd", "devops", "ml", "machine learning", "deep learning",
-    "ai", "llm", "rag", "vector database", "embedding",
-    "linux", "bash", "shell", "command line", "terminal",
-    "testing", "unit test", "integration test", "tdd",
-    "performance", "optimization", "scalability",
-    "difference between", "what is", "how to", "tutorial",
-    "best practice", "example", "vs ",
+    "python",
+    "javascript",
+    "typescript",
+    "react",
+    "angular",
+    "vue",
+    "docker",
+    "kubernetes",
+    "k8s",
+    "aws",
+    "azure",
+    "gcp",
+    "api",
+    "rest",
+    "graphql",
+    "microservices",
+    "architecture",
+    "algorithm",
+    "data structure",
+    "design pattern",
+    "oop",
+    "functional programming",
+    "sql",
+    "nosql",
+    "mongodb",
+    "postgresql",
+    "redis",
+    "mysql",
+    "git",
+    "ci/cd",
+    "devops",
+    "ml",
+    "machine learning",
+    "deep learning",
+    "ai",
+    "llm",
+    "rag",
+    "vector database",
+    "embedding",
+    "linux",
+    "bash",
+    "shell",
+    "command line",
+    "terminal",
+    "testing",
+    "unit test",
+    "integration test",
+    "tdd",
+    "performance",
+    "optimization",
+    "scalability",
+    "difference between",
+    "what is",
+    "how to",
+    "tutorial",
+    "best practice",
+    "example",
+    "vs ",
 ]
 
 _PROJECT_SPECIFIC_PATTERNS: list[re.Pattern] = [
@@ -122,17 +168,21 @@ class ConfidenceRouter:
         elif max_score >= self.hybrid_threshold:
             mode = RoutingMode.HYBRID
             confidence = (max_score / self.rag_threshold) * 75.0
-            bypass_reason = (
-                f"max_score={max_score:.4f} >= hybrid_threshold={self.hybrid_threshold}"
-            )
+            bypass_reason = f"max_score={max_score:.4f} >= hybrid_threshold={self.hybrid_threshold}"
         else:
             mode = RoutingMode.GENERAL
-            confidence = (max_score / self.hybrid_threshold) * 40.0 if self.hybrid_threshold > 0 else 0.0
+            confidence = (
+                (max_score / self.hybrid_threshold) * 40.0 if self.hybrid_threshold > 0 else 0.0
+            )
             bypass_reason = f"max_score={max_score:.4f} < hybrid_threshold={self.hybrid_threshold}"
 
         logger.info(
             "Router decision: mode=%s confidence=%.2f max_score=%.4f intent=%s reason=%s",
-            mode.value, confidence, max_score, intent, bypass_reason,
+            mode.value,
+            confidence,
+            max_score,
+            intent,
+            bypass_reason,
         )
 
         return RouterDecision(
@@ -191,7 +241,9 @@ class AIRouter:
                 bypass_reason="greeting_detected",
             )
 
-        if not self.general_enabled and (max_score < self.confidence_router.hybrid_threshold or document_count == 0):
+        if not self.general_enabled and (
+            max_score < self.confidence_router.hybrid_threshold or document_count == 0
+        ):
             return RouterDecision(
                 mode=RoutingMode.RAG,
                 confidence=0.0,
