@@ -6,18 +6,18 @@ Enterprise AI copilot for codebase understanding with RAG, agentic AI, and strea
 
 ```
 ┌──────────────┐     ┌─────────────────────────────────────┐
-│   Frontend    │     │            Backend (FastAPI)         │
-│  (React/Vite) │────▶│  api/v1/  ──▶ services ──▶ llm/     │
-│               │     │    │            │            │       │
-│  Streaming    │     │    ├ assistant  ├ chat      ├ Ollama │
-│  SSE Events   │◀────│    ├ agent      ├ streaming └ mock   │
-│               │     │    └ knowledge  └ chat       │       │
-└──────────────┘     │                     │        │       │
-                     │              ┌──────┘        │       │
-                     │              ▼                ▼       │
-                     │         retrieval/       memory/      │
-                     │         rag/             generation/  │
-                     │         vectorstore/     prompt/      │
+│   Frontend   │     │            Backend (FastAPI)        │
+│  (React/Vite)│────▶│  api/v1/  ──▶ services ──▶ llm/     │
+│              │     │    │            │           │       │
+│  Streaming   │     │    ├ assistant  ├ chat      ├ Ollama│
+│  SSE Events  │◀────│    ├ agent      ├ streaming └ mock  │
+│              │     │    └ knowledge  └ chat       │      │
+└──────────────┘     │                     │        │      │
+                     │              ┌──────┘        │      │
+                     │              ▼               ▼      │
+                     │         retrieval/       memory/    │
+                     │         rag/             generation/│
+                     │         vectorstore/     prompt/    │
                      └─────────────────────────────────────┘
 ```
 
