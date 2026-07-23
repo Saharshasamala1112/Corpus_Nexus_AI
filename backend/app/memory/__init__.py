@@ -1,11 +1,9 @@
 import json
-import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
 from app.core.logging import get_logger
 from app.llm import BaseLLM, LLMMessage, get_llm
-from app.repositories.conversation_repository import ConversationRepository
 from app.repositories.message_repository import MessageRepository
 
 logger = get_logger("memory")
@@ -81,13 +79,9 @@ Follow-up questions:"""
 class ConversationMemoryManager:
     def __init__(
         self,
-        conversation_repo: ConversationRepository | None = None,
-        message_repo: MessageRepository | None = None,
         llm: BaseLLM | None = None,
         max_history_turns: int = 20,
     ):
-        self.conversation_repo = conversation_repo
-        self.message_repo = message_repo
         self.llm = llm or get_llm()
         self.max_history_turns = max_history_turns
         self._sessions: dict[str, SessionMemory] = {}
@@ -102,21 +96,9 @@ class ConversationMemoryManager:
         session_id: str,
         role: str,
         content: str,
-        conversation_id: str | None = None,
     ) -> None:
         session = self.get_or_create_session(session_id)
         session.add_entry(role, content)
-
-        if self.message_repo and conversation_id:
-            try:
-                await self.message_repo.create(
-                    message_id=str(uuid.uuid4()),
-                    conversation_id=conversation_id,
-                    role=role,
-                    content=content,
-                )
-            except Exception as e:
-                logger.warning("Failed to persist message to DB: %s", e)
 
         if session.turn_count > 0 and session.turn_count % 5 == 0:
             await self._summarize_context(session_id)
@@ -125,12 +107,13 @@ class ConversationMemoryManager:
         self,
         conversation_id: str,
         session_id: str,
+        message_repo: MessageRepository | None = None,
     ) -> SessionMemory:
         session = self.get_or_create_session(session_id)
 
-        if self.message_repo and self.conversation_repo:
+        if message_repo:
             try:
-                messages = await self.message_repo.list_by_conversation(conversation_id)
+                messages = await message_repo.list_by_conversation(conversation_id)
                 for msg in messages:
                     session.add_entry(msg.role, msg.content)
 

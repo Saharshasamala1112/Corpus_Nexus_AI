@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
+from app.core.security import require_auth
 from app.database.session import get_async_session
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.schemas.common import (
@@ -138,6 +139,7 @@ async def create_conversation(
 async def delete_conversation(
     conversation_id: str,
     service: ConversationService = Depends(_get_conversation_service),
+    user_id: str = Depends(require_auth),
 ) -> None:
     await service.delete_conversation(conversation_id)
 

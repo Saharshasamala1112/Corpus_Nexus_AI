@@ -49,8 +49,37 @@ INSTRUCTION_BOUNDARY_START = "[INST]"
 INSTRUCTION_BOUNDARY_END = "[/INST]"
 
 
+_INJECTION_PATTERNS = [
+    "ignore previous instructions",
+    "ignore all instructions",
+    "forget everything",
+    "you are now",
+    "act as a",
+    "pretend to be",
+    "override",
+    "new instruction",
+    "system prompt",
+    "you must",
+    "you will",
+    "disregard",
+    "you are free",
+    "you can now",
+    "do not follow",
+    "ignore the above",
+    "ignore your",
+    "forget your",
+]
+
+
 def sanitize_query(query: str) -> str:
-    return query.replace(INSTRUCTION_BOUNDARY_START, "").replace(INSTRUCTION_BOUNDARY_END, "")
+    safe = query.replace(INSTRUCTION_BOUNDARY_START, "").replace(INSTRUCTION_BOUNDARY_END, "")
+    safe_lower = safe.lower()
+    for pattern in _INJECTION_PATTERNS:
+        if pattern in safe_lower:
+            from app.core.logging import get_logger
+            get_logger("prompt").warning("Prompt injection pattern detected: '%s'", pattern)
+            safe = safe.replace(pattern, "[redacted]")
+    return safe
 
 
 def build_user_prompt(query: str, context_block: str) -> str:

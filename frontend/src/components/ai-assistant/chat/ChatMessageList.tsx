@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { memo, useEffect } from 'react'
 import { useAutoScroll } from '@/hooks/useAutoScroll'
 import type { Message } from '@/types/chat'
 import ChatMessage from './ChatMessage'
@@ -9,7 +9,10 @@ interface ChatMessageListProps {
   isGenerating: boolean
 }
 
-function ChatMessageList({ messages, isGenerating }: ChatMessageListProps) {
+const ChatMessageList = memo(function ChatMessageList({
+  messages,
+  isGenerating,
+}: ChatMessageListProps) {
   const { scrollRef, scrollIfAutoScrolling } = useAutoScroll()
 
   useEffect(() => {
@@ -30,6 +33,6 @@ function ChatMessageList({ messages, isGenerating }: ChatMessageListProps) {
       <div id="scroll-anchor" className="h-px" />
     </div>
   )
-}
+})
 
 export default ChatMessageList

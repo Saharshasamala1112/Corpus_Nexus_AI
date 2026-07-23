@@ -1,4 +1,5 @@
 import time
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -34,6 +35,31 @@ class RateLimitExceeded(Exception):
     pass
 
 
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    settings = get_settings()
+    setup_logging()
+    logger.info("Starting %s v%s", settings.APP_NAME, settings.APP_VERSION)
+
+    if settings.JWT_SECRET_KEY == "change-me-in-production":
+        logger.warning("JWT_SECRET_KEY is set to default value -- update in production!")
+
+    await init_database(settings)
+
+    yield
+
+    _rate_limit_store.clear()
+    logger.info("Shutting down %s", settings.APP_NAME)
+
+
+async def init_database(settings) -> None:
+    from app.database.session import init_db
+
+    await init_db()
+    db_type = "PostgreSQL/production" if "sqlite" not in settings.DATABASE_URL else "SQLite/development"
+    logger.info("Database initialized (%s)", db_type)
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
 
@@ -43,11 +69,8 @@ def create_app() -> FastAPI:
         description="Enterprise AI copilot for codebase understanding",
         docs_url="/docs",
         redoc_url="/redoc",
+        lifespan=lifespan,
     )
-
-    # ---------------------------------------------------------------------------
-    # Middleware
-    # ---------------------------------------------------------------------------
 
     app.add_middleware(
         CORSMiddleware,
@@ -91,41 +114,8 @@ def create_app() -> FastAPI:
         )
         return response
 
-    # ---------------------------------------------------------------------------
-    # Exception handlers
-    # ---------------------------------------------------------------------------
-
     register_exception_handlers(app)
-
-    # ---------------------------------------------------------------------------
-    # Routes
-    # ---------------------------------------------------------------------------
-
     app.include_router(api_v1_router)
-
-    # ---------------------------------------------------------------------------
-    # Lifecycle
-    # ---------------------------------------------------------------------------
-
-    @app.on_event("startup")
-    async def on_startup() -> None:
-        setup_logging()
-        logger.info("Starting %s v%s", settings.APP_NAME, settings.APP_VERSION)
-
-        if "sqlite" not in settings.DATABASE_URL:
-            from app.database.session import init_db
-
-            await init_db()
-            logger.info("Database initialized (PostgreSQL/production)")
-        else:
-            from app.database.session import init_db
-
-            await init_db()
-            logger.info("Database initialized (SQLite/development)")
-
-    @app.on_event("shutdown")
-    async def on_shutdown() -> None:
-        logger.info("Shutting down %s", settings.APP_NAME)
 
     return app
 

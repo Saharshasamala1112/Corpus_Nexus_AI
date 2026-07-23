@@ -15,7 +15,7 @@ class Conversation(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False, default="New conversation")
-    model: Mapped[str] = mapped_column(String(50), nullable=False, default="gpt-4o")
+    model: Mapped[str] = mapped_column(String(50), nullable=False, default="llama3.2")
     user_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, nullable=False

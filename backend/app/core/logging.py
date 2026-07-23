@@ -6,7 +6,7 @@ from app.core.config import get_settings
 
 request_id_var: ContextVar[str | None] = ContextVar("request_id", default=None)
 
-LOG_FORMATTER = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+LOG_FORMATTER = "%(asctime)s | %(levelname)-8s | %(name)s | %(request_id)s | %(message)s"
 
 
 class RequestContextFilter(logging.Filter):

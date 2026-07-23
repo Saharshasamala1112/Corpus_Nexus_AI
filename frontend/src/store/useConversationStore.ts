@@ -55,7 +55,7 @@ export function useConversationStore() {
       messages: [],
       createdAt: now,
       updatedAt: now,
-      model: 'gpt-4o',
+      model: 'llama3.2',
     }
     setState((prev) => ({
       conversations: [newConv, ...prev.conversations],

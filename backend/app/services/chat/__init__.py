@@ -45,12 +45,12 @@ class RAGChatService:
             session_id=conversation_id,
             role="user",
             content=user_message_content,
-            conversation_id=conversation_id,
         )
 
         await self.memory_manager.load_conversation_history(
             conversation_id=conversation_id,
             session_id=conversation_id,
+            message_repo=self.message_repo,
         )
 
         generation_result = await self.generation_pipeline.generate(
@@ -64,7 +64,6 @@ class RAGChatService:
             session_id=conversation_id,
             role="assistant",
             content=assistant_content,
-            conversation_id=conversation_id,
         )
 
         follow_up_questions = await self.memory_manager.generate_followup_questions(

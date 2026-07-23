@@ -52,6 +52,7 @@ class Settings(BaseSettings):
     # RAG / Knowledge
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
     VECTOR_STORE_TYPE: str = "in_memory"
+    VECTOR_STORE_PATH: str = "./chroma_db"
     CHUNK_SIZE: int = 800
     CHUNK_OVERLAP: int = 150
     TOP_K: int = 5

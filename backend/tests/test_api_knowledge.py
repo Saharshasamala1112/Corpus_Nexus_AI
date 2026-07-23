@@ -2,14 +2,21 @@
 
 import pytest
 
+from app.core.security import create_access_token
+
 
 @pytest.fixture
 def client():
     from fastapi.testclient import TestClient
 
     from app.main import app
-
     return TestClient(app)
+
+
+@pytest.fixture
+def auth_header():
+    token = create_access_token(subject="test-user")
+    return {"Authorization": f"Bearer {token}"}
 
 
 class TestKnowledgeStatus:
@@ -22,14 +29,15 @@ class TestKnowledgeStatus:
 
 
 class TestKnowledgeIndex:
-    def test_index_missing_path(self, client):
+    def test_index_missing_path(self, client, auth_header):
         response = client.post(
             "/api/v1/knowledge/index",
             json={"repository_path": "/nonexistent/path", "repository_name": "test"},
+            headers=auth_header,
         )
         assert response.status_code == 404
 
-    def test_index_hidden_directory(self, client):
+    def test_index_hidden_directory(self, client, auth_header):
         import os
         import tempfile
 
@@ -39,8 +47,16 @@ class TestKnowledgeIndex:
             response = client.post(
                 "/api/v1/knowledge/index",
                 json={"repository_path": hidden, "repository_name": "test"},
+                headers=auth_header,
             )
             assert response.status_code == 400
+
+    def test_index_requires_auth(self, client):
+        response = client.post(
+            "/api/v1/knowledge/index",
+            json={"repository_path": "/tmp", "repository_name": "test"},
+        )
+        assert response.status_code == 401
 
 
 class TestKnowledgeSearch:

@@ -36,10 +36,11 @@ class PDFParser(BaseParser):
                 page = doc[page_num]
                 text_parts.append(page.get_text())
 
+            total_pages = len(doc)
             doc.close()
             content = "\n\n".join(text_parts)
 
-            metadata["total_pages"] = len(doc)
+            metadata["total_pages"] = total_pages
             metadata["file_size_bytes"] = path.stat().st_size
 
             return ParsedDocument(content=content, metadata=metadata)

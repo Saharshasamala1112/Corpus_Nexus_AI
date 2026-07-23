@@ -64,6 +64,7 @@ class StreamingChatService:
         await self.memory_manager.load_conversation_history(
             conversation_id=conversation_id,
             session_id=conversation_id,
+            message_repo=self.message_repo,
         )
 
         retrieval_results = await self.generation_pipeline.retrieval.search(

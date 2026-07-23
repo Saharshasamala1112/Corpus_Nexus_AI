@@ -31,7 +31,8 @@ class BaseLLM(ABC):
         temperature: float = 0.1,
         max_tokens: int = 4096,
     ):
-        yield await self.chat(messages, temperature=temperature, max_tokens=max_tokens)
+        response = await self.chat(messages, temperature=temperature, max_tokens=max_tokens)
+        yield response.content
 
     @property
     @abstractmethod

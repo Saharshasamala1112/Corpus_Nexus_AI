@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 class ConversationCreate(BaseModel):
     title: str = Field(default="New conversation", max_length=255)
-    model: str = Field(default="gpt-4o", max_length=50)
+    model: str = Field(default="llama3.2", max_length=50)
 
 
 class ConversationResponse(BaseModel):

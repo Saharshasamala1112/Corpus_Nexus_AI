@@ -112,15 +112,12 @@ class GenerationPipeline:
 
         related_docs = doc_summaries[3:] if len(doc_summaries) > 3 else []
 
-        repos = list(
-            {
-                doc.get("repository", "") or doc.get("file_path", "").split("/")[0]
-                if "/" in doc.get("file_path", "")
-                else ""
-                for doc in retrieval_results
-            }
-        )
-        related_repos = [r for r in repos if r]
+        repos = set()
+        for r in retrieval_results:
+            repo = r.metadata.get("repository", "") or r.metadata.get("file_path", "").split("/")[0]
+            if repo:
+                repos.add(repo)
+        related_repos = list(repos)
 
         logger.info(
             "Generation complete: confidence=%.2f sources=%d tokens=%s",

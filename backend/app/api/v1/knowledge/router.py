@@ -3,7 +3,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.core.logging import get_logger
-from app.core.security import get_current_user
+from app.core.security import require_auth
 from app.indexing import IndexingOrchestrator
 from app.retrieval import SemanticSearch
 from app.schemas.knowledge import (
@@ -52,7 +52,7 @@ def _get_search() -> SemanticSearch:
 @router.post("/index", response_model=IndexResponse, summary="Index a repository")
 async def index_repository(
     request: IndexRequest,
-    user_id: str | None = Depends(get_current_user),
+    user_id: str = Depends(require_auth),
 ) -> IndexResponse:
     validated = _validate_path(request.repository_path)
     orchestrator = _get_orchestrator()
@@ -123,7 +123,10 @@ async def get_status() -> KnowledgeStatusResponse:
 
 
 @router.post("/reindex", response_model=ReindexResponse, summary="Reindex a repository")
-async def reindex_repository(request: IndexRequest) -> ReindexResponse:
+async def reindex_repository(
+    request: IndexRequest,
+    user_id: str = Depends(require_auth),
+) -> ReindexResponse:
     orchestrator = _get_orchestrator()
     try:
         result = await orchestrator.reindex_repository(
