@@ -61,7 +61,9 @@ function TaskDetails() {
       return
     }
 
-    saveTask(currentTask.id, previewUrls)
+    if (currentTask) {
+      saveTask(currentTask.id, previewUrls)
+    }
 
     alert('Task marked as completed.')
 
@@ -74,13 +76,13 @@ function TaskDetails() {
         &larr; Back
       </button>
 
-      <h1>{currentTask.title}</h1>
+      <h1>{currentTask?.title}</h1>
 
       <span className={`badge ${isCompleted ? 'completed' : 'pending'}`}>
         {isCompleted ? 'Completed' : 'Pending'}
       </span>
 
-      <p className="description">{currentTask.description}</p>
+      <p className="description">{currentTask?.description}</p>
 
       <div className="upload-section">
         <h3>Evidence Upload</h3>

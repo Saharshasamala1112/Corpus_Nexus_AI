@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom'
 import AIAssistant from '../../components/explorer/AIAssistant'
 
 interface ExplorerRecord {
+  [key: string]: unknown
   title?: string
   username?: string
   description?: string
