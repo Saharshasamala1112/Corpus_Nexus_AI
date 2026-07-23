@@ -103,9 +103,31 @@ frontend/src/
 | `uvicorn app.main:app --reload` | `backend/` | API server |
 
 ## Team
-
-- Meghana Vanamoju
-- Himavantha Reddy
-- Ramireddy Niteesha
-- Akshaya
-- Saharsha
+e merge conflict in AppRoutes - Meghana Vanamoju - Himavantha Reddy - 
+Ramireddy Niteesha - Akshaya - Saharsha
+| | |\ /
+| |/|
+| * | 1a8d408 Merge branch 'feature/sprintwise' into 'develop'
+| |\ \ * | d872647 feat(sprintwise): add onboarding empty states and 
+| | navigation * | 40b3e90 feat(sprint): implement SprintWise dashboard, 
+| | projects, team and gene
+rator
+| | * | 2c9448a deleted duplicate files * | 05887d2 feat(sprint): implement 
+| | SprintWise dashboard UI * | 9f24df8 feat(sprint): add initial dashboard 
+| | components * | f772049 feat(sprint): add sprint landing page * | 2a4c967 
+| | feat(sprint): add sprint layout and navigation * | 0e173a6 chore(sprint): 
+| | create sprint module structure
+| |/ /
+| * | c428a08 Merge branch 'feature/onboarding' into 'develop'
+| |\ \ * | 6066285 refactor onboarding module and improve code quality
+(END)
+| | * | 40b3e90 feat(sprint): implement SprintWise dashboard, projects, team 
+| | and generator * | 2c9448a deleted duplicate files * | 05887d2 
+| | feat(sprint): implement SprintWise dashboard UI * | 9f24df8 feat(sprint): 
+| | add initial dashboard components * | f772049 feat(sprint): add sprint 
+| | landing page * | 2a4c967 feat(sprint): add sprint layout and navigation * 
+| | | 0e173a6 chore(sprint): create sprint module structure
+| |/ /
+| * | c428a08 Merge branch 'feature/onboarding' into 'develop'
+| |\ \ * | 6066285 refactor onboarding module and improve code quality
+(END)
