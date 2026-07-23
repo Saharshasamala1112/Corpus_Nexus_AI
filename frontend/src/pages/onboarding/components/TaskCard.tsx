@@ -22,7 +22,13 @@ function TaskCard({ id, title, status }: TaskCardProps) {
                     </p>
                 </div>
 
-                <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-amber-300">
+                <span
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.2em] ${
+                        status === "Completed"
+                            ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                            : "border border-amber-500/30 bg-amber-500/10 text-amber-300"
+                    }`}
+                >
                     {status}
                 </span>
             </div>
@@ -31,7 +37,7 @@ function TaskCard({ id, title, status }: TaskCardProps) {
                 onClick={() => navigate(`/onboarding/task/${id}`)}
                 className="mt-5 inline-flex items-center rounded-full border border-violet-500/30 bg-violet-500/10 px-3.5 py-2 text-sm font-medium text-violet-300 transition hover:bg-violet-500/20"
             >
-                Start
+                {status === "Completed" ? "View" : "Start"}
             </button>
         </div>
     );
