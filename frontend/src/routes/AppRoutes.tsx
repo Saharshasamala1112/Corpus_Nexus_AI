@@ -8,14 +8,21 @@ import Search from '@/pages/explorer/Search'
 import RecordDetails from '@/pages/explorer/RecordDetails'
 import OnboardingPage from '@/pages/onboarding'
 import TaskDetails from '@/pages/onboarding/TaskDetails'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 function AppRoutes() {
   return (
     <Routes>
-      <Route element={<MainLayout />}>
+      <Route path="login" element={<Login />} />
+      <Route
+        element={
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<DashboardPage />} />
         <Route path="ai-assistant" element={<AIAssistantPage />} />
-        <Route path="login" element={<Login />} />
         <Route path="profile" element={<Profile />} />
         <Route path="search" element={<Search />} />
         <Route path="record/:id" element={<RecordDetails />} />
