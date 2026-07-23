@@ -1,51 +1,77 @@
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight, Sparkles, Zap } from "lucide-react";
 
-export default function DashboardHero() {
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+type DashboardHeroProps = {
+    className?: string;
+};
+
+export default function DashboardHero({ className }: DashboardHeroProps) {
     return (
-        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-violet-700 via-violet-600 to-fuchsia-600 p-8 shadow-xl">
-            <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-            <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+        <section
+            className={cn(
+                "relative overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-violet-600/25 via-indigo-500/20 to-cyan-500/20 p-6 shadow-[0_20px_80px_rgba(15,23,42,0.45)] sm:p-8 lg:p-10",
+                className
+            )}
+        >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(34,211,238,0.16),_transparent_28%)]" />
+            <div className="absolute -left-12 top-8 h-28 w-28 rounded-full bg-fuchsia-500/20 blur-3xl" />
+            <div className="absolute bottom-0 right-0 h-36 w-36 rounded-full bg-cyan-400/20 blur-3xl" />
+
+            <div className="relative grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
                 <div className="max-w-2xl">
-                    <p className="mb-2 text-sm font-medium uppercase tracking-[0.3em] text-violet-100">
-                        SprintWise AI
-                    </p>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm font-medium text-slate-100 backdrop-blur">
+                        <Sparkles className="h-4 w-4 text-cyan-300" />
+                        <span>SprintWise AI</span>
+                    </div>
 
-                    <h1 className="text-4xl font-bold leading-tight text-white lg:text-5xl">
+                    <h2 className="mt-5 text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
                         Build better sprints with AI
-                    </h1>
+                    </h2>
 
-                    <p className="mt-4 text-lg leading-8 text-violet-100">
-                        Plan projects, organize teams, generate sprint backlogs,
-                        and monitor delivery—all from a single workspace inside
-                        Corpus Nexus AI.
+                    <p className="mt-4 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
+                        Plan projects, organize teams, and generate high-impact sprint workflows with intelligent guidance built for modern product teams.
                     </p>
 
-                    <div className="mt-8 flex flex-wrap gap-4">
-                        <button className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 font-semibold text-violet-700 transition hover:scale-105">
-                            <Plus size={18} />
+                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                        <Button type="button" variant="default" className="w-full sm:w-auto">
+                            <Sparkles className="h-4 w-4" />
                             New Project
-                        </button>
-
-                        <button className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20">
+                        </Button>
+                        <Button type="button" variant="outline" className="w-full sm:w-auto">
                             Explore Projects
-                            <ArrowRight size={18} />
-                        </button>
+                            <ArrowRight className="h-4 w-4" />
+                        </Button>
                     </div>
                 </div>
 
-                <div className="flex h-60 w-full max-w-sm items-center justify-center rounded-2xl border border-white/15 bg-white/10 backdrop-blur">
-                    <div className="text-center">
-                        <p className="text-sm uppercase tracking-widest text-violet-200">
-                            AI Workspace
-                        </p>
+                <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur sm:p-5">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-slate-400">Sprint Pulse</p>
+                            <p className="mt-1 text-lg font-semibold text-white">Weekly overview</p>
+                        </div>
+                        <div className="rounded-full bg-emerald-500/15 p-2 text-emerald-300">
+                            <Zap className="h-4 w-4" />
+                        </div>
+                    </div>
 
-                        <h2 className="mt-3 text-3xl font-bold text-white">
-                            Sprint Hub
-                        </h2>
-
-                        <p className="mt-4 text-violet-100">
-                            Projects • Teams • Planning • Insights
-                        </p>
+                    <div className="mt-5 grid grid-cols-2 gap-3">
+                        {[
+                            ["Active Projects", "12"],
+                            ["AI Suggestions", "48"],
+                            ["Velocity", "87%"],
+                            ["Team Capacity", "92%"],
+                        ].map(([label, value]) => (
+                            <div
+                                key={label}
+                                className="rounded-xl border border-white/10 bg-white/5 px-3 py-3"
+                            >
+                                <p className="text-xs text-slate-400">{label}</p>
+                                <p className="mt-1 text-base font-semibold text-white">{value}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>

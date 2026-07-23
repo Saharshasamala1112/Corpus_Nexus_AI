@@ -12,24 +12,20 @@ type StatsCardProps = {
     className?: string;
 };
 
-const colorMap = {
+const palette = {
     cyan: {
-        ring: "ring-cyan-400/20",
         icon: "bg-cyan-500/15 text-cyan-300",
         badge: "bg-cyan-500/10 text-cyan-200",
     },
     violet: {
-        ring: "ring-violet-400/20",
         icon: "bg-violet-500/15 text-violet-300",
         badge: "bg-violet-500/10 text-violet-200",
     },
     emerald: {
-        ring: "ring-emerald-400/20",
         icon: "bg-emerald-500/15 text-emerald-300",
         badge: "bg-emerald-500/10 text-emerald-200",
     },
     amber: {
-        ring: "ring-amber-400/20",
         icon: "bg-amber-500/15 text-amber-300",
         badge: "bg-amber-500/10 text-amber-200",
     },
@@ -44,13 +40,12 @@ export default function StatsCard({
     color = "cyan",
     className,
 }: StatsCardProps) {
-    const palette = colorMap[color];
+    const styles = palette[color];
 
     return (
         <article
             className={cn(
-                "group rounded-xl border border-white/10 bg-slate-950/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-400/20 hover:shadow-lg hover:shadow-cyan-500/10",
-                palette.ring,
+                "group rounded-xl border border-white/10 bg-slate-950/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-400/20 hover:shadow-lg hover:shadow-cyan-500/10 sm:p-5",
                 className
             )}
         >
@@ -63,7 +58,7 @@ export default function StatsCard({
                 </div>
 
                 {icon ? (
-                    <div className={cn("rounded-lg p-2.5", palette.icon)}>
+                    <div className={cn("rounded-lg p-2.5", styles.icon)}>
                         {icon}
                     </div>
                 ) : null}
@@ -75,7 +70,7 @@ export default function StatsCard({
                 ) : null}
 
                 {trend ? (
-                    <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium", palette.badge)}>
+                    <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium", styles.badge)}>
                         {trend}
                     </span>
                 ) : null}
