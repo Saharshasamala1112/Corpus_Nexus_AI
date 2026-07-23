@@ -2,25 +2,16 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import MainLayout from '@/layouts/MainLayout'
 import DashboardPage from '@/pages/dashboard'
 import AIAssistantPage from '@/pages/ai-assistant'
-import Login from '@/pages/explorer/login'
 import Profile from '@/pages/explorer/profile'
 import Search from '@/pages/explorer/Search'
 import RecordDetails from '@/pages/explorer/RecordDetails'
 import OnboardingPage from '@/pages/onboarding'
 import TaskDetails from '@/pages/onboarding/TaskDetails'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="login" element={<Login />} />
-      <Route
-        element={
-          <ProtectedRoute>
-            <MainLayout />
-          </ProtectedRoute>
-        }
-      >
+      <Route element={<MainLayout />}>
         <Route index element={<DashboardPage />} />
         <Route path="ai-assistant" element={<AIAssistantPage />} />
         <Route path="profile" element={<Profile />} />

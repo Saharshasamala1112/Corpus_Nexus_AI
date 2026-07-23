@@ -1,9 +1,7 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import '../../styles/Navbar.css'
 
 export default function Navbar() {
-  const navigate = useNavigate()
-
   const token = localStorage.getItem('token')
   const username = localStorage.getItem('username')
 
@@ -11,8 +9,6 @@ export default function Navbar() {
     localStorage.removeItem('token')
     localStorage.removeItem('username')
     localStorage.removeItem('phone')
-
-    navigate('/login')
   }
 
   return (
@@ -47,8 +43,6 @@ export default function Navbar() {
             </button>
           </>
         )}
-
-        {!token && <Link to="/login">Login</Link>}
       </div>
     </nav>
   )

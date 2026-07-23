@@ -1,4 +1,4 @@
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import AIAssistantButton from '@/components/ai-assistant/AIAssistantButton'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
@@ -6,7 +6,6 @@ import LanguageSwitcher from '@/components/LanguageSwitcher'
 function MainLayout() {
   const { t } = useTranslation()
   const location = useLocation()
-  const navigate = useNavigate()
   const hideFAB = location.pathname === '/ai-assistant'
   const username = localStorage.getItem('username')
 
@@ -14,7 +13,6 @@ function MainLayout() {
     localStorage.removeItem('token')
     localStorage.removeItem('username')
     localStorage.removeItem('phone')
-    navigate('/login')
   }
 
   return (
