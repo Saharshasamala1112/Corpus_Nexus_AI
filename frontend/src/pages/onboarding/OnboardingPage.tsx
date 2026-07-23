@@ -1,23 +1,13 @@
 import ProgressSummary from "./components/ProgressSummary";
 import TaskCard from "./components/TaskCard";
-
-type Task = {
-    title: string;
-    status: string;
-};
+import { onboardingTasks } from "./data/onboardingTasks";
 
 function OnboardingPage() {
-    const tasks: Task[] = [
-        { title: "Install Linux Environment", status: "Pending" },
-        { title: "Configure Git & GitLab", status: "Pending" },
-        { title: "Setup Docker", status: "Pending" },
-        { title: "Install Development Tools", status: "Pending" },
-        { title: "Verify Development Environment", status: "Pending" },
-    ];
-
     const completedTasks = 0;
-    const pendingTasks = tasks.length - completedTasks;
-    const progress = Math.round((completedTasks / tasks.length) * 100);
+    const pendingTasks = onboardingTasks.length - completedTasks;
+    const progress = Math.round(
+        (completedTasks / onboardingTasks.length) * 100
+    );
 
     return (
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-10 shadow-2xl shadow-black/20">
@@ -30,13 +20,13 @@ function OnboardingPage() {
             </h1>
 
             <p className="mt-3 max-w-2xl text-base text-zinc-400">
-                Complete the required onboarding tasks to prepare your development
-                environment and begin contributing to the project.
+                Complete the required onboarding tasks to prepare your
+                development environment and begin contributing to the project.
             </p>
 
             <div className="mt-8 space-y-6">
                 <ProgressSummary
-                    totalTasks={tasks.length}
+                    totalTasks={onboardingTasks.length}
                     completedTasks={completedTasks}
                     pendingTasks={pendingTasks}
                     progress={progress}
@@ -50,19 +40,20 @@ function OnboardingPage() {
                             </h2>
 
                             <p className="mt-1 text-sm text-zinc-400">
-                                Work through the setup tasks to prepare your workspace.
+                                Work through the setup tasks to prepare your
+                                workspace.
                             </p>
                         </div>
 
                         <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-sm font-medium text-violet-300">
-                            {completedTasks}/{tasks.length} done
+                            {completedTasks}/{onboardingTasks.length} done
                         </span>
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        {tasks.map((task) => (
+                        {onboardingTasks.map((task) => (
                             <TaskCard
-                                key={task.title}
+                                key={task.id}
                                 title={task.title}
                                 status={task.status}
                             />
