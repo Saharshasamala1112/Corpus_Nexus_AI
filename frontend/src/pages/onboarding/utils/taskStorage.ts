@@ -6,13 +6,17 @@ export type CompletedTask = {
 };
 
 export function getProgress(): Record<number, CompletedTask> {
-    const data = localStorage.getItem(STORAGE_KEY);
+    try {
+        const data = localStorage.getItem(STORAGE_KEY);
 
-    if (!data) {
+        if (!data) {
+            return {};
+        }
+
+        return JSON.parse(data);
+    } catch {
         return {};
     }
-
-    return JSON.parse(data);
 }
 
 export function saveTask(id: number, image: string) {

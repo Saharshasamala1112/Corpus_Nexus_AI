@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ChangeEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { onboardingTasks } from "./data/onboardingTasks";
@@ -22,8 +23,10 @@ function TaskDetailsPage() {
         );
     }
 
+    const currentTask = task;
+
     const progress = getProgress();
-    const completedTask = progress[task.id];
+    const completedTask = progress[currentTask.id];
 
     const isCompleted = completedTask?.completed ?? false;
 
@@ -34,9 +37,11 @@ function TaskDetailsPage() {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     async function handleImageChange(
-        event: React.ChangeEvent<HTMLInputElement>
+        event: ChangeEvent<HTMLInputElement>
     ) {
-        if (!event.target.files?.length) return;
+        if (!event.target.files?.length) {
+            return;
+        }
 
         const file = event.target.files[0];
 
@@ -58,7 +63,7 @@ function TaskDetailsPage() {
             return;
         }
 
-        saveTask(task.id, image);
+        saveTask(currentTask.id, image);
 
         alert("Task marked as completed.");
 
@@ -67,7 +72,6 @@ function TaskDetailsPage() {
 
     return (
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-10 shadow-2xl shadow-black/20">
-
             <Link
                 to="/onboarding"
                 className="text-violet-400 hover:text-violet-300"
@@ -80,11 +84,11 @@ function TaskDetailsPage() {
             </p>
 
             <h1 className="mt-4 text-3xl font-semibold text-white">
-                {task.title}
+                {currentTask.title}
             </h1>
 
             <p className="mt-6 max-w-3xl text-base leading-8 text-zinc-400">
-                {task.description}
+                {currentTask.description}
             </p>
 
             <a
@@ -156,7 +160,6 @@ function TaskDetailsPage() {
                     />
                 </div>
             )}
-
         </div>
     );
 }
