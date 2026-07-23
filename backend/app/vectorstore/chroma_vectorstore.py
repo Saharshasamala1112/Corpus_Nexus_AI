@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -32,13 +33,17 @@ class ChromaVectorStore(BaseVectorStore):
             return
         import chromadb
 
-        self._client = chromadb.PersistentClient(path=str(self._persist_dir))
-        self._collection = self._client.get_or_create_collection(
-            name=self._collection_name,
-            metadata={"hnsw:space": "cosine"},
-        )
+        def _init():
+            client = chromadb.PersistentClient(path=str(self._persist_dir))
+            collection = client.get_or_create_collection(
+                name=self._collection_name,
+                metadata={"hnsw:space": "cosine"},
+            )
+            count = collection.count()
+            return client, collection, count
+
+        self._client, self._collection, count = await asyncio.to_thread(_init)
         self._initialized = True
-        count = self._collection.count()
         logger.info("ChromaDB initialized: path=%s documents=%d", self._persist_dir, count)
 
     async def insert(self, records: list[VectorRecord]) -> int:
@@ -48,14 +53,18 @@ class ChromaVectorStore(BaseVectorStore):
         metadatas = [r.metadata for r in records]
         documents = [r.content for r in records]
 
-        self._collection.add(
-            ids=ids,
-            embeddings=embeddings,
-            metadatas=metadatas,
-            documents=documents,
-        )
-        logger.info("ChromaDB insert: %d records", len(records))
-        return len(records)
+        def _insert():
+            self._collection.add(
+                ids=ids,
+                embeddings=embeddings,
+                metadatas=metadatas,
+                documents=documents,
+            )
+            return len(records)
+
+        count = await asyncio.to_thread(_insert)
+        logger.info("ChromaDB insert: %d records", count)
+        return count
 
     async def search(
         self,
@@ -66,11 +75,14 @@ class ChromaVectorStore(BaseVectorStore):
         await self._ensure_init()
         where = filter_metadata or None
 
-        results = self._collection.query(
-            query_embeddings=[query_embedding],
-            n_results=top_k,
-            where=where,
-        )
+        def _search():
+            return self._collection.query(
+                query_embeddings=[query_embedding],
+                n_results=top_k,
+                where=where,
+            )
+
+        results = await asyncio.to_thread(_search)
 
         if not results["ids"]:
             return []
@@ -95,18 +107,30 @@ class ChromaVectorStore(BaseVectorStore):
 
     async def delete(self, ids: list[str]) -> int:
         await self._ensure_init()
-        existing = self._collection.get(ids=ids)
-        if existing and existing["ids"]:
-            self._collection.delete(ids=existing["ids"])
-        return len(existing["ids"]) if existing else 0
+
+        def _delete():
+            existing = self._collection.get(ids=ids)
+            if existing and existing["ids"]:
+                self._collection.delete(ids=existing["ids"])
+            return len(existing["ids"]) if existing else 0
+
+        return await asyncio.to_thread(_delete)
 
     async def delete_by_filter(self, filter_metadata: dict) -> int:
         await self._ensure_init()
-        existing = self._collection.get(where=filter_metadata)
-        if existing and existing["ids"]:
-            self._collection.delete(ids=existing["ids"])
-        return len(existing["ids"]) if existing else 0
+
+        def _delete():
+            existing = self._collection.get(where=filter_metadata)
+            if existing and existing["ids"]:
+                self._collection.delete(ids=existing["ids"])
+            return len(existing["ids"]) if existing else 0
+
+        return await asyncio.to_thread(_delete)
 
     async def count(self) -> int:
         await self._ensure_init()
-        return self._collection.count()
+
+        def _count():
+            return self._collection.count()
+
+        return await asyncio.to_thread(_count)

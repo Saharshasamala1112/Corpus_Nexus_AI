@@ -1,7 +1,7 @@
 import uuid
 
 from app.core.logging import get_logger
-from app.generation import GeneratedResponse, GenerationPipeline
+from app.generation import GenerationPipeline
 from app.memory import get_memory_manager
 from app.repositories.conversation_repository import ConversationRepository
 from app.repositories.message_repository import MessageRepository
@@ -10,7 +10,7 @@ from app.schemas.chat import ChatMessage, ChatRequest, ChatResponse, RetrievedDo
 logger = get_logger("chat.service")
 
 
-class RAGChatService:
+class BaseChatService:
     def __init__(
         self,
         conversation_repo: ConversationRepository,
@@ -22,24 +22,44 @@ class RAGChatService:
         self.generation_pipeline = generation_pipeline or GenerationPipeline()
         self.memory_manager = get_memory_manager()
 
-    async def send_message(self, request: ChatRequest) -> ChatResponse:
-        conversation_id = request.conversation_id
-        user_message_content = request.message.strip()
-
+    async def _ensure_conversation(
+        self, conversation_id: str | None, content: str, model: str
+    ) -> str:
         if not conversation_id:
             conversation_id = str(uuid.uuid4())
-            title = self._derive_title(user_message_content)
             await self.conversation_repo.create(
                 conversation_id=conversation_id,
-                title=title,
-                model=request.model,
+                title=self._derive_title(content),
+                model=model,
             )
-
         conversation = await self.conversation_repo.get_by_id(conversation_id)
         if not conversation:
             from app.core.exceptions import NotFoundException
 
             raise NotFoundException("Conversation", conversation_id)
+        return conversation_id
+
+    async def _load_memory(self, conversation_id: str) -> None:
+        await self.memory_manager.load_conversation_history(
+            conversation_id=conversation_id,
+            session_id=conversation_id,
+            message_repo=self.message_repo,
+        )
+
+    def _derive_title(self, message: str) -> str:
+        if len(message) <= 60:
+            return message
+        return message[:57] + "..."
+
+
+class RAGChatService(BaseChatService):
+    async def send_message(self, request: ChatRequest) -> ChatResponse:
+        conversation_id = request.conversation_id
+        user_message_content = request.message.strip()
+
+        conversation_id = await self._ensure_conversation(
+            conversation_id, user_message_content, request.model
+        )
 
         await self.memory_manager.add_to_session(
             session_id=conversation_id,
@@ -47,18 +67,14 @@ class RAGChatService:
             content=user_message_content,
         )
 
-        await self.memory_manager.load_conversation_history(
-            conversation_id=conversation_id,
-            session_id=conversation_id,
-            message_repo=self.message_repo,
-        )
+        await self._load_memory(conversation_id)
 
         generation_result = await self.generation_pipeline.generate(
             query=user_message_content,
             top_k=5,
         )
 
-        assistant_content = self._format_response(user_message_content, generation_result)
+        assistant_content = generation_result.answer
 
         await self.memory_manager.add_to_session(
             session_id=conversation_id,
@@ -98,11 +114,3 @@ class RAGChatService:
             token_usage=generation_result.token_usage,
             follow_up_questions=follow_up_questions,
         )
-
-    def _format_response(self, query: str, result: GeneratedResponse) -> str:
-        return result.answer
-
-    def _derive_title(self, message: str) -> str:
-        if len(message) <= 60:
-            return message
-        return message[:57] + "..."

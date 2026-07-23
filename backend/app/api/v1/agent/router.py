@@ -56,7 +56,7 @@ async def agent_chat(
 
 @router.get("/tools", summary="List available agent tools")
 async def list_tools():
-    from app.agent import get_tool_executor
+    from app.agent.executor import get_tool_executor
 
     executor = get_tool_executor()
     return {"tools": executor.get_available_tools()}

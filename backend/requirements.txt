@@ -19,3 +19,9 @@ chromadb>=0.6.0
 
 # PDF parsing
 PyMuPDF>=1.25.0
+
+# Database migrations
+alembic>=1.14.0
+
+# Caching / Rate limiting
+redis>=5.2.0

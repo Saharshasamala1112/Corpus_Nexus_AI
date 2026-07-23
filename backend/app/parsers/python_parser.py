@@ -24,24 +24,9 @@ class PythonParser(BaseParser):
             return content
 
         for node in ast.iter_child_nodes(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                docstring = ast.get_docstring(node) or ""
-                parts.append(
-                    f"def {node.name}():\n    {docstring}" if docstring else f"def {node.name}()"
-                )
-            elif isinstance(node, ast.ClassDef):
-                docstring = ast.get_docstring(node) or ""
-                methods = [
-                    n.name
-                    for n in node.body
-                    if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
-                ]
-                header = f"class {node.name}:"
-                if docstring:
-                    header += f"\n    {docstring}"
-                if methods:
-                    header += f"\n    Methods: {', '.join(methods)}"
-                parts.append(header)
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                source = ast.get_source_segment(content, node) or ""
+                parts.append(source)
             elif isinstance(node, ast.Assign):
                 targets = [self._get_name(t) for t in node.targets]
                 parts.append(f"{' = '.join(targets)} = ...")

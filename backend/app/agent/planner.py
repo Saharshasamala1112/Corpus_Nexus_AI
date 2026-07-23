@@ -163,6 +163,7 @@ class AgentPlanner:
 
     def _parse_plan(self, llm_output: str) -> list[dict]:
         import json
+        import re as _re
 
         text = llm_output.strip()
         if text.startswith("```"):
@@ -172,15 +173,29 @@ class AgentPlanner:
         try:
             parsed = json.loads(text)
             if isinstance(parsed, list):
-                valid = []
-                known_tools = {t.value for t in ToolType}
-                for item in parsed:
-                    if isinstance(item, dict) and item.get("tool") in known_tools:
-                        valid.append(item)
-                return valid
+                return self._filter_known_tools(parsed)
         except (json.JSONDecodeError, TypeError):
-            logger.warning("Failed to parse LLM plan output as JSON")
+            pass
+
+        m = _re.search(r"(\[[\s\S]*?\])", text)
+        if m:
+            try:
+                parsed = json.loads(m.group(1))
+                if isinstance(parsed, list):
+                    return self._filter_known_tools(parsed)
+            except (json.JSONDecodeError, TypeError):
+                pass
+
+        logger.warning("Failed to parse LLM plan output as JSON")
         return []
+
+    def _filter_known_tools(self, items: list) -> list[dict]:
+        known_tools = {t.value for t in ToolType}
+        valid = []
+        for item in items:
+            if isinstance(item, dict) and item.get("tool") in known_tools:
+                valid.append(item)
+        return valid
 
 
 _planner: AgentPlanner | None = None

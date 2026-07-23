@@ -13,10 +13,16 @@ class ErrorResponse(BaseModel):
     error: ErrorDetail
 
 
+class HealthCheckResult(BaseModel):
+    status: str
+    detail: str | None = None
+
+
 class HealthResponse(BaseModel):
     status: str = "healthy"
     version: str
     service: str
+    checks: dict[str, HealthCheckResult] | None = None
 
 
 class SuggestionItem(BaseModel):

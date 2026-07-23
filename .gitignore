@@ -18,3 +18,12 @@ frontend/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Database
+*.db
+backend/chroma_db/
+
+# Cache directories
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/

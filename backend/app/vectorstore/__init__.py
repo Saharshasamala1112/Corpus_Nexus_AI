@@ -1,7 +1,9 @@
 from app.core.config import get_settings
+from app.core.logging import get_logger
 from app.vectorstore.base import BaseVectorStore
 
 _vector_store: BaseVectorStore | None = None
+_logger = get_logger("vectorstore")
 
 
 def get_vector_store() -> BaseVectorStore:
@@ -11,14 +13,14 @@ def get_vector_store() -> BaseVectorStore:
         store_type = settings.VECTOR_STORE_TYPE.lower()
         if store_type == "chroma":
             from app.vectorstore.chroma_vectorstore import ChromaVectorStore
+
             _vector_store = ChromaVectorStore()
-            from app.core.logging import get_logger
-            get_logger("vectorstore").info("Using ChromaDB vector store")
+            _logger.info("Using ChromaDB vector store")
         else:
             from app.vectorstore.in_memory_vectorstore import InMemoryVectorStore
+
             _vector_store = InMemoryVectorStore()
-            from app.core.logging import get_logger
-            get_logger("vectorstore").info("Using in-memory vector store (no persistence)")
+            _logger.info("Using in-memory vector store (no persistence)")
     return _vector_store
 
 

@@ -46,8 +46,8 @@ export function useConversationStore() {
 
   const activeConversation = store.conversations.find((c) => c.id === store.activeConversationId)
 
-  const createConversation = useCallback((title?: string) => {
-    const id = `conv_${++idCounter}`
+  const createConversation = useCallback((title?: string, serverId?: string) => {
+    const id = serverId || `conv_${++idCounter}`
     const now = new Date()
     const newConv: Conversation = {
       id,
@@ -59,7 +59,7 @@ export function useConversationStore() {
     }
     setState((prev) => ({
       conversations: [newConv, ...prev.conversations],
-      activeConversationId: id,
+      activeConversationId: serverId ? prev.activeConversationId : id,
     }))
     return id
   }, [])

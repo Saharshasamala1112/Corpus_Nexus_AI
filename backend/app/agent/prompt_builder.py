@@ -140,52 +140,46 @@ class AgentPromptBuilder:
     def _extract_sources(self, tool_calls: list[ToolCall]) -> list[SourceReference]:
         sources = []
         seen = set()
+
+        def _find_paths(obj: object) -> None:
+            if isinstance(obj, dict):
+                path = obj.get("path") or obj.get("file_path") or ""
+                if path and isinstance(path, str) and path not in seen:
+                    seen.add(path)
+                    sources.append(
+                        SourceReference(
+                            file_path=path,
+                            file_name=path.split("/")[-1] if "/" in path else path,
+                            score=obj.get("score", 0.0),
+                        )
+                    )
+                for v in obj.values():
+                    _find_paths(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    _find_paths(item)
+
         for tc in tool_calls:
-            if not tc.success:
-                continue
-            result = tc.result
-            for key in [
-                "results",
-                "endpoints",
-                "tables",
-                "projects",
-                "setup_steps",
-                "documentation_references",
-                "setup_sources",
-                "configs",
-                "docker_configs",
-                "redis_configs",
-                "celery_configs",
-                "other_configs",
-            ]:
-                items = result.get(key, [])
-                if isinstance(items, list):
-                    for item in items:
-                        if isinstance(item, dict):
-                            path = item.get("path", item.get("file_path", ""))
-                            if path and path not in seen:
-                                seen.add(path)
-                                sources.append(
-                                    SourceReference(
-                                        file_path=path,
-                                        file_name=path.split("/")[-1] if "/" in path else path,
-                                        score=item.get("score", 0.0),
-                                    )
-                                )
+            if tc.success:
+                _find_paths(tc.result)
         return sources
 
     def _extract_scores(self, tool_calls: list[ToolCall]) -> list[float]:
         scores = []
+
+        def _find_scores(obj: object) -> None:
+            if isinstance(obj, dict):
+                if "score" in obj and isinstance(obj["score"], (int, float)):
+                    scores.append(obj["score"])
+                for v in obj.values():
+                    _find_scores(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    _find_scores(item)
+
         for tc in tool_calls:
-            if not tc.success:
-                continue
-            result = tc.result
-            for key in ["results", "endpoints", "tables", "projects"]:
-                items = result.get(key, [])
-                if isinstance(items, list):
-                    for item in items:
-                        if isinstance(item, dict) and "score" in item:
-                            scores.append(item["score"])
+            if tc.success:
+                _find_scores(tc.result)
         return scores if scores else [0.5]
 
     def _fallback_response(self, query: str, tool_calls: list[ToolCall]) -> str:

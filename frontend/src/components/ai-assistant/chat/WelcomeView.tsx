@@ -1,6 +1,5 @@
 import { Bot, Sparkles, ArrowUpRight } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { useConversationStore } from '@/store/useConversationStore'
 import { SUGGESTED_PROMPTS } from '@/utils/constants'
 
 interface WelcomeViewProps {
@@ -8,10 +7,7 @@ interface WelcomeViewProps {
 }
 
 function WelcomeView({ onSendPrompt }: WelcomeViewProps) {
-  const { createConversation } = useConversationStore()
-
   const handlePrompt = (prompt: string) => {
-    createConversation(prompt)
     onSendPrompt(prompt)
   }
 

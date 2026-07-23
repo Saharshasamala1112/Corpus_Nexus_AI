@@ -4,31 +4,16 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 
 from app.api.v1.router import api_v1_router
 from app.core.config import get_settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import get_logger, request_id_var, setup_logging
+from app.core.rate_limiter import check_rate_limit, clear_rate_limiter, close_rate_limiter
+from app.schemas.common import HealthCheckResult, HealthResponse
 
 logger = get_logger("main")
-
-_rate_limit_store: dict[str, list[float]] = {}
-
-
-def _rate_limiter(request: Request) -> None:
-    settings = get_settings()
-    if not settings.RATE_LIMIT_ENABLED:
-        return
-    client_ip = request.client.host if request.client else "unknown"
-    now = time.time()
-    window = settings.RATE_LIMIT_WINDOW_SECONDS
-    max_requests = settings.RATE_LIMIT_MAX_REQUESTS
-    timestamps = _rate_limit_store.get(client_ip, [])
-    timestamps = [t for t in timestamps if now - t < window]
-    if len(timestamps) >= max_requests:
-        raise RateLimitExceeded()
-    timestamps.append(now)
-    _rate_limit_store[client_ip] = timestamps
 
 
 class RateLimitExceeded(Exception):
@@ -48,7 +33,8 @@ async def lifespan(application: FastAPI):
 
     yield
 
-    _rate_limit_store.clear()
+    await close_rate_limiter()
+    clear_rate_limiter()
     logger.info("Shutting down %s", settings.APP_NAME)
 
 
@@ -56,7 +42,9 @@ async def init_database(settings) -> None:
     from app.database.session import init_db
 
     await init_db()
-    db_type = "PostgreSQL/production" if "sqlite" not in settings.DATABASE_URL else "SQLite/development"
+    db_type = (
+        "PostgreSQL/production" if "sqlite" not in settings.DATABASE_URL else "SQLite/development"
+    )
     logger.info("Database initialized (%s)", db_type)
 
 
@@ -83,9 +71,9 @@ def create_app() -> FastAPI:
     @app.middleware("http")
     async def rate_limit_middleware(request: Request, call_next):
         if request.url.path.startswith("/api/"):
-            try:
-                _rate_limiter(request)
-            except RateLimitExceeded:
+            client_ip = request.client.host if request.client else "unknown"
+            allowed = await check_rate_limit(client_ip)
+            if not allowed:
                 return JSONResponse(
                     status_code=429,
                     content={
@@ -121,3 +109,43 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+
+
+# ---------------------------------------------------------------------------
+# Root-level health endpoint (outside /api prefix for load balancers)
+# ---------------------------------------------------------------------------
+
+
+@app.get("/health", tags=["health"])
+async def root_health():
+    from app.database.session import engine as db_engine
+    from app.vectorstore import get_vector_store
+
+    checks: dict[str, HealthCheckResult] = {}
+
+    # Database check
+    try:
+        async with db_engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        checks["database"] = HealthCheckResult(status="healthy")
+    except Exception as exc:
+        checks["database"] = HealthCheckResult(status="unhealthy", detail=str(exc))
+
+    # Vector store check
+    try:
+        vs = get_vector_store()
+        vs_count = vs.count()
+        checks["vector_store"] = HealthCheckResult(
+            status="healthy", detail=f"{vs_count} documents indexed"
+        )
+    except Exception as exc:
+        checks["vector_store"] = HealthCheckResult(status="unhealthy", detail=str(exc))
+
+    settings = get_settings()
+    all_healthy = all(c.status == "healthy" for c in checks.values())
+    return HealthResponse(
+        status="healthy" if all_healthy else "degraded",
+        version=settings.APP_VERSION,
+        service=settings.APP_NAME,
+        checks=checks,
+    )

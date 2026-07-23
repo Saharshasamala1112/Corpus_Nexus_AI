@@ -1,6 +1,5 @@
 """Tests for generation pipeline and response building."""
 
-
 from app.generation import GeneratedResponse
 from app.retrieval import RetrievalResult
 

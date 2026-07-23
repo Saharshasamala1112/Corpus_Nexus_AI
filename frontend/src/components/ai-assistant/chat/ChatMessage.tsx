@@ -17,8 +17,18 @@ function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === 'user'
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(message.content)
-    setCopied(true)
+    try {
+      navigator.clipboard.writeText(message.content)
+      setCopied(true)
+    } catch {
+      const ta = document.createElement('textarea')
+      ta.value = message.content
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+      setCopied(true)
+    }
     setTimeout(() => setCopied(false), 2000)
   }
 

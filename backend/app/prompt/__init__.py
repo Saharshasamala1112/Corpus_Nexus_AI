@@ -77,6 +77,7 @@ def sanitize_query(query: str) -> str:
     for pattern in _INJECTION_PATTERNS:
         if pattern in safe_lower:
             from app.core.logging import get_logger
+
             get_logger("prompt").warning("Prompt injection pattern detected: '%s'", pattern)
             safe = safe.replace(pattern, "[redacted]")
     return safe

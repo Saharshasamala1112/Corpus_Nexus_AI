@@ -49,16 +49,25 @@ class PDFParser(BaseParser):
             return self._fallback_parse(path, metadata)
 
     def _fallback_parse(self, path: Path, metadata: dict) -> ParsedDocument:
+        try:
+            import magic
+
+            mime = magic.from_file(str(path), mime=True)
+        except ImportError:
+            mime = ""
+
+        if mime and mime != "text/plain":
+            return ParsedDocument(
+                content=f"[PDF document: {path.name} — requires PyMuPDF for text extraction]",
+                metadata=metadata,
+            )
+
         text_part = self._read_file(str(path))
         content_lines = []
-        in_binary = False
         for line in text_part.split("\n"):
-            if any(c in line for c in ["\x00", "\xff", "\xfe"]):
-                in_binary = True
-            if not in_binary and line.strip():
-                printable = sum(1 for c in line if 32 <= ord(c) <= 126 or c in "\t\r")
-                if len(line) > 0 and printable / len(line) > 0.6:
-                    content_lines.append(line)
+            printable = sum(1 for c in line if 32 <= ord(c) <= 126 or c in "\t\r")
+            if len(line) > 0 and printable / len(line) > 0.6 and line.strip():
+                content_lines.append(line)
 
         content = "\n".join(content_lines) if content_lines else f"[PDF document: {path.name}]"
         metadata["document_type"] = "pdf"

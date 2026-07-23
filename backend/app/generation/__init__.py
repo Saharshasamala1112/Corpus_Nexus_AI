@@ -5,6 +5,8 @@ from app.citation import compute_confidence, extract_citations
 from app.context import BuiltContext as BuiltContext
 from app.context import build_context_from_results
 from app.core.logging import get_logger
+from app.core.output_validator import validate_output
+from app.core.prompt_injection import sanitize_query
 from app.llm import BaseLLM, LLMMessage, get_llm
 from app.prompt import build_system_prompt, build_user_prompt
 from app.retrieval import RetrievalResult as RetrievalResult
@@ -41,7 +43,23 @@ class GenerationPipeline:
         filter_metadata: dict | None = None,
         min_relevance_score: float = 0.0,
     ) -> GeneratedResponse:
+        original_query = query
+        query = sanitize_query(query)
         logger.info("Generation pipeline started: query='%s' top_k=%d", query[:50], top_k)
+
+        # Short-circuit on prompt injection — no LLM call needed
+        if query == "I don't have enough information":
+            logger.info("Short-circuited due to prompt injection detection")
+            return GeneratedResponse(
+                answer="I don't have enough information",
+                confidence_score=0.0,
+                sources_used=[],
+                retrieved_documents=[],
+                model=self.llm.model if hasattr(self.llm, "model") else "unknown",
+                related_documents=[],
+                related_repositories=[],
+                token_usage={},
+            )
 
         retrieval_results = await self.retrieval.search(
             query=query,
@@ -79,6 +97,8 @@ class GenerationPipeline:
         ]
 
         llm_response = await self.llm.chat(messages=messages)
+
+        llm_response.content = validate_output(original_query, llm_response.content)
 
         citation_result = extract_citations(llm_response.content)
 

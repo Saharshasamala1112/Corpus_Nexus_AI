@@ -1,4 +1,4 @@
-import { type ReactNode, useState, useRef, useEffect } from 'react'
+import React, { type ReactNode, useState, useRef, useEffect, useId } from 'react'
 import { cn } from '@/lib/utils'
 
 interface TooltipProps {
@@ -11,9 +11,11 @@ interface TooltipProps {
 function Tooltip({ children, content, side = 'top', shortcut }: TooltipProps) {
   const [visible, setVisible] = useState(false)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const tooltipId = useId()
 
   const show = () => {
-    timeoutRef.current = setTimeout(() => setVisible(true), 400)
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    timeoutRef.current = setTimeout(() => setVisible(true), 200)
   }
 
   const hide = () => {
@@ -34,11 +36,22 @@ function Tooltip({ children, content, side = 'top', shortcut }: TooltipProps) {
     right: 'left-full top-1/2 -translate-y-1/2 ml-2',
   }
 
+  const child = React.Children.only(children) as React.ReactElement
+
+  const trigger = React.cloneElement(child, {
+    onMouseEnter: show,
+    onMouseLeave: hide,
+    onFocus: show,
+    onBlur: hide,
+    'aria-describedby': visible ? tooltipId : undefined,
+  })
+
   return (
-    <div className="relative inline-flex" onMouseEnter={show} onMouseLeave={hide}>
-      {children}
+    <div className="relative inline-flex">
+      {trigger}
       {visible && (
         <div
+          id={tooltipId}
           role="tooltip"
           className={cn(
             'pointer-events-none absolute z-50 whitespace-nowrap rounded-md bg-foreground px-2.5 py-1.5 text-xs text-background shadow-md animate-in fade-in-0 zoom-in-95',

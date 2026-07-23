@@ -1,7 +1,7 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useConversationStore } from '@/store/useConversationStore'
 import { useChatStore } from '@/store/useChatStore'
-import { sendChatMessage } from '@/services/api'
+import { streamChatMessage, listConversations } from '@/services/api'
 import type { Message } from '@/types/chat'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import Sidebar from '@/components/ai-assistant/sidebar/Sidebar'
@@ -12,6 +12,7 @@ function AIAssistantPage() {
   const {
     activeConversation,
     activeConversationId,
+    conversations,
     createConversation,
     addMessage,
     updateMessage,
@@ -21,6 +22,26 @@ function AIAssistantPage() {
   } = useConversationStore()
 
   const { isGenerating, setGenerating, setStreaming } = useChatStore()
+
+  const abortRef = useRef<AbortController | null>(null)
+  const syncGuard = useRef(false)
+
+  useEffect(() => {
+    if (syncGuard.current) return
+    syncGuard.current = true
+    listConversations()
+      .then((res) => {
+        const serverConvs = res.conversations || []
+        const localIds = new Set(conversations.map((c) => c.id))
+        for (const sc of serverConvs) {
+          if (!localIds.has(sc.id)) {
+            createConversation(sc.title, sc.id)
+          }
+        }
+      })
+      .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleSend = useCallback(
     async (content: string) => {
@@ -50,27 +71,53 @@ function AIAssistantPage() {
       setGenerating(true)
       setStreaming(true)
 
+      const controller = new AbortController()
+      abortRef.current = controller
+
+      let resolvedConversationId = convId
+
       try {
-        const response = await sendChatMessage({
-          message: content,
-          conversation_id:
-            convId !== activeConversationId ? convId : activeConversationId || undefined,
-        })
-
-        updateMessage(convId, assistantMessage.id, response.message.content)
-
-        updateMessageMetadata(convId, assistantMessage.id, {
-          confidence_score: response.confidence_score,
-          sources_used: response.sources_used,
-          retrieved_documents: response.retrieved_documents,
-        })
-
-        updateMessageStreaming(convId, assistantMessage.id, false)
-
-        if (response.conversation_id && response.conversation_id !== convId) {
-          setActiveConversation(response.conversation_id)
+        for await (const event of streamChatMessage(
+          {
+            message: content,
+            conversation_id:
+              convId !== activeConversationId ? convId : activeConversationId || undefined,
+          },
+          controller.signal
+        )) {
+          switch (event.type) {
+            case 'meta':
+              if (event.conversation_id && event.conversation_id !== convId) {
+                resolvedConversationId = event.conversation_id
+                setActiveConversation(event.conversation_id)
+              }
+              break
+            case 'content':
+              updateMessage(convId, assistantMessage.id, event.content as string)
+              break
+            case 'done': {
+              const done = event as Record<string, unknown>
+              updateMessageMetadata(convId, assistantMessage.id, {
+                confidence_score: done.confidence_score as number,
+                sources_used: done.sources_used as string[],
+              })
+              updateMessageStreaming(convId, assistantMessage.id, false)
+              if (resolvedConversationId !== convId) {
+                setActiveConversation(resolvedConversationId)
+              }
+              break
+            }
+            case 'documents':
+              updateMessageMetadata(convId, assistantMessage.id, {
+                retrieved_documents: (event as Record<string, unknown>).documents as [],
+              })
+              break
+            case 'error':
+              throw new Error((event as Record<string, unknown>).message as string)
+          }
         }
       } catch (error) {
+        if ((error as Error).name === 'AbortError') return
         const errorMsg =
           error instanceof Error ? error.message : 'Failed to get response from server'
         updateMessage(
@@ -80,6 +127,7 @@ function AIAssistantPage() {
         )
         updateMessageStreaming(convId, assistantMessage.id, false)
       } finally {
+        abortRef.current = null
         setGenerating(false)
         setStreaming(false)
       }
@@ -98,6 +146,7 @@ function AIAssistantPage() {
   )
 
   const handleStop = useCallback(() => {
+    abortRef.current?.abort()
     setGenerating(false)
     setStreaming(false)
   }, [setGenerating, setStreaming])

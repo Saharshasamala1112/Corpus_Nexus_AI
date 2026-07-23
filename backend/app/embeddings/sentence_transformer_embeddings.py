@@ -19,10 +19,12 @@ class SentenceTransformerEmbeddingService(BaseEmbeddingService):
 
     async def embed_texts(self, texts: list[str]) -> list[list[float]]:
         import asyncio
-        embeddings = await asyncio.to_thread(self._model.encode, texts, False, False)
+
+        embeddings = await asyncio.to_thread(self._model.encode, texts, show_progress_bar=False)
         return [e.tolist() for e in embeddings]
 
     async def embed_query(self, text: str) -> list[float]:
         import asyncio
-        embedding = await asyncio.to_thread(self._model.encode, [text], False, False)
+
+        embedding = await asyncio.to_thread(self._model.encode, [text], show_progress_bar=False)
         return embedding[0].tolist()

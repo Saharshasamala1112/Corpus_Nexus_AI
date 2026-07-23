@@ -176,18 +176,11 @@ export interface ConversationItem {
   updated_at: string
 }
 
+export type ConversationResponse = ConversationItem
+
 export interface ConversationListResponse {
   conversations: ConversationItem[]
   total: number
-}
-
-export interface ConversationResponse {
-  id: string
-  title: string
-  model: string
-  message_count: number
-  created_at: string
-  updated_at: string
 }
 
 export interface SuggestionItem {
