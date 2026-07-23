@@ -10,33 +10,33 @@ import StatsCard from "@/components/sprint/common/StatsCard";
 const stats = [
     {
         title: "Projects",
-        value: "24",
-        subtitle: "Active initiatives",
-        trend: "+12%",
+        value: "0",
+        subtitle: "No active projects",
+        trend: "",
         icon: <FolderKanban className="h-5 w-5" />,
         color: "cyan" as const,
     },
     {
         title: "Team Members",
-        value: "18",
-        subtitle: "Cross-functional crew",
-        trend: "+4",
+        value: "0",
+        subtitle: "Invite your team",
+        trend: "",
         icon: <Users className="h-5 w-5" />,
         color: "violet" as const,
     },
     {
-        title: "AI Sprints",
-        value: "9",
-        subtitle: "Automated workflows",
-        trend: "Live",
+        title: "Sprint Plans",
+        value: "0",
+        subtitle: "Generate your first sprint",
+        trend: "",
         icon: <Sparkles className="h-5 w-5" />,
         color: "emerald" as const,
     },
     {
         title: "Velocity",
-        value: "87%",
-        subtitle: "Delivery confidence",
-        trend: "+8%",
+        value: "--",
+        subtitle: "Available after your first sprint",
+        trend: "",
         icon: <Activity className="h-5 w-5" />,
         color: "amber" as const,
     },
@@ -58,4 +58,4 @@ export default function StatsOverview() {
             ))}
         </section>
     );
-}
+}   

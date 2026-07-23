@@ -12,7 +12,6 @@ export default function SprintPage() {
             <PageHeader
                 title="SprintWise AI"
                 description="Plan, manage, and generate AI-powered sprints for your engineering teams."
-                actionLabel="New Project"
             />
 
             <SprintNavigation />

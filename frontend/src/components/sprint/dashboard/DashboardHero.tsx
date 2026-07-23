@@ -1,4 +1,5 @@
 import { ArrowRight, Sparkles, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -8,6 +9,8 @@ type DashboardHeroProps = {
 };
 
 export default function DashboardHero({ className }: DashboardHeroProps) {
+    const navigate = useNavigate();
+
     return (
         <section
             className={cn(
@@ -31,47 +34,81 @@ export default function DashboardHero({ className }: DashboardHeroProps) {
                     </h2>
 
                     <p className="mt-4 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
-                        Plan projects, organize teams, and generate high-impact sprint workflows with intelligent guidance built for modern product teams.
+                        Create your first project, invite your team, and generate
+                        AI-powered sprint plans. Everything you need to organize
+                        modern product development in one place.
                     </p>
 
                     <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                        <Button type="button" variant="default" className="w-full sm:w-auto">
+                        <Button
+                            type="button"
+                            className="w-full sm:w-auto"
+                            onClick={() => navigate("/sprintwise-ai/projects")}
+                        >
                             <Sparkles className="h-4 w-4" />
                             New Project
                         </Button>
-                        <Button type="button" variant="outline" className="w-full sm:w-auto">
+
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full sm:w-auto"
+                            onClick={() => navigate("/sprintwise-ai/projects")}
+                        >
                             Explore Projects
                             <ArrowRight className="h-4 w-4" />
                         </Button>
                     </div>
                 </div>
 
-                <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur sm:p-5">
+                <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-5 backdrop-blur">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-slate-400">Sprint Pulse</p>
-                            <p className="mt-1 text-lg font-semibold text-white">Weekly overview</p>
+                            <p className="text-sm text-slate-400">
+                                Workspace Overview
+                            </p>
+
+                            <p className="mt-1 text-lg font-semibold text-white">
+                                Get Started
+                            </p>
                         </div>
-                        <div className="rounded-full bg-emerald-500/15 p-2 text-emerald-300">
+
+                        <div className="rounded-full bg-cyan-500/15 p-2 text-cyan-300">
                             <Zap className="h-4 w-4" />
                         </div>
                     </div>
 
-                    <div className="mt-5 grid grid-cols-2 gap-3">
+                    <div className="mt-6 grid grid-cols-2 gap-3">
                         {[
-                            ["Active Projects", "12"],
-                            ["AI Suggestions", "48"],
-                            ["Velocity", "87%"],
-                            ["Team Capacity", "92%"],
+                            ["Projects", "0"],
+                            ["Team Members", "0"],
+                            ["Sprint Plans", "0"],
+                            ["AI Suggestions", "0"],
                         ].map(([label, value]) => (
                             <div
                                 key={label}
-                                className="rounded-xl border border-white/10 bg-white/5 px-3 py-3"
+                                className="rounded-xl border border-white/10 bg-white/5 p-4"
                             >
-                                <p className="text-xs text-slate-400">{label}</p>
-                                <p className="mt-1 text-base font-semibold text-white">{value}</p>
+                                <p className="text-xs text-slate-400">
+                                    {label}
+                                </p>
+
+                                <p className="mt-1 text-xl font-semibold text-white">
+                                    {value}
+                                </p>
                             </div>
                         ))}
+                    </div>
+
+                    <div className="mt-6 rounded-xl border border-dashed border-cyan-500/20 bg-cyan-500/5 p-4">
+                        <p className="text-sm font-medium text-cyan-300">
+                            Your workspace is ready
+                        </p>
+
+                        <p className="mt-1 text-sm text-slate-400">
+                            Create your first project to start planning AI-powered
+                            sprints and collaborating with your team.
+                        </p>
                     </div>
                 </div>
             </div>

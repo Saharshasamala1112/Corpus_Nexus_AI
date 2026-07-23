@@ -1,86 +1,39 @@
-import ProjectCard from "./ProjectCard";
+import { ArrowRight, FolderKanban } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type ProjectGridProps = {
     className?: string;
 };
 
-type ProjectItem = {
-    name: string;
-    description: string;
-    status: "Active" | "Planning" | "Completed";
-    members: number;
-    tasks: number;
-    lastUpdated: string;
-};
-
-const projects: ProjectItem[] = [
-    {
-        name: "Project Atlas",
-        description: "AI-assisted planning and delivery coordination.",
-        status: "Active",
-        members: 8,
-        tasks: 24,
-        lastUpdated: "2h ago",
-    },
-    {
-        name: "Sprint Forge",
-        description: "Create sprint workflows with intelligent sequencing.",
-        status: "Planning",
-        members: 5,
-        tasks: 13,
-        lastUpdated: "5h ago",
-    },
-    {
-        name: "Launch Pulse",
-        description: "Track readiness, dependencies, and launch milestones.",
-        status: "Completed",
-        members: 6,
-        tasks: 31,
-        lastUpdated: "1d ago",
-    },
-    {
-        name: "Insight Loop",
-        description: "Surface retrospectives and continuous improvement insights.",
-        status: "Active",
-        members: 4,
-        tasks: 17,
-        lastUpdated: "2d ago",
-    },
-    {
-        name: "Velocity Lab",
-        description: "Monitor throughput and sprint health with AI forecasting.",
-        status: "Planning",
-        members: 7,
-        tasks: 22,
-        lastUpdated: "3d ago",
-    },
-    {
-        name: "Ops Navigator",
-        description: "Coordinate team execution across multi-step initiatives.",
-        status: "Completed",
-        members: 9,
-        tasks: 29,
-        lastUpdated: "4d ago",
-    },
-];
-
 export default function ProjectGrid({ className }: ProjectGridProps) {
+    const navigate = useNavigate();
+
     return (
         <section className={cn("w-full", className)}>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {projects.map((project) => (
-                    <ProjectCard
-                        key={project.name}
-                        name={project.name}
-                        description={project.description}
-                        status={project.status}
-                        members={project.members}
-                        tasks={project.tasks}
-                        lastUpdated={project.lastUpdated}
-                    />
-                ))}
+            <div className="rounded-2xl border border-dashed border-white/10 bg-slate-950/70 p-10 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-300">
+                    <FolderKanban className="h-8 w-8" />
+                </div>
+
+                <h3 className="mt-6 text-2xl font-semibold text-white">
+                    No projects yet
+                </h3>
+
+                <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-400">
+                    Create your first project to start planning AI-powered
+                    sprints, organize your work, and collaborate with your team.
+                </p>
+
+                <Button
+                    className="mt-6"
+                    onClick={() => navigate("/sprintwise-ai/projects")}
+                >
+                    Create Project
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
             </div>
         </section>
     );
