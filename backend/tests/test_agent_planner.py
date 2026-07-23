@@ -35,7 +35,9 @@ class TestAgentPlannerParsePlan:
         self.planner = AgentPlanner()
 
     def test_parse_valid_json_array(self):
-        valid_json = '[{"tool": "repository_search", "reasoning": "test", "parameters": {"query": "auth"}}]'
+        valid_json = (
+            '[{"tool": "repository_search", "reasoning": "test", "parameters": {"query": "auth"}}]'
+        )
         result = self.planner._parse_plan(valid_json)
         assert len(result) == 1
         assert result[0]["tool"] == "repository_search"
