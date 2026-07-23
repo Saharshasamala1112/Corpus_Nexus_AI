@@ -38,21 +38,21 @@ function SearchInput({ onSearch }: SearchInputProps) {
   if (!sidebarOpen) return null
 
   return (
-    <div className="relative px-3">
-      <Search className="absolute left-6 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+    <div className="relative px-3 py-2">
+      <Search className="absolute left-6 top-1/2 -translate-y-1/2 size-3.5 text-blue-300/30 pointer-events-none" />
       <input
         ref={inputRef}
         type="text"
         placeholder="Search conversations..."
         value={value}
         onChange={(e) => handleChange(e.target.value)}
-        className="w-full h-8 rounded-lg border border-input bg-muted/50 pl-8 pr-8 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        className="w-full h-8 rounded-xl border border-blue-500/10 bg-white/[0.03] pl-8 pr-8 text-xs text-white placeholder:text-blue-300/20 focus:outline-none focus:border-blue-500/30 focus:bg-white/[0.05] transition-all"
       />
       {value && (
         <Button
           variant="ghost"
           size="icon-xs"
-          className="absolute right-5 top-1/2 -translate-y-1/2 text-muted-foreground"
+          className="absolute right-5 top-1/2 -translate-y-1/2 text-blue-300/30 hover:text-blue-200 hover:bg-blue-500/10"
           onClick={handleClear}
         >
           <X className="size-3" />

@@ -19,7 +19,7 @@ COMMON_ISSUES = {
         "diagnosis_steps": [
             "Check if all required environment variables are set (OPENAI_API_KEY, DATABASE_URL, etc.)",
             "Verify Python dependencies are installed: pip install -r requirements.txt",
-            "Check for port conflicts: another process may be using port 8000",
+            "Check for port conflicts: another process may be using port 8001",
             "Review application logs for specific error messages",
             "Ensure database is accessible and connection string is correct",
         ],

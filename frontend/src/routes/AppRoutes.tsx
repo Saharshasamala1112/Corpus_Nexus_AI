@@ -5,8 +5,8 @@ import AIAssistantPage from '@/pages/ai-assistant'
 import Profile from '@/pages/explorer/profile'
 import Search from '@/pages/explorer/Search'
 import RecordDetails from '@/pages/explorer/RecordDetails'
-import OnboardingPage from '@/pages/onboarding'
-import TaskDetails from '@/pages/onboarding/TaskDetails'
+import OnboardingPage from '../pages/onboarding/index'
+import TaskDetails from '../pages/onboarding/TaskDetails'
 
 function AppRoutes() {
   return (

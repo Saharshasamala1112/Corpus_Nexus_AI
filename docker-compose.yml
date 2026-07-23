@@ -35,7 +35,7 @@ services:
       dockerfile: Dockerfile
     container_name: corpusguard-backend
     ports:
-      - "8000:8000"
+      - "8001:8000"
     environment:
       - DATABASE_URL=sqlite+aiosqlite:///./corpusguard.db
       - REDIS_URL=redis://redis:6379/0

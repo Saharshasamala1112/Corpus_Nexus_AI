@@ -153,7 +153,7 @@ export async function getKnowledgeStatus(): Promise<KnowledgeStatusResponse> {
 // Explorer compatibility helpers
 // ---------------------------------------------------------------------------
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8001'
 
 function getHeaders(): Record<string, string> {
   const token = localStorage.getItem('token')

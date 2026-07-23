@@ -11,7 +11,7 @@ function Sidebar() {
   return (
     <aside
       className={cn(
-        'flex h-full flex-col border-r border-border bg-card transition-all duration-300 ease-in-out',
+        'flex h-full flex-col border-r border-blue-500/10 bg-[#0A0F1E]/60 backdrop-blur-2xl transition-all duration-300 ease-in-out shrink-0',
         sidebarOpen ? 'w-[280px]' : 'w-[56px]'
       )}
     >

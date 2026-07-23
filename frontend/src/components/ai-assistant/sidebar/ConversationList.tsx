@@ -3,6 +3,7 @@ import { MessageSquare, Pencil, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useConversationStore } from '@/store/useConversationStore'
 import { useChatStore } from '@/store/useChatStore'
+import { motion } from 'framer-motion'
 
 interface ConversationItemProps {
   id: string
@@ -45,7 +46,7 @@ function ConversationItem({ id, title, isActive, onClick }: ConversationItemProp
 
   if (isEditing) {
     return (
-      <div className="group mx-2 flex items-center rounded-lg bg-muted px-3 py-2">
+      <div className="group mx-2 flex items-center rounded-xl border border-blue-500/20 bg-white/[0.05] px-3 py-2">
         <input
           ref={inputRef}
           value={editTitle}
@@ -55,43 +56,46 @@ function ConversationItem({ id, title, isActive, onClick }: ConversationItemProp
             if (e.key === 'Enter') handleRename()
             if (e.key === 'Escape') setIsEditing(false)
           }}
-          className="w-full bg-transparent text-sm text-foreground outline-none"
+          className="w-full bg-transparent text-sm text-white outline-none"
         />
       </div>
     )
   }
 
   return (
-    <div
+    <motion.div
+      whileHover={{ x: 2 }}
       className={cn(
-        'group mx-2 flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
+        'group mx-2 flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm transition-all',
         isActive
-          ? 'bg-muted text-foreground'
-          : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+          ? 'bg-blue-500/10 text-white border border-blue-500/20 shadow-sm'
+          : 'text-blue-200/50 hover:bg-white/[0.03] hover:text-blue-200 border border-transparent'
       )}
       onClick={onClick}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
-      <MessageSquare className="size-4 shrink-0" />
+      <MessageSquare
+        className={cn('size-4 shrink-0', isActive ? 'text-blue-400' : 'text-blue-300/30')}
+      />
       <span className="truncate flex-1">{title}</span>
       {showActions && (
         <div className="flex shrink-0 gap-0.5">
           <button
             onClick={handleRenameStart}
-            className="rounded p-1 hover:bg-border text-muted-foreground hover:text-foreground"
+            className="rounded p-1 text-blue-300/30 hover:text-blue-200 hover:bg-blue-500/10 transition-all"
           >
             <Pencil className="size-3" />
           </button>
           <button
             onClick={handleDelete}
-            className="rounded p-1 hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+            className="rounded p-1 text-blue-300/30 hover:text-red-400 hover:bg-red-500/10 transition-all"
           >
             <Trash2 className="size-3" />
           </button>
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 
@@ -135,7 +139,7 @@ function ConversationList({ searchQuery }: ConversationListProps) {
     if (items.length === 0) return null
     return (
       <div key={label} className="mb-2">
-        <p className="px-5 py-1.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+        <p className="px-5 py-1.5 text-[10px] font-medium text-blue-300/30 uppercase tracking-wider">
           {label}
         </p>
         {items.map((conv) => (
@@ -152,7 +156,7 @@ function ConversationList({ searchQuery }: ConversationListProps) {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto py-2 space-y-1">
+    <div className="flex-1 overflow-y-auto py-2 space-y-1 scrollbar-thin">
       {renderGroup('Today', grouped.today)}
       {renderGroup('Previous 7 days', grouped.thisWeek)}
       {renderGroup('Older', grouped.older)}

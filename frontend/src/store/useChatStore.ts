@@ -6,6 +6,7 @@ interface ChatStore {
   sidebarOpen: boolean
   contextPanelOpen: boolean
   searchQuery: string
+  aiDrawerOpen: boolean
 }
 
 let state: ChatStore = {
@@ -14,6 +15,7 @@ let state: ChatStore = {
   sidebarOpen: true,
   contextPanelOpen: true,
   searchQuery: '',
+  aiDrawerOpen: false,
 }
 
 let listeners: Array<() => void> = []
@@ -71,6 +73,14 @@ export function useChatStore() {
     setState((prev) => ({ ...prev, searchQuery: val }))
   }, [])
 
+  const toggleAiDrawer = useCallback(() => {
+    setState((prev) => ({ ...prev, aiDrawerOpen: !prev.aiDrawerOpen }))
+  }, [])
+
+  const setAiDrawerOpen = useCallback((val: boolean) => {
+    setState((prev) => ({ ...prev, aiDrawerOpen: val }))
+  }, [])
+
   return {
     ...store,
     setGenerating,
@@ -80,5 +90,7 @@ export function useChatStore() {
     setSidebarOpen,
     setContextPanelOpen,
     setSearchQuery,
+    toggleAiDrawer,
+    setAiDrawerOpen,
   }
 }

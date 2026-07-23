@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+from app.ai_router import RoutingMode
 from app.citation import CitationResult as CitationResult
 from app.citation import compute_confidence, extract_citations
 from app.context import BuiltContext as BuiltContext
@@ -22,6 +23,7 @@ class GeneratedResponse:
     sources_used: list[str]
     retrieved_documents: list[dict]
     model: str
+    routing_mode: str = "rag"
     related_documents: list[dict] = field(default_factory=list)
     related_repositories: list[str] = field(default_factory=list)
     token_usage: dict = field(default_factory=dict)
@@ -42,12 +44,15 @@ class GenerationPipeline:
         top_k: int = 5,
         filter_metadata: dict | None = None,
         min_relevance_score: float = 0.0,
+        mode: RoutingMode = RoutingMode.RAG,
     ) -> GeneratedResponse:
         original_query = query
         query = sanitize_query(query)
-        logger.info("Generation pipeline started: query='%s' top_k=%d", query[:50], top_k)
+        logger.info(
+            "Generation pipeline started: query='%s' top_k=%d mode=%s",
+            query[:50], top_k, mode.value,
+        )
 
-        # Short-circuit on prompt injection — no LLM call needed
         if query == "I don't have enough information":
             logger.info("Short-circuited due to prompt injection detection")
             return GeneratedResponse(
@@ -55,10 +60,29 @@ class GenerationPipeline:
                 confidence_score=0.0,
                 sources_used=[],
                 retrieved_documents=[],
-                model=self.llm.model if hasattr(self.llm, "model") else "unknown",
-                related_documents=[],
-                related_repositories=[],
-                token_usage={},
+                model=self.llm.model_name,
+                routing_mode=mode.value,
+            )
+
+        if mode == RoutingMode.GENERAL:
+            messages = [
+                LLMMessage(role="system", content=build_system_prompt(mode)),
+                LLMMessage(
+                    role="user",
+                    content=build_user_prompt(query, mode=mode),
+                ),
+            ]
+
+            llm_response = await self.llm.chat(messages=messages)
+
+            return GeneratedResponse(
+                answer=llm_response.content,
+                confidence_score=100.0,
+                sources_used=[],
+                retrieved_documents=[],
+                model=llm_response.model,
+                routing_mode=mode.value,
+                token_usage=llm_response.usage,
             )
 
         retrieval_results = await self.retrieval.search(
@@ -89,16 +113,17 @@ class GenerationPipeline:
         )
 
         messages = [
-            LLMMessage(role="system", content=build_system_prompt()),
+            LLMMessage(role="system", content=build_system_prompt(mode)),
             LLMMessage(
                 role="user",
-                content=build_user_prompt(query, built_context.context_block),
+                content=build_user_prompt(query, built_context.context_block, mode),
             ),
         ]
 
         llm_response = await self.llm.chat(messages=messages)
 
-        llm_response.content = validate_output(original_query, llm_response.content)
+        if mode == RoutingMode.RAG:
+            llm_response.content = validate_output(original_query, llm_response.content)
 
         citation_result = extract_citations(llm_response.content)
 
@@ -108,6 +133,9 @@ class GenerationPipeline:
             has_citations=bool(citation_result.source_references),
             has_context=built_context.has_relevant_docs,
         )
+
+        if mode == RoutingMode.HYBRID:
+            confidence = max(confidence, 50.0)
 
         sources_used = citation_result.source_references
         if not sources_used:
@@ -140,9 +168,8 @@ class GenerationPipeline:
         related_repos = list(repos)
 
         logger.info(
-            "Generation complete: confidence=%.2f sources=%d tokens=%s",
-            confidence,
-            len(sources_used),
+            "Generation complete: mode=%s confidence=%.2f sources=%d tokens=%s",
+            mode.value, confidence, len(sources_used),
             llm_response.usage.get("total_tokens", "?"),
         )
 
@@ -154,5 +181,6 @@ class GenerationPipeline:
             related_documents=related_docs,
             related_repositories=related_repos,
             model=llm_response.model,
+            routing_mode=mode.value,
             token_usage=llm_response.usage,
         )

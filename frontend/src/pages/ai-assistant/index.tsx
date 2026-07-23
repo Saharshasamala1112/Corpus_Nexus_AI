@@ -7,6 +7,7 @@ import { ErrorBoundary } from '@/components/ui/error-boundary'
 import Sidebar from '@/components/ai-assistant/sidebar/Sidebar'
 import ChatArea from '@/components/ai-assistant/chat/ChatArea'
 import ContextPanel from '@/components/ai-assistant/context-panel/ContextPanel'
+import { motion } from 'framer-motion'
 
 function AIAssistantPage() {
   const {
@@ -126,7 +127,7 @@ function AIAssistantPage() {
         updateMessage(
           convId,
           assistantMessage.id,
-          `**Error:** ${errorMsg}\n\nPlease check that the backend server is running at \`http://localhost:8000\`.`
+          `**Error:** ${errorMsg}\n\nPlease check that the backend server is running at \`http://localhost:8001\`.`
         )
         updateMessageStreaming(convId, assistantMessage.id, false)
       } finally {
@@ -158,15 +159,38 @@ function AIAssistantPage() {
 
   return (
     <ErrorBoundary>
-      <div className="flex h-screen overflow-hidden bg-background">
-        <Sidebar />
-        <ChatArea
-          messages={messages}
-          isGenerating={isGenerating}
-          onSend={handleSend}
-          onStop={handleStop}
-        />
-        <ContextPanel />
+      <div className="flex h-screen overflow-hidden bg-[#020617] relative">
+        {/* Ambient background effects */}
+        <div className="fixed inset-0 pointer-events-none">
+          <motion.div
+            className="absolute top-1/4 -left-48 w-[500px] h-[500px] rounded-full bg-blue-500/5 blur-3xl"
+            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.div
+            className="absolute bottom-1/4 -right-48 w-[600px] h-[600px] rounded-full bg-cyan-500/5 blur-3xl"
+            animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.4, 0.2] }}
+            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-blue-600/[0.02] blur-3xl"
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <div className="absolute inset-0 bg-grid opacity-40" />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 flex h-full w-full">
+          <Sidebar />
+          <ChatArea
+            messages={messages}
+            isGenerating={isGenerating}
+            onSend={handleSend}
+            onStop={handleStop}
+          />
+          <ContextPanel />
+        </div>
       </div>
     </ErrorBoundary>
   )

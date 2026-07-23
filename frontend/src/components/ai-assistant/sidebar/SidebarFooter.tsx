@@ -1,38 +1,41 @@
-import { Plus, Search, Trash2, Settings, Moon, Sun, LogOut } from 'lucide-react'
+import { User, HelpCircle, LayoutDashboard, LogOut, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Tooltip from '@/components/ui/tooltip'
 import { useChatStore } from '@/store/useChatStore'
-import { useConversationStore } from '@/store/useConversationStore'
-import { useTheme } from '@/hooks/useTheme'
+import { useNavigate } from 'react-router-dom'
 
 function SidebarFooter() {
   const { sidebarOpen } = useChatStore()
-  const { createConversation, clearAllConversations } = useConversationStore()
-  const { theme, setTheme } = useTheme()
+  const navigate = useNavigate()
+  const username = localStorage.getItem('username') || 'User'
 
-  const handleNewChat = () => {
-    createConversation()
-  }
-
-  const handleClearHistory = () => {
-    clearAllConversations()
-  }
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark')
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('username')
+    localStorage.removeItem('phone')
+    navigate('/', { replace: true })
   }
 
   if (!sidebarOpen) {
     return (
-      <div className="flex flex-col items-center gap-1 py-2 border-t border-border px-2">
-        <Tooltip content="New Chat" side="right" shortcut="⌘N">
-          <Button variant="ghost" size="icon" onClick={handleNewChat}>
-            <Plus className="size-4" />
+      <div className="flex flex-col items-center gap-1 py-2 border-t border-blue-500/10 px-2">
+        <Tooltip content="Account" side="right">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-blue-300/40 hover:text-blue-200 hover:bg-blue-500/10"
+          >
+            <User className="size-4" />
           </Button>
         </Tooltip>
-        <Tooltip content="Settings" side="right">
-          <Button variant="ghost" size="icon">
-            <Settings className="size-4" />
+        <Tooltip content="Dashboard" side="right">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-blue-300/40 hover:text-blue-200 hover:bg-blue-500/10"
+            onClick={() => navigate('/')}
+          >
+            <LayoutDashboard className="size-4" />
           </Button>
         </Tooltip>
       </div>
@@ -40,75 +43,48 @@ function SidebarFooter() {
   }
 
   return (
-    <div className="border-t border-border p-2 space-y-1">
-      <div className="flex gap-1">
-        <Tooltip content="New Chat" shortcut="⌘N" side="top">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex-1 justify-start gap-2 text-muted-foreground"
-            onClick={handleNewChat}
-          >
-            <Plus className="size-4" />
-            New Chat
-          </Button>
-        </Tooltip>
-        <Tooltip content="Search" shortcut="⌘K" side="top">
-          <Button variant="ghost" size="icon-sm" className="text-muted-foreground">
-            <Search className="size-4" />
-          </Button>
-        </Tooltip>
-      </div>
-      <div className="flex gap-1">
-        <Tooltip content="Clear history" side="top">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex-1 justify-start gap-2 text-muted-foreground"
-            onClick={handleClearHistory}
-          >
-            <Trash2 className="size-4" />
-            Clear History
-          </Button>
-        </Tooltip>
-        <Tooltip content={theme === 'dark' ? 'Light mode' : 'Dark mode'} side="top">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="text-muted-foreground"
-            onClick={toggleTheme}
-          >
-            {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
-          </Button>
-        </Tooltip>
-      </div>
-      <div className="flex gap-1">
-        <Tooltip content="Settings" side="top">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex-1 justify-start gap-2 text-muted-foreground"
-          >
-            <Settings className="size-4" />
-            Settings
-          </Button>
-        </Tooltip>
-        <Tooltip content="Account" side="top">
-          <Button variant="ghost" size="icon-sm" className="text-muted-foreground">
-            <LogOut className="size-4" />
-          </Button>
-        </Tooltip>
-      </div>
-      <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-muted/50">
-        <div className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-          SC
+    <div className="border-t border-blue-500/10">
+      {/* User account section */}
+      <div className="px-3 py-2.5 border-b border-blue-500/10">
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-[11px] font-bold text-white shadow-lg shadow-blue-500/20 shrink-0">
+            {username.charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-blue-200 truncate">{username}</p>
+            <p className="text-[10px] text-blue-300/30 truncate">Enterprise Account</p>
+          </div>
         </div>
-        <div className="min-w-0">
-          <p className="text-xs font-medium text-foreground truncate">Sarah Chen</p>
-          <p className="text-[10px] text-muted-foreground truncate">Senior Engineer</p>
-        </div>
+      </div>
+
+      {/* Navigation items */}
+      <div className="py-1.5 space-y-0.5">
+        <NavItem icon={User} label="Profile" />
+        <NavItem icon={HelpCircle} label="Help & Support" />
+        <div className="border-t border-blue-500/10 my-1.5" />
+        <NavItem icon={LayoutDashboard} label="Back to Dashboard" onClick={() => navigate('/')} />
+        <NavItem icon={LogOut} label="Logout" onClick={handleLogout} />
       </div>
     </div>
+  )
+}
+
+interface NavItemProps {
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  onClick?: () => void
+}
+
+function NavItem({ icon: Icon, label, onClick }: NavItemProps) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex w-full items-center gap-2.5 px-4 py-2 text-xs text-blue-200/40 hover:text-blue-200 hover:bg-blue-500/[0.04] transition-all rounded-lg group"
+    >
+      <Icon className="size-3.5 shrink-0" />
+      <span className="flex-1 text-left">{label}</span>
+      <ChevronRight className="size-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+    </button>
   )
 }
 

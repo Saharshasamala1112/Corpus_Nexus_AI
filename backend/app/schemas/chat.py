@@ -43,3 +43,4 @@ class ChatResponse(BaseModel):
     related_repositories: list[str] = Field(default_factory=list)
     token_usage: dict = Field(default_factory=dict)
     follow_up_questions: list[str] = Field(default_factory=list)
+    routing_mode: str = "rag"

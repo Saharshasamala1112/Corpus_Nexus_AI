@@ -29,7 +29,7 @@ Enterprise AI copilot for codebase understanding with RAG, agentic AI, and strea
 cd backend
 cp .env.example .env       # Edit if needed
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8001
 ```
 
 ### Frontend

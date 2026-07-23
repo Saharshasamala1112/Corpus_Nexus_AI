@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-The dev server runs at `http://localhost:5173` and proxies API calls to the backend at `http://localhost:8000`.
+The dev server runs at `http://localhost:5173` and proxies API calls to the backend at `http://localhost:8001`.
 
 ## Available Scripts
 
@@ -28,7 +28,7 @@ The dev server runs at `http://localhost:5173` and proxies API calls to the back
 
 Copy `.env.example` to `.env` and configure:
 
-- `VITE_API_BASE_URL` — Backend API URL (default: `http://localhost:8000/api/v1`)
+- `VITE_API_BASE_URL` — Backend API URL (default: `http://localhost:8001/api/v1`)
 - `VITE_OLLAMA_BASE_URL` — Ollama URL for health checks (default: `http://localhost:11434`)
 - `VITE_APP_NAME` — Application display name
 
@@ -38,7 +38,7 @@ Copy `.env.example` to `.env` and configure:
 docker compose up --build
 ```
 
-This starts the frontend (nginx on port 80), backend (FastAPI on port 8000), Redis, and Ollama.
+This starts the frontend (nginx on port 80), backend (FastAPI on port 8001), Redis, and Ollama.
 
 ## Project Structure
 

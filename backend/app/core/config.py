@@ -20,7 +20,7 @@ class Settings(BaseSettings):
 
     # Server
     HOST: str = "0.0.0.0"
-    PORT: int = 8000
+    PORT: int = 8001
 
     # CORS
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
@@ -59,6 +59,12 @@ class Settings(BaseSettings):
     TOP_K: int = 5
     MIN_RELEVANCE_SCORE: float = 0.3
 
+    # AI Router
+    AI_ROUTER_ENABLED: bool = True
+    RAG_CONFIDENCE_THRESHOLD: float = 0.75
+    HYBRID_CONFIDENCE_THRESHOLD: float = 0.40
+    GENERAL_AI_ENABLED: bool = True
+
     # Rate Limiting
     RATE_LIMIT_ENABLED: bool = True
     RATE_LIMIT_MAX_REQUESTS: int = 60
@@ -94,7 +100,7 @@ class Settings(BaseSettings):
     LOG_FORMAT: str = "json"
 
     # Explorer compatibility
-    corpus_api_base_url: str = "http://127.0.0.1:8000"
+    corpus_api_base_url: str = "http://127.0.0.1:8001"
     corpus_api_token: str = ""
 
 
