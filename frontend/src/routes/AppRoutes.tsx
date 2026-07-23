@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
+
 import AskCorpusPage from "../pages/askCorpus/AskCorpusPage";
 import CorpusGuardPage from "../pages/corpusGuard/CorpusGuardPage";
 import CorpusInsightsPage from "../pages/corpusInsights/CorpusInsightsPage";
@@ -8,17 +9,26 @@ import OnboardingPage from "../pages/onboarding/OnboardingPage";
 import TaskDetailsPage from "../pages/onboarding/TaskDetailsPage";
 import ProfilePage from "../pages/profile/ProfilePage";
 import SettingsPage from "../pages/settings/SettingsPage";
+
 import SprintPage from "../pages/sprint/SprintPage";
+import Projects from "../pages/sprint/Projects";
+import Team from "../pages/sprint/Team";
+import SprintGenerator from "../pages/sprint/SprintGenerator";
 
 function AppRoutes() {
     return (
         <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
+
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/corpus-insights" element={<CorpusInsightsPage />} />
             <Route path="/ask-corpus" element={<AskCorpusPage />} />
+
             <Route path="/sprintwise-ai" element={<SprintPage />} />
+            <Route path="/sprintwise-ai/projects" element={<Projects />} />
+            <Route path="/sprintwise-ai/team" element={<Team />} />
+            <Route path="/sprintwise-ai/generator" element={<SprintGenerator />} />
 
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route

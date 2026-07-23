@@ -1,13 +1,19 @@
+import PageHeader from "@/components/sprint/common/PageHeader";
+import SprintNavigation from "@/components/sprint/common/SprintNavigation";
+import TeamSection from "@/components/sprint/team/TeamSection";
+
 export default function Team() {
     return (
-        <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-white">
-                Team
-            </h1>
+        <div className="space-y-8">
+            <PageHeader
+                title="Team"
+                description="Manage your engineering team and sprint collaboration."
+                actionLabel="Invite Member"
+            />
 
-            <p className="text-muted-foreground">
-                Manage team members
-            </p>
+            <SprintNavigation />
+
+            <TeamSection />
         </div>
     );
 }

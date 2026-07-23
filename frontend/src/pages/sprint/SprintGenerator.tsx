@@ -1,13 +1,19 @@
+import PageHeader from "@/components/sprint/common/PageHeader";
+import SprintNavigation from "@/components/sprint/common/SprintNavigation";
+import GeneratorSection from "@/components/sprint/generator/GeneratorSection";
+
 export default function SprintGenerator() {
     return (
-        <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-white">
-                Sprint Generator
-            </h1>
+        <div className="space-y-8">
+            <PageHeader
+                title="Sprint Generator"
+                description="Generate AI-powered sprint plans for your software projects."
+                actionLabel="Generate Sprint"
+            />
 
-            <p className="text-muted-foreground">
-                Generate AI Sprint plans
-            </p>
+            <SprintNavigation />
+
+            <GeneratorSection />
         </div>
     );
 }

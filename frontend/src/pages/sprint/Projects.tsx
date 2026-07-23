@@ -1,13 +1,19 @@
+import PageHeader from "@/components/sprint/common/PageHeader";
+import SprintNavigation from "@/components/sprint/common/SprintNavigation";
+import ProjectsSection from "@/components/sprint/projects/ProjectsSection";
+
 export default function Projects() {
     return (
-        <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-white">
-                Projects
-            </h1>
+        <div className="space-y-8">
+            <PageHeader
+                title="Projects"
+                description="Manage your AI software projects and sprint planning."
+                actionLabel="New Project"
+            />
 
-            <p className="text-muted-foreground">
-                Manage Sprint projects
-            </p>
+            <SprintNavigation />
+
+            <ProjectsSection />
         </div>
     );
 }
