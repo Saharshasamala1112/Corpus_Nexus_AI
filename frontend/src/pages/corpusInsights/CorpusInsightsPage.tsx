@@ -63,30 +63,32 @@ function CorpusInsightsPage() {
             <StatCard title="Contributors" value={contributors.toLocaleString()} />
           </section>
 
-          <section className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-6 shadow-lg shadow-black/20 sm:p-8">
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-white">Language Analytics</h2>
-              <p className="mt-1 text-sm text-zinc-400">
-                Explore the distribution of recordings across languages.
-              </p>
+          <section className="grid gap-6 xl:grid-cols-2">
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-sm">
+              <div className="mb-5">
+                <h2 className="text-lg font-semibold text-white">Language Analytics</h2>
+                <p className="mt-1 text-sm text-slate-400">
+                  Explore the distribution of recordings across languages.
+                </p>
+              </div>
+              <LanguageChart />
             </div>
-            <LanguageChart />
+
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-sm">
+              <div className="mb-5">
+                <h2 className="text-lg font-semibold text-white">Media Type Analytics</h2>
+                <p className="mt-1 text-sm text-slate-400">
+                  Review the representation of audio, video, image, text, and document recordings.
+                </p>
+              </div>
+              <MediaTypeChart />
+            </div>
           </section>
 
-          <section className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-6 shadow-lg shadow-black/20 sm:p-8">
+          <section className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-sm sm:p-8">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-white">Media Type Analytics</h2>
-              <p className="mt-1 text-sm text-zinc-400">
-                Review the representation of audio, video, image, text, and document recordings.
-              </p>
-            </div>
-            <MediaTypeChart />
-          </section>
-
-          <section className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-6 shadow-lg shadow-black/20 sm:p-8">
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-white">Top Contributors</h2>
-              <p className="mt-1 text-sm text-zinc-400">
+              <h2 className="text-lg font-semibold text-white">Top Contributors</h2>
+              <p className="mt-1 text-sm text-slate-400">
                 See the highest-ranked contributors in the current leaderboard.
               </p>
             </div>

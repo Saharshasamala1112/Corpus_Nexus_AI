@@ -20,11 +20,11 @@ interface MediaTypeData {
 }
 
 const MEDIA_COLORS: Record<string, string> = {
-  audio: "#3b82f6",
-  video: "#ef4444",
-  text: "#10b981",
-  image: "#f59e0b",
-  document: "#8b5cf6",
+  audio: "#3B82F6",
+  video: "#8B5CF6",
+  text: "#10B981",
+  image: "#F59E0B",
+  document: "#06B6D4",
 };
 
 const MEDIA_LABELS: Record<string, string> = {
@@ -71,32 +71,46 @@ const MediaTypeChart = () => {
 
   if (loading) {
     return (
-      <div className="flex h-80 items-center justify-center text-sm text-gray-400">
+      <div className="flex h-[280px] items-center justify-center text-sm text-slate-400">
         Loading chart...
       </div>
     );
   }
 
   return (
-    <ResponsiveContainer width="100%" height={320}>
-      <BarChart data={chartData}>
-        <CartesianGrid strokeDasharray="3 3" />
+    <ResponsiveContainer width="100%" height={280}>
+      <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
+        <CartesianGrid stroke="#27272a" strokeDasharray="3 3" vertical={false} />
 
-        <XAxis dataKey="mediaType" />
+        <XAxis
+          dataKey="mediaType"
+          axisLine={false}
+          tickLine={false}
+          tick={{ fill: "#cbd5e1", fontSize: 12 }}
+        />
 
-        <YAxis />
+        <YAxis
+          axisLine={false}
+          tickLine={false}
+          tick={{ fill: "#94a3b8", fontSize: 12 }}
+        />
 
-        <Tooltip />
+        <Tooltip
+          cursor={{ fill: "rgba(59, 130, 246, 0.08)" }}
+          contentStyle={{
+            backgroundColor: "#111827",
+            border: "1px solid #334155",
+            borderRadius: 12,
+            color: "#f8fafc",
+          }}
+        />
 
-        <Bar dataKey="recordings" radius={[6, 6, 0, 0]}>
-          <LabelList dataKey="recordings" position="top" />
+        <Bar dataKey="recordings" radius={[8, 8, 0, 0]}>
+          <LabelList dataKey="recordings" position="top" fill="#cbd5e1" fontSize={12} />
           {chartData.map((entry) => (
             <Cell
               key={entry.mediaType}
-              fill={
-                MEDIA_COLORS[entry.mediaType.toLowerCase()] ||
-                "#3b82f6"
-              }
+              fill={MEDIA_COLORS[entry.mediaType.toLowerCase()] || "#3B82F6"}
             />
           ))}
         </Bar>

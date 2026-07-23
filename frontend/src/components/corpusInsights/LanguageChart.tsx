@@ -51,31 +51,48 @@ const LanguageChart = () => {
   }, []);
 
   return (
-    <ResponsiveContainer width="100%" height={350}>
+    <ResponsiveContainer width="100%" height={280}>
       <BarChart
         data={data}
         layout="vertical"
         margin={{
-          top: 10,
-          right: 40,
-          left: 20,
-          bottom: 10,
+          top: 8,
+          right: 24,
+          left: 12,
+          bottom: 8,
         }}
       >
-        <CartesianGrid strokeDasharray="3 3" />
+        <CartesianGrid stroke="#27272a" strokeDasharray="3 3" vertical={false} />
 
-        <XAxis type="number" />
+        <XAxis
+          type="number"
+          axisLine={false}
+          tickLine={false}
+          tick={{ fill: "#94a3b8", fontSize: 12 }}
+          domain={[0, "dataMax + 2"]}
+        />
 
         <YAxis
           type="category"
           dataKey="language"
-          width={120}
+          width={110}
+          axisLine={false}
+          tickLine={false}
+          tick={{ fill: "#cbd5e1", fontSize: 12 }}
         />
 
-        <Tooltip />
+        <Tooltip
+          cursor={{ fill: "rgba(139, 92, 246, 0.08)" }}
+          contentStyle={{
+            backgroundColor: "#111827",
+            border: "1px solid #334155",
+            borderRadius: 12,
+            color: "#f8fafc",
+          }}
+        />
 
-        <Bar dataKey="count" radius={[0, 6, 6, 0]}>
-          <LabelList dataKey="count" position="right" />
+        <Bar dataKey="count" radius={[0, 8, 8, 0]} fill="#8B5CF6">
+          <LabelList dataKey="count" position="right" fill="#f8fafc" fontSize={12} />
         </Bar>
       </BarChart>
     </ResponsiveContainer>
