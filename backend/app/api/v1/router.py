@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from app.api.v1.assistant.router import router as assistant_router
 from app.api.v1.agent.router import router as agent_router
+from app.api.v1.assistant.router import router as assistant_router
 from app.api.v1.knowledge.router import router as knowledge_router
 
 api_v1_router = APIRouter(prefix="/api/v1")

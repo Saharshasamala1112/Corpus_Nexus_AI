@@ -1,9 +1,9 @@
 import time
 
 from app.agent.base import BaseTool, ToolDefinition
-from app.retrieval import SemanticSearch, RetrievalResult
-from app.schemas.agent import ToolType
 from app.core.logging import get_logger
+from app.retrieval import RetrievalResult, SemanticSearch
+from app.schemas.agent import ToolType
 
 logger = get_logger("agent.tools.doc_search")
 
@@ -53,16 +53,27 @@ class DocumentationSearchTool(BaseTool):
                 "Find API documentation",
             ],
             keywords=[
-                "documentation", "docs", "readme", "wiki", "architecture",
-                "guide", "manual", "reference", "pdf", "markdown", "md",
-                "setup instructions", "getting started", "introduction",
+                "documentation",
+                "docs",
+                "readme",
+                "wiki",
+                "architecture",
+                "guide",
+                "manual",
+                "reference",
+                "pdf",
+                "markdown",
+                "md",
+                "setup instructions",
+                "getting started",
+                "introduction",
             ],
         )
 
     def matches_query(self, query: str) -> float:
         score = super().matches_query(query)
         query_lower = query.lower()
-        for doc_type, keywords in DOC_TYPE_KEYWORDS.items():
+        for _doc_type, keywords in DOC_TYPE_KEYWORDS.items():
             for kw in keywords:
                 if kw in query_lower:
                     score += 0.2
@@ -92,21 +103,25 @@ class DocumentationSearchTool(BaseTool):
         formatted_results = []
         for r in results:
             meta = r.metadata
-            formatted_results.append({
-                "document_type": meta.get("document_type", ""),
-                "file": meta.get("filename", ""),
-                "path": meta.get("file_path", ""),
-                "repository": meta.get("repository", ""),
-                "score": round(r.score, 4),
-                "content": r.content,
-                "language": meta.get("language", ""),
-                "chunk_index": meta.get("chunk_index", 0),
-            })
+            formatted_results.append(
+                {
+                    "document_type": meta.get("document_type", ""),
+                    "file": meta.get("filename", ""),
+                    "path": meta.get("file_path", ""),
+                    "repository": meta.get("repository", ""),
+                    "score": round(r.score, 4),
+                    "content": r.content,
+                    "language": meta.get("language", ""),
+                    "chunk_index": meta.get("chunk_index", 0),
+                }
+            )
 
         elapsed_ms = (time.perf_counter() - start) * 1000
         logger.info(
             "Documentation search: query='%s' results=%d time=%.1fms",
-            query[:50], len(formatted_results), elapsed_ms,
+            query[:50],
+            len(formatted_results),
+            elapsed_ms,
         )
 
         return {

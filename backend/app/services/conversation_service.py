@@ -1,3 +1,4 @@
+from app.core.exceptions import NotFoundException
 from app.core.logging import get_logger
 from app.repositories.conversation_repository import ConversationRepository
 from app.schemas.conversation import (
@@ -7,7 +8,6 @@ from app.schemas.conversation import (
     ConversationResponse,
     MessageResponse,
 )
-from app.core.exceptions import NotFoundException
 
 logger = get_logger("conversation_service")
 
@@ -60,9 +60,7 @@ class ConversationService:
             updated_at=conversation.updated_at,
         )
 
-    async def create_conversation(
-        self, data: ConversationCreate
-    ) -> ConversationResponse:
+    async def create_conversation(self, data: ConversationCreate) -> ConversationResponse:
         import uuid
 
         conv = await self.conversation_repo.create(

@@ -1,10 +1,10 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.assistant import Message
 from app.core.logging import get_logger
+from app.models.assistant import Message
 
 logger = get_logger("message_repo")
 
@@ -20,7 +20,7 @@ class MessageRepository:
         role: str,
         content: str,
     ) -> Message:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         message = Message(
             id=message_id,
             conversation_id=conversation_id,

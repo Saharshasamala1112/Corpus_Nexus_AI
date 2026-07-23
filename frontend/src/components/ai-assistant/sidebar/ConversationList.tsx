@@ -104,9 +104,7 @@ function ConversationList({ searchQuery }: ConversationListProps) {
   const { sidebarOpen } = useChatStore()
 
   const filtered = searchQuery
-    ? conversations.filter((c) =>
-        c.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    ? conversations.filter((c) => c.title.toLowerCase().includes(searchQuery.toLowerCase()))
     : conversations
 
   if (!sidebarOpen) return null
@@ -118,9 +116,7 @@ function ConversationList({ searchQuery }: ConversationListProps) {
     (acc, conv) => {
       const convDate = new Date(conv.updatedAt)
       convDate.setHours(0, 0, 0, 0)
-      const diffDays = Math.floor(
-        (today.getTime() - convDate.getTime()) / (1000 * 60 * 60 * 24)
-      )
+      const diffDays = Math.floor((today.getTime() - convDate.getTime()) / (1000 * 60 * 60 * 24))
 
       if (diffDays === 0) acc.today.push(conv)
       else if (diffDays <= 7) acc.thisWeek.push(conv)

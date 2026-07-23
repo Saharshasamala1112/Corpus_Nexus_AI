@@ -1,10 +1,10 @@
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class ToolType(str, Enum):
+class ToolType(StrEnum):
     REPOSITORY_SEARCH = "repository_search"
     DOCUMENTATION_SEARCH = "documentation_search"
     API_EXPLORER = "api_explorer"
@@ -16,10 +16,14 @@ class ToolType(str, Enum):
 
 
 class AgentRequest(BaseModel):
-    message: str = Field(..., min_length=1, max_length=10000, description="User question or instruction")
+    message: str = Field(
+        ..., min_length=1, max_length=10000, description="User question or instruction"
+    )
     conversation_id: str | None = Field(None, description="Existing conversation ID")
     model: str = Field(default="gpt-4o", description="LLM model to use")
-    max_tool_calls: int = Field(default=5, ge=1, le=10, description="Maximum tool invocations per request")
+    max_tool_calls: int = Field(
+        default=5, ge=1, le=10, description="Maximum tool invocations per request"
+    )
 
 
 class ToolCall(BaseModel):
@@ -55,5 +59,5 @@ class AgentResponse(BaseModel):
     sources: list[SourceReference] = Field(default_factory=list)
     confidence_score: float = 0.0
     model: str = "gpt-4o"
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     tool_calls: list[ToolCall] = Field(default_factory=list)

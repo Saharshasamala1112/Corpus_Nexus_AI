@@ -1,10 +1,10 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.assistant import Conversation, Message
 from app.core.logging import get_logger
+from app.models.assistant import Conversation
 
 logger = get_logger("conversation_repo")
 
@@ -20,7 +20,7 @@ class ConversationRepository:
         model: str,
         user_id: str | None = None,
     ) -> Conversation:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         conversation = Conversation(
             id=conversation_id,
             title=title,
@@ -76,20 +76,16 @@ class ConversationRepository:
         if not conversation:
             return None
         conversation.title = title
-        conversation.updated_at = datetime.now(timezone.utc)
+        conversation.updated_at = datetime.now(UTC)
         await self.session.flush()
         return conversation
 
     async def touch(self, conversation_id: str) -> None:
-        stmt = (
-            select(Conversation)
-            .where(Conversation.id == conversation_id)
-            .with_for_update()
-        )
+        stmt = select(Conversation).where(Conversation.id == conversation_id).with_for_update()
         result = await self.session.execute(stmt)
         conversation = result.scalar_one_or_none()
         if conversation:
-            conversation.updated_at = datetime.now(timezone.utc)
+            conversation.updated_at = datetime.now(UTC)
             await self.session.flush()
 
     async def delete(self, conversation_id: str) -> bool:

@@ -1,9 +1,9 @@
 import time
 
 from app.agent.base import BaseTool, ToolDefinition
-from app.retrieval import SemanticSearch, RetrievalResult
-from app.schemas.agent import ToolType
 from app.core.logging import get_logger
+from app.retrieval import RetrievalResult, SemanticSearch
+from app.schemas.agent import ToolType
 
 logger = get_logger("agent.tools.setup_guide")
 
@@ -39,10 +39,23 @@ class SetupGuideTool(BaseTool):
                 "Steps to get the development environment running",
             ],
             keywords=[
-                "setup", "install", "getting started", "prerequisites",
-                "requirements", "development environment", "run", "start",
-                "configure", "configuration", "bootstrap", "init", "clone",
-                "docker compose up", "make install", "npm install", "pip install",
+                "setup",
+                "install",
+                "getting started",
+                "prerequisites",
+                "requirements",
+                "development environment",
+                "run",
+                "start",
+                "configure",
+                "configuration",
+                "bootstrap",
+                "init",
+                "clone",
+                "docker compose up",
+                "make install",
+                "npm install",
+                "pip install",
             ],
         )
 
@@ -50,9 +63,16 @@ class SetupGuideTool(BaseTool):
         score = super().matches_query(query)
         query_lower = query.lower()
         setup_terms = [
-            "setup", "install", "getting started", "prerequisites",
-            "how do i run", "how to run", "development environment",
-            "setup instructions", "getting started guide", "bootstrap",
+            "setup",
+            "install",
+            "getting started",
+            "prerequisites",
+            "how do i run",
+            "how to run",
+            "development environment",
+            "setup instructions",
+            "getting started guide",
+            "bootstrap",
         ]
         for term in setup_terms:
             if term in query_lower:
@@ -98,7 +118,17 @@ class SetupGuideTool(BaseTool):
             filename_lower = filename.lower()
             if any(kw in filename_lower for kw in ["readme", "setup", "install", "getting"]):
                 setup_sections.append(entry)
-            elif any(kw in filename_lower for kw in ["dockerfile", "docker-compose", ".env", "requirements", "package.json", "pyproject"]):
+            elif any(
+                kw in filename_lower
+                for kw in [
+                    "dockerfile",
+                    "docker-compose",
+                    ".env",
+                    "requirements",
+                    "package.json",
+                    "pyproject",
+                ]
+            ):
                 config_files.append(entry)
             else:
                 infrastructure_hints.append(entry)
@@ -108,7 +138,9 @@ class SetupGuideTool(BaseTool):
         elapsed_ms = (time.perf_counter() - start) * 1000
         logger.info(
             "Setup guide: query='%s' steps=%d time=%.1fms",
-            query[:50], len(steps), elapsed_ms,
+            query[:50],
+            len(steps),
+            elapsed_ms,
         )
 
         return {
@@ -135,45 +167,56 @@ def _build_setup_steps(
     for section in setup_sections:
         content = section["content"]
         content_lower = content.lower()
-        if any(kw in content_lower for kw in ["prerequisite", "requirement", "before you begin", "before starting"]):
+        if any(
+            kw in content_lower
+            for kw in ["prerequisite", "requirement", "before you begin", "before starting"]
+        ):
             prereqs.append(section)
 
     if prereqs:
-        steps.append({
-            "step": step_num,
-            "title": "Prerequisites",
-            "description": prereqs[0]["content"][:2000],
-            "source_file": prereqs[0]["file"],
-        })
+        steps.append(
+            {
+                "step": step_num,
+                "title": "Prerequisites",
+                "description": prereqs[0]["content"][:2000],
+                "source_file": prereqs[0]["file"],
+            }
+        )
         step_num += 1
 
     for section in setup_sections:
         content = section["content"]
         if section in prereqs:
             continue
-        steps.append({
-            "step": step_num,
-            "title": f"Setup Instructions ({section['file']})",
-            "description": content[:2000],
-            "source_file": section["file"],
-        })
+        steps.append(
+            {
+                "step": step_num,
+                "title": f"Setup Instructions ({section['file']})",
+                "description": content[:2000],
+                "source_file": section["file"],
+            }
+        )
         step_num += 1
 
     for config in config_files[:3]:
-        steps.append({
-            "step": step_num,
-            "title": f"Configuration ({config['file']})",
-            "description": config["content"][:1500],
-            "source_file": config["file"],
-        })
+        steps.append(
+            {
+                "step": step_num,
+                "title": f"Configuration ({config['file']})",
+                "description": config["content"][:1500],
+                "source_file": config["file"],
+            }
+        )
         step_num += 1
 
     if not steps:
-        steps.append({
-            "step": 1,
-            "title": "No Setup Documentation Found",
-            "description": "No README, setup guide, or installation documentation was found in the indexed knowledge base.",
-            "source_file": "",
-        })
+        steps.append(
+            {
+                "step": 1,
+                "title": "No Setup Documentation Found",
+                "description": "No README, setup guide, or installation documentation was found in the indexed knowledge base.",
+                "source_file": "",
+            }
+        )
 
     return steps

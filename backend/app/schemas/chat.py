@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -14,7 +13,7 @@ class ChatRequest(BaseModel):
     conversation_id: str | None = Field(
         None, description="Existing conversation ID. Omit to start a new conversation."
     )
-    model: str = Field(default="gpt-4o", description="Model to use for generation")
+    model: str = Field(default="llama3.2", description="Model to use for generation")
 
 
 class SourceReference(BaseModel):
@@ -40,3 +39,7 @@ class ChatResponse(BaseModel):
     confidence_score: float = 0.0
     sources_used: list[str] = Field(default_factory=list)
     retrieved_documents: list[RetrievedDocument] = Field(default_factory=list)
+    related_documents: list[RetrievedDocument] = Field(default_factory=list)
+    related_repositories: list[str] = Field(default_factory=list)
+    token_usage: dict = Field(default_factory=dict)
+    follow_up_questions: list[str] = Field(default_factory=list)

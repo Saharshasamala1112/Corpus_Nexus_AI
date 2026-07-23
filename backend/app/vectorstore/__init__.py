@@ -1,7 +1,6 @@
 from app.vectorstore.base import BaseVectorStore
 from app.vectorstore.in_memory_vectorstore import InMemoryVectorStore
 
-
 _vector_store: BaseVectorStore | None = None
 
 

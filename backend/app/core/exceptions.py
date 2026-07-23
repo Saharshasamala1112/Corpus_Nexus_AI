@@ -59,7 +59,7 @@ async def validation_exception_handler(
     errors = exc.errors()
     messages = []
     for error in errors:
-        loc = " -> ".join(str(l) for l in error.get("loc", []))
+        loc = " -> ".join(str(part) for part in error.get("loc", []))
         messages.append(f"{loc}: {error.get('msg', '')}")
 
     logger.warning("Validation error: %s", "; ".join(messages))
@@ -98,6 +98,7 @@ def _app_is_debug() -> bool:
 def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(AppException, app_exception_handler)  # type: ignore[arg-type]
     app.add_exception_handler(
-        RequestValidationError, validation_exception_handler  # type: ignore[arg-type]
+        RequestValidationError,
+        validation_exception_handler,  # type: ignore[arg-type]
     )
     app.add_exception_handler(Exception, general_exception_handler)  # type: ignore[arg-type]

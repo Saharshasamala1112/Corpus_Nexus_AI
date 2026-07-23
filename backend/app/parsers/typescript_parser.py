@@ -28,10 +28,13 @@ class TypeScriptParser(BaseParser):
     def parse(self, file_path: str) -> ParsedDocument:
         content = self._read_file(file_path)
         extracted = self._extract_typescript(content)
-        metadata = self._build_metadata(file_path, {
-            "document_type": "source_code",
-            "language": "typescript",
-        })
+        metadata = self._build_metadata(
+            file_path,
+            {
+                "document_type": "source_code",
+                "language": "typescript",
+            },
+        )
         return ParsedDocument(content=extracted, metadata=metadata)
 
     def _extract_typescript(self, content: str) -> str:
@@ -54,7 +57,11 @@ class TypeScriptParser(BaseParser):
             parts.append(f"function {m.group(1)}()")
 
         if not parts:
-            lines = [l for l in content.split("\n") if l.strip() and not l.strip().startswith("//")]
+            lines = [
+                line
+                for line in content.split("\n")
+                if line.strip() and not line.strip().startswith("//")
+            ]
             parts = [" ".join(lines[:50])]
 
         return "\n".join(parts)

@@ -11,13 +11,13 @@ import {
   ChevronRight,
   PanelRightClose,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import Badge from '@/components/ui/badge'
 import { useChatStore } from '@/store/useChatStore'
-import { MOCK_CONTEXT_DOCUMENTS } from '@/lib/mock-data'
+import { useConversationStore } from '@/store/useConversationStore'
 
-const ICON_MAP = {
+const ICON_MAP: Record<string, typeof FileText> = {
   document: FileText,
   project: FolderGit2,
   repository: GitBranch,
@@ -25,17 +25,17 @@ const ICON_MAP = {
   database: Database,
   docker: Container,
   architecture: BookOpen,
-} as const
+}
 
 interface ContextSectionProps {
   type: string
   label: string
-  items: typeof MOCK_CONTEXT_DOCUMENTS
+  items: Array<{ id: string; title: string; source: string; snippet?: string; score?: number }>
 }
 
 function ContextSection({ type, label, items }: ContextSectionProps) {
   const [expanded, setExpanded] = useState(true)
-  const Icon = ICON_MAP[type as keyof typeof ICON_MAP] || FileText
+  const Icon = ICON_MAP[type] || FileText
 
   return (
     <div className="border-b border-border last:border-b-0">
@@ -74,13 +74,16 @@ function ContextSection({ type, label, items }: ContextSectionProps) {
                     <p className="text-xs font-medium text-foreground truncate group-hover:text-primary transition-colors">
                       {item.title}
                     </p>
-                    <p className="text-[11px] text-muted-foreground truncate">
-                      {item.source}
-                    </p>
+                    <p className="text-[11px] text-muted-foreground truncate">{item.source}</p>
                     {item.snippet && (
                       <p className="mt-0.5 text-[11px] text-muted-foreground/70 line-clamp-2">
                         {item.snippet}
                       </p>
+                    )}
+                    {item.score !== undefined && (
+                      <span className="text-[10px] text-muted-foreground/60">
+                        Relevance: {Math.round(item.score * 100)}%
+                      </span>
                     )}
                   </div>
                 </div>
@@ -95,25 +98,45 @@ function ContextSection({ type, label, items }: ContextSectionProps) {
 
 function ContextPanel() {
   const { contextPanelOpen, toggleContextPanel } = useChatStore()
+  const { activeConversation } = useConversationStore()
 
-  const grouped = MOCK_CONTEXT_DOCUMENTS.reduce(
-    (acc, doc) => {
-      if (!acc[doc.type]) acc[doc.type] = []
-      acc[doc.type].push(doc)
-      return acc
-    },
-    {} as Record<string, typeof MOCK_CONTEXT_DOCUMENTS>
-  )
+  const documents = useMemo(() => {
+    if (!activeConversation) return []
 
-  const sections = [
-    { type: 'document', label: 'Retrieved Documents' },
-    { type: 'project', label: 'Related Projects' },
-    { type: 'repository', label: 'Repository' },
-    { type: 'api', label: 'APIs' },
-    { type: 'database', label: 'Database Tables' },
-    { type: 'docker', label: 'Docker Files' },
-    { type: 'architecture', label: 'Architecture Documents' },
-  ]
+    const lastAssistantMsg = [...activeConversation.messages]
+      .reverse()
+      .find(
+        (m) => m.role === 'assistant' && m.retrieved_documents && m.retrieved_documents.length > 0
+      )
+
+    if (!lastAssistantMsg?.retrieved_documents) return []
+
+    return lastAssistantMsg.retrieved_documents.map((doc) => ({
+      id: doc.id,
+      title: doc.filename,
+      type: 'document' as const,
+      source: doc.file_path,
+      score: doc.score,
+      snippet: `Type: ${doc.document_type} | Language: ${doc.language}`,
+    }))
+  }, [activeConversation])
+
+  const sourceFiles = useMemo(() => {
+    if (!activeConversation) return []
+
+    const lastAssistantMsg = [...activeConversation.messages]
+      .reverse()
+      .find((m) => m.role === 'assistant' && m.sources_used && m.sources_used.length > 0)
+
+    if (!lastAssistantMsg?.sources_used) return []
+
+    return lastAssistantMsg.sources_used.map((src, i) => ({
+      id: `src_${i}`,
+      title: src.split('/').pop() || src,
+      type: 'repository' as const,
+      source: src,
+    }))
+  }, [activeConversation])
 
   return (
     <AnimatePresence>
@@ -129,7 +152,7 @@ function ContextPanel() {
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-foreground">Context</span>
               <Badge variant="secondary" className="text-[10px]">
-                {MOCK_CONTEXT_DOCUMENTS.length}
+                {activeConversation ? activeConversation.messages.length : 0}
               </Badge>
             </div>
             <Button
@@ -142,18 +165,21 @@ function ContextPanel() {
             </Button>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {sections.map((section) => {
-              const items = grouped[section.type] || []
-              if (items.length === 0) return null
-              return (
-                <ContextSection
-                  key={section.type}
-                  type={section.type}
-                  label={section.label}
-                  items={items}
-                />
-              )
-            })}
+            {sourceFiles.length > 0 && (
+              <ContextSection type="repository" label="Source References" items={sourceFiles} />
+            )}
+            {documents.length > 0 && (
+              <ContextSection type="document" label="Retrieved Documents" items={documents} />
+            )}
+            {documents.length === 0 && sourceFiles.length === 0 && (
+              <div className="flex flex-1 items-center justify-center p-8 text-center">
+                <div className="text-xs text-muted-foreground">
+                  <FileText className="mx-auto mb-2 size-8 opacity-40" />
+                  <p>Ask a question to see</p>
+                  <p>retrieved context here</p>
+                </div>
+              </div>
+            )}
           </div>
           <div className="border-t border-border px-4 py-3">
             <p className="text-[11px] text-muted-foreground text-center">

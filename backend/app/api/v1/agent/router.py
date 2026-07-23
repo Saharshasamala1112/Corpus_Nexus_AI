@@ -1,17 +1,17 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agent.executor import get_tool_executor
+from app.agent.planner import get_agent_planner
+from app.agent.prompt_builder import get_agent_prompt_builder
+from app.core.config import get_settings
+from app.core.logging import get_logger
 from app.database.session import get_async_session
+from app.repositories.conversation_repository import ConversationRepository
+from app.repositories.message_repository import MessageRepository
 from app.schemas.agent import AgentRequest, AgentResponse
 from app.schemas.common import HealthResponse
 from app.services.agent_service import AgentChatService
-from app.repositories.conversation_repository import ConversationRepository
-from app.repositories.message_repository import MessageRepository
-from app.agent.planner import AgentPlanner, get_agent_planner
-from app.agent.executor import ToolExecutor, get_tool_executor
-from app.agent.prompt_builder import AgentPromptBuilder, get_agent_prompt_builder
-from app.core.config import get_settings
-from app.core.logging import get_logger
 
 logger = get_logger("agent.api")
 
@@ -47,7 +47,9 @@ async def agent_chat(
 ) -> AgentResponse:
     logger.info(
         "Agent chat request: conversation_id=%s model=%s max_tools=%d",
-        request.conversation_id, request.model, request.max_tool_calls,
+        request.conversation_id,
+        request.model,
+        request.max_tool_calls,
     )
     return await service.process(request)
 
@@ -55,5 +57,6 @@ async def agent_chat(
 @router.get("/tools", summary="List available agent tools")
 async def list_tools():
     from app.agent import get_tool_executor
+
     executor = get_tool_executor()
     return {"tools": executor.get_available_tools()}

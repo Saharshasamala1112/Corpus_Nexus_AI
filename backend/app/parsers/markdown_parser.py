@@ -7,15 +7,15 @@ class MarkdownParser(BaseParser):
     def parse(self, file_path: str) -> ParsedDocument:
         content = self._read_file(file_path)
         sections = self._split_sections(content)
-        combined = "\n\n".join(
-            f"## {title}\n{body}" if title else body
-            for title, body in sections
+        combined = "\n\n".join(f"## {title}\n{body}" if title else body for title, body in sections)
+        metadata = self._build_metadata(
+            file_path,
+            {
+                "document_type": "markdown",
+                "language": "markdown",
+                "section_count": len(sections),
+            },
         )
-        metadata = self._build_metadata(file_path, {
-            "document_type": "markdown",
-            "language": "markdown",
-            "section_count": len(sections),
-        })
         return ParsedDocument(content=combined, metadata=metadata)
 
     def _split_sections(self, content: str) -> list[tuple[str, str]]:

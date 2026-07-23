@@ -1,5 +1,4 @@
 import ast
-import re
 
 from app.parsers.base import BaseParser, ParsedDocument
 
@@ -8,10 +7,13 @@ class PythonParser(BaseParser):
     def parse(self, file_path: str) -> ParsedDocument:
         content = self._read_file(file_path)
         extracted = self._extract_python(content)
-        metadata = self._build_metadata(file_path, {
-            "document_type": "source_code",
-            "language": "python",
-        })
+        metadata = self._build_metadata(
+            file_path,
+            {
+                "document_type": "source_code",
+                "language": "python",
+            },
+        )
         return ParsedDocument(content=extracted, metadata=metadata)
 
     def _extract_python(self, content: str) -> str:
@@ -24,11 +26,14 @@ class PythonParser(BaseParser):
         for node in ast.iter_child_nodes(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 docstring = ast.get_docstring(node) or ""
-                parts.append(f"def {node.name}():\n    {docstring}" if docstring else f"def {node.name}()")
+                parts.append(
+                    f"def {node.name}():\n    {docstring}" if docstring else f"def {node.name}()"
+                )
             elif isinstance(node, ast.ClassDef):
                 docstring = ast.get_docstring(node) or ""
                 methods = [
-                    n.name for n in node.body
+                    n.name
+                    for n in node.body
                     if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
                 ]
                 header = f"class {node.name}:"
@@ -44,7 +49,11 @@ class PythonParser(BaseParser):
                 parts.append(ast.get_source_segment(content, node) or "")
 
         if not parts:
-            lines = [l for l in content.split("\n") if l.strip() and not l.strip().startswith("#")]
+            lines = [
+                line
+                for line in content.split("\n")
+                if line.strip() and not line.strip().startswith("#")
+            ]
             parts = [" ".join(lines[:50])]
 
         return "\n".join(parts)

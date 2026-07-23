@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, ForeignKey, Index, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -7,7 +7,7 @@ from app.database.session import Base
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Conversation(Base):
@@ -28,9 +28,7 @@ class Conversation(Base):
         back_populates="conversation", cascade="all, delete-orphan", order_by="Message.created_at"
     )
 
-    __table_args__ = (
-        Index("ix_conversations_user_updated", "user_id", "updated_at"),
-    )
+    __table_args__ = (Index("ix_conversations_user_updated", "user_id", "updated_at"),)
 
 
 class Message(Base):
@@ -48,6 +46,4 @@ class Message(Base):
 
     conversation: Mapped["Conversation"] = relationship(back_populates="messages")
 
-    __table_args__ = (
-        Index("ix_messages_conversation_created", "conversation_id", "created_at"),
-    )
+    __table_args__ = (Index("ix_messages_conversation_created", "conversation_id", "created_at"),)

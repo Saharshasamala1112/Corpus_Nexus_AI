@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 
 
 @dataclass
@@ -14,7 +14,7 @@ class DocumentMetadata:
     repository: str
     project: str
     chunk_count: int = 0
-    indexed_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    indexed_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     def to_dict(self) -> dict:
         return {
@@ -68,8 +68,7 @@ class MetadataStore:
 
     def delete_by_path(self, file_path: str) -> bool:
         to_delete = [
-            doc_id for doc_id, meta in self._documents.items()
-            if meta.file_path == file_path
+            doc_id for doc_id, meta in self._documents.items() if meta.file_path == file_path
         ]
         for doc_id in to_delete:
             del self._documents[doc_id]

@@ -1,9 +1,9 @@
 import time
 
 from app.agent.base import BaseTool, ToolDefinition
-from app.retrieval import SemanticSearch, RetrievalResult
-from app.schemas.agent import ToolType
 from app.core.logging import get_logger
+from app.retrieval import RetrievalResult, SemanticSearch
+from app.schemas.agent import ToolType
 
 logger = get_logger("agent.tools.repo_search")
 
@@ -43,17 +43,45 @@ class RepositorySearchTool(BaseTool):
                 "Find all API endpoint definitions",
             ],
             keywords=[
-                "find", "search", "code", "function", "class", "implementation",
-                "repository", "repo", "where", "file", "module", "component",
-                "middleware", "service", "controller", "handler", "router",
-                "model", "schema", "type", "interface",
+                "find",
+                "search",
+                "code",
+                "function",
+                "class",
+                "implementation",
+                "repository",
+                "repo",
+                "where",
+                "file",
+                "module",
+                "component",
+                "middleware",
+                "service",
+                "controller",
+                "handler",
+                "router",
+                "model",
+                "schema",
+                "type",
+                "interface",
             ],
         )
 
     def matches_query(self, query: str) -> float:
         score = super().matches_query(query)
-        high_value = ["find", "search", "where is", "code", "function", "class",
-                       "implementation", "repository", "repo", "file", "module"]
+        high_value = [
+            "find",
+            "search",
+            "where is",
+            "code",
+            "function",
+            "class",
+            "implementation",
+            "repository",
+            "repo",
+            "file",
+            "module",
+        ]
         query_lower = query.lower()
         for term in high_value:
             if term in query_lower:
@@ -83,22 +111,26 @@ class RepositorySearchTool(BaseTool):
         formatted_results = []
         for r in results:
             meta = r.metadata
-            formatted_results.append({
-                "repository": meta.get("repository", "unknown"),
-                "file": meta.get("filename", ""),
-                "path": meta.get("file_path", ""),
-                "function": _extract_function_name(r.content),
-                "score": round(r.score, 4),
-                "document_type": meta.get("document_type", ""),
-                "language": meta.get("language", ""),
-                "chunk_index": meta.get("chunk_index", 0),
-                "content_preview": r.content[:500],
-            })
+            formatted_results.append(
+                {
+                    "repository": meta.get("repository", "unknown"),
+                    "file": meta.get("filename", ""),
+                    "path": meta.get("file_path", ""),
+                    "function": _extract_function_name(r.content),
+                    "score": round(r.score, 4),
+                    "document_type": meta.get("document_type", ""),
+                    "language": meta.get("language", ""),
+                    "chunk_index": meta.get("chunk_index", 0),
+                    "content_preview": r.content[:500],
+                }
+            )
 
         elapsed_ms = (time.perf_counter() - start) * 1000
         logger.info(
             "Repository search: query='%s' results=%d time=%.1fms",
-            query[:50], len(formatted_results), elapsed_ms,
+            query[:50],
+            len(formatted_results),
+            elapsed_ms,
         )
 
         return {
@@ -114,6 +146,6 @@ def _extract_function_name(content: str) -> str:
         stripped = line.strip()
         for prefix in ("def ", "function ", "async def ", "class ", "export function "):
             if stripped.startswith(prefix):
-                name = stripped[len(prefix):].split("(")[0].split(":")[0].strip()
+                name = stripped[len(prefix) :].split("(")[0].split(":")[0].strip()
                 return name
     return ""

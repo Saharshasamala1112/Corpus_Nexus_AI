@@ -1,17 +1,16 @@
 import uuid
 
-from app.agent.planner import AgentPlanner, get_agent_planner
 from app.agent.executor import ToolExecutor, get_tool_executor
+from app.agent.planner import AgentPlanner, get_agent_planner
 from app.agent.prompt_builder import AgentPromptBuilder, get_agent_prompt_builder
+from app.core.logging import get_logger
 from app.repositories.conversation_repository import ConversationRepository
 from app.repositories.message_repository import MessageRepository
 from app.schemas.agent import (
     AgentRequest,
     AgentResponse,
     ReasoningStep,
-    SourceReference,
 )
-from app.core.logging import get_logger
 
 logger = get_logger("agent.chat.service")
 
@@ -45,6 +44,7 @@ class AgentChatService:
         conversation = await self.conversation_repo.get_by_id(conversation_id)
         if not conversation:
             from app.core.exceptions import NotFoundException
+
             raise NotFoundException("Conversation", conversation_id)
 
         await self.message_repo.create(
@@ -66,16 +66,20 @@ class AgentChatService:
         for tc in tool_calls:
             tool_step_num = len(reasoning_steps) + 1
             if tc.success:
-                observation = f"Tool {tc.tool.value} returned results ({tc.execution_time_ms:.1f}ms)"
+                observation = (
+                    f"Tool {tc.tool.value} returned results ({tc.execution_time_ms:.1f}ms)"
+                )
             else:
                 observation = f"Tool {tc.tool.value} failed: {tc.error}"
-            reasoning_steps.append({
-                "step": tool_step_num,
-                "thought": f"Executing {tc.tool.value}: {tc.reasoning}",
-                "action": f"Executed {tc.tool.value}",
-                "tool_used": tc.tool.value,
-                "observation": observation,
-            })
+            reasoning_steps.append(
+                {
+                    "step": tool_step_num,
+                    "thought": f"Executing {tc.tool.value}: {tc.reasoning}",
+                    "action": f"Executed {tc.tool.value}",
+                    "tool_used": tc.tool.value,
+                    "observation": observation,
+                }
+            )
 
         answer, confidence, sources = await self.prompt_builder.build_response(
             query=request.message,
@@ -84,11 +88,13 @@ class AgentChatService:
         )
 
         final_step_num = len(reasoning_steps) + 1
-        reasoning_steps.append({
-            "step": final_step_num,
-            "thought": "Synthesized final response from all tool results",
-            "action": "Response generation",
-        })
+        reasoning_steps.append(
+            {
+                "step": final_step_num,
+                "thought": "Synthesized final response from all tool results",
+                "action": "Response generation",
+            }
+        )
 
         tools_used = [tc.tool for tc in tool_calls if tc.success]
 
@@ -102,15 +108,16 @@ class AgentChatService:
 
         logger.info(
             "Agent chat complete: conversation=%s tools=%d confidence=%.2f",
-            conversation_id, len(tools_used), confidence,
+            conversation_id,
+            len(tools_used),
+            confidence,
         )
 
         return AgentResponse(
             answer=answer,
             conversation_id=conversation_id,
             reasoning_steps=[
-                ReasoningStep(**rs) if isinstance(rs, dict) else rs
-                for rs in reasoning_steps
+                ReasoningStep(**rs) if isinstance(rs, dict) else rs for rs in reasoning_steps
             ],
             tools_used=tools_used,
             sources=sources,

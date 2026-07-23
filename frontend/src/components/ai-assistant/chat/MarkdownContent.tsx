@@ -39,10 +39,7 @@ function renderMarkdown(text: string): string {
   let html = escapeHtml(text)
 
   // Code blocks
-  html = html.replace(
-    /```(\w*)\n([\s\S]*?)```/g,
-    '<pre><code class="language-$1">$2</code></pre>'
-  )
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>')
 
   // Inline code
   html = html.replace(/`([^`]+)`/g, '<code>$1</code>')
@@ -65,17 +62,14 @@ function renderMarkdown(text: string): string {
   html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
 
   // Tables
-  html = html.replace(
-    /^\|(.+)\|$/gm,
-    (match) => {
-      const cells = match
-        .split('|')
-        .filter((c) => c.trim())
-        .map((c) => c.trim())
-      if (cells.every((c) => /^[-:]+$/.test(c))) return ''
-      return `<tr>${cells.map((c) => `<td>${c}</td>`).join('')}</tr>`
-    }
-  )
+  html = html.replace(/^\|(.+)\|$/gm, (match) => {
+    const cells = match
+      .split('|')
+      .filter((c) => c.trim())
+      .map((c) => c.trim())
+    if (cells.every((c) => /^[-:]+$/.test(c))) return ''
+    return `<tr>${cells.map((c) => `<td>${c}</td>`).join('')}</tr>`
+  })
   html = html.replace(/(<tr>.*<\/tr>\n?)+/g, (match) => {
     const rows = match.split('\n').filter((r) => r.trim())
     if (rows.length === 0) return ''
@@ -111,10 +105,7 @@ function renderMarkdown(text: string): string {
 }
 
 function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 export default MarkdownContent

@@ -2,6 +2,7 @@ import time
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.v1.router import api_v1_router
 from app.core.config import get_settings
@@ -9,6 +10,28 @@ from app.core.exceptions import register_exception_handlers
 from app.core.logging import get_logger, request_id_var, setup_logging
 
 logger = get_logger("main")
+
+_rate_limit_store: dict[str, list[float]] = {}
+
+
+def _rate_limiter(request: Request) -> None:
+    settings = get_settings()
+    if not settings.RATE_LIMIT_ENABLED:
+        return
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    window = settings.RATE_LIMIT_WINDOW_SECONDS
+    max_requests = settings.RATE_LIMIT_MAX_REQUESTS
+    timestamps = _rate_limit_store.get(client_ip, [])
+    timestamps = [t for t in timestamps if now - t < window]
+    if len(timestamps) >= max_requests:
+        raise RateLimitExceeded()
+    timestamps.append(now)
+    _rate_limit_store[client_ip] = timestamps
+
+
+class RateLimitExceeded(Exception):
+    pass
 
 
 def create_app() -> FastAPI:
@@ -33,6 +56,20 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @app.middleware("http")
+    async def rate_limit_middleware(request: Request, call_next):
+        if request.url.path.startswith("/api/"):
+            try:
+                _rate_limiter(request)
+            except RateLimitExceeded:
+                return JSONResponse(
+                    status_code=429,
+                    content={
+                        "error": {"code": 429, "message": "Too many requests. Please slow down."}
+                    },
+                )
+        return await call_next(request)
 
     @app.middleware("http")
     async def request_logging_middleware(request: Request, call_next):

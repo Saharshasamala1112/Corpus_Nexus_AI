@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -36,10 +37,17 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     # LLM
+    LLM_PROVIDER: str = "ollama"
     OPENAI_API_KEY: str = ""
-    LLM_MODEL: str = "gpt-4o"
+    LLM_MODEL: str = "llama3.2"
     LLM_TEMPERATURE: float = 0.1
     LLM_MAX_TOKENS: int = 4096
+
+    # Ollama
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
+    OLLAMA_MODEL: str = "llama3.2"
+    OLLAMA_MAX_RETRIES: int = 2
+    OLLAMA_TIMEOUT_SECONDS: int = 120
 
     # RAG / Knowledge
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
@@ -47,7 +55,37 @@ class Settings(BaseSettings):
     CHUNK_SIZE: int = 800
     CHUNK_OVERLAP: int = 150
     TOP_K: int = 5
-    MIN_RELEVANCE_SCORE: float = 0.0
+    MIN_RELEVANCE_SCORE: float = 0.3
+
+    # Rate Limiting
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_MAX_REQUESTS: int = 60
+    RATE_LIMIT_WINDOW_SECONDS: int = 60
+
+    # Security
+    ALLOWED_FILE_EXTENSIONS: list[str] = Field(
+        default_factory=lambda: [
+            ".py",
+            ".ts",
+            ".tsx",
+            ".js",
+            ".jsx",
+            ".yaml",
+            ".yml",
+            ".json",
+            ".md",
+            ".markdown",
+            ".txt",
+            ".toml",
+            ".cfg",
+            ".ini",
+            ".sh",
+            ".pdf",
+            ".rst",
+            ".env",
+            ".dockerfile",
+        ]
+    )
 
     # Logging
     LOG_LEVEL: str = "INFO"

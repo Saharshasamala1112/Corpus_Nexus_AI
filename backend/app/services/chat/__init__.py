@@ -1,7 +1,8 @@
 import uuid
 
 from app.core.logging import get_logger
-from app.generation import GenerationPipeline, GeneratedResponse
+from app.generation import GeneratedResponse, GenerationPipeline
+from app.memory import get_memory_manager
 from app.repositories.conversation_repository import ConversationRepository
 from app.repositories.message_repository import MessageRepository
 from app.schemas.chat import ChatMessage, ChatRequest, ChatResponse, RetrievedDocument
@@ -19,6 +20,7 @@ class RAGChatService:
         self.conversation_repo = conversation_repo
         self.message_repo = message_repo
         self.generation_pipeline = generation_pipeline or GenerationPipeline()
+        self.memory_manager = get_memory_manager()
 
     async def send_message(self, request: ChatRequest) -> ChatResponse:
         conversation_id = request.conversation_id
@@ -39,11 +41,16 @@ class RAGChatService:
 
             raise NotFoundException("Conversation", conversation_id)
 
-        await self.message_repo.create(
-            message_id=str(uuid.uuid4()),
-            conversation_id=conversation_id,
+        await self.memory_manager.add_to_session(
+            session_id=conversation_id,
             role="user",
             content=user_message_content,
+            conversation_id=conversation_id,
+        )
+
+        await self.memory_manager.load_conversation_history(
+            conversation_id=conversation_id,
+            session_id=conversation_id,
         )
 
         generation_result = await self.generation_pipeline.generate(
@@ -53,11 +60,17 @@ class RAGChatService:
 
         assistant_content = self._format_response(user_message_content, generation_result)
 
-        await self.message_repo.create(
-            message_id=str(uuid.uuid4()),
-            conversation_id=conversation_id,
+        await self.memory_manager.add_to_session(
+            session_id=conversation_id,
             role="assistant",
             content=assistant_content,
+            conversation_id=conversation_id,
+        )
+
+        follow_up_questions = await self.memory_manager.generate_followup_questions(
+            session_id=conversation_id,
+            query=user_message_content,
+            answer=assistant_content,
         )
 
         await self.conversation_repo.touch(conversation_id)
@@ -79,6 +92,12 @@ class RAGChatService:
             retrieved_documents=[
                 RetrievedDocument(**doc) for doc in generation_result.retrieved_documents
             ],
+            related_documents=[
+                RetrievedDocument(**doc) for doc in generation_result.related_documents
+            ],
+            related_repositories=generation_result.related_repositories,
+            token_usage=generation_result.token_usage,
+            follow_up_questions=follow_up_questions,
         )
 
     def _format_response(self, query: str, result: GeneratedResponse) -> str:

@@ -23,10 +23,16 @@ class BaseLLM(ABC):
         messages: list[LLMMessage],
         temperature: float = 0.1,
         max_tokens: int = 4096,
-    ) -> LLMResponse:
-        ...
+    ) -> LLMResponse: ...
+
+    async def chat_stream(
+        self,
+        messages: list[LLMMessage],
+        temperature: float = 0.1,
+        max_tokens: int = 4096,
+    ):
+        yield await self.chat(messages, temperature=temperature, max_tokens=max_tokens)
 
     @property
     @abstractmethod
-    def model_name(self) -> str:
-        ...
+    def model_name(self) -> str: ...

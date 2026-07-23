@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
-from app.schemas.agent import ToolType
 from app.core.logging import get_logger
+from app.schemas.agent import ToolType
 
 logger = get_logger("agent.base")
 
@@ -19,12 +19,10 @@ class ToolDefinition:
 class BaseTool(ABC):
     @property
     @abstractmethod
-    def definition(self) -> ToolDefinition:
-        ...
+    def definition(self) -> ToolDefinition: ...
 
     @abstractmethod
-    async def execute(self, parameters: dict) -> dict:
-        ...
+    async def execute(self, parameters: dict) -> dict: ...
 
     def matches_query(self, query: str) -> float:
         """Return a relevance score (0.0-1.0) for how well this tool matches the query."""

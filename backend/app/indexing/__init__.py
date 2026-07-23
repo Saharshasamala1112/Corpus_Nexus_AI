@@ -1,6 +1,6 @@
-from app.ingestion import IngestionPipeline
-from app.retrieval import SemanticSearch
 from app.core.logging import get_logger
+from app.ingestion import IngestionPipeline
+from app.retrieval import SemanticSearch as SemanticSearch
 
 logger = get_logger("indexing")
 
@@ -56,8 +56,6 @@ class IndexingOrchestrator:
         repository_name: str,
         extensions: list[str] | None = None,
     ) -> dict:
-        from app.metadata import MetadataStore
-
         meta_store = self.pipeline.metadata_store
         existing = meta_store.list_all(repository=repository_name)
         for doc in existing:

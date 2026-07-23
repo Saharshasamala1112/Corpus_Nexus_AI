@@ -6,10 +6,13 @@ from app.parsers.base import BaseParser, ParsedDocument
 class JsonParser(BaseParser):
     def parse(self, file_path: str) -> ParsedDocument:
         content = self._read_file(file_path)
-        metadata = self._build_metadata(file_path, {
-            "document_type": "configuration",
-            "language": "json",
-        })
+        metadata = self._build_metadata(
+            file_path,
+            {
+                "document_type": "configuration",
+                "language": "json",
+            },
+        )
 
         try:
             data = json.loads(content)

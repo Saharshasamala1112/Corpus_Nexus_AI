@@ -31,7 +31,11 @@ function ChatArea({ messages, isGenerating, onSend, onStop }: ChatAreaProps) {
             Enterprise
           </span>
         </div>
-        <Tooltip content={contextPanelOpen ? 'Close context' : 'Open context'} side="bottom" shortcut="⌘.">
+        <Tooltip
+          content={contextPanelOpen ? 'Close context' : 'Open context'}
+          side="bottom"
+          shortcut="⌘."
+        >
           <Button
             variant="ghost"
             size="icon-sm"
@@ -55,11 +59,7 @@ function ChatArea({ messages, isGenerating, onSend, onStop }: ChatAreaProps) {
       )}
 
       {/* Input */}
-      <MessageInput
-        onSend={onSend}
-        onStop={onStop}
-        isGenerating={isGenerating}
-      />
+      <MessageInput onSend={onSend} onStop={onStop} isGenerating={isGenerating} />
     </div>
   )
 }

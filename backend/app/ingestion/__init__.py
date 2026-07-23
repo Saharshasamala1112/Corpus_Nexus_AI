@@ -1,15 +1,16 @@
 import uuid
 from pathlib import Path
 
-from app.parsers import get_parser
-from app.parsers.base import ParsedDocument
-from app.chunking import TextChunker, Chunk
+from app.chunking import Chunk as Chunk
+from app.chunking import TextChunker
+from app.core.logging import get_logger
 from app.embeddings import get_embedding_service
 from app.embeddings.base import BaseEmbeddingService
+from app.metadata import DocumentMetadata, MetadataStore
+from app.parsers import get_parser
+from app.parsers.base import ParsedDocument as ParsedDocument
 from app.vectorstore import get_vector_store
 from app.vectorstore.base import BaseVectorStore, VectorRecord
-from app.metadata import MetadataStore, DocumentMetadata
-from app.core.logging import get_logger
 
 logger = get_logger("ingestion")
 
@@ -71,7 +72,7 @@ class IngestionPipeline:
                     "chunk_index": chunk.index,
                 },
             )
-            for chunk, embedding in zip(chunks, embeddings)
+            for chunk, embedding in zip(chunks, embeddings, strict=False)
         ]
 
         inserted = await self.vector_store.insert(records)
@@ -119,9 +120,19 @@ class IngestionPipeline:
             return results
 
         skip_dirs = {
-            "node_modules", "__pycache__", ".git", ".venv", "venv",
-            "dist", "build", ".next", ".nuxt", "coverage", ".mypy_cache",
-            ".pytest_cache", "egg-info",
+            "node_modules",
+            "__pycache__",
+            ".git",
+            ".venv",
+            "venv",
+            "dist",
+            "build",
+            ".next",
+            ".nuxt",
+            "coverage",
+            ".mypy_cache",
+            ".pytest_cache",
+            "egg-info",
         }
 
         for file_path in sorted(path.rglob("*")):
@@ -150,9 +161,6 @@ class IngestionPipeline:
         return results
 
     async def _delete_old_chunks(self, meta: DocumentMetadata) -> None:
-        chunk_ids = [
-            f"{meta.doc_id}_chunk_{i}"
-            for i in range(meta.chunk_count)
-        ]
+        chunk_ids = [f"{meta.doc_id}_chunk_{i}" for i in range(meta.chunk_count)]
         await self.vector_store.delete(chunk_ids)
         self.metadata_store.delete(meta.doc_id)

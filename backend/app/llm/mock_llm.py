@@ -28,18 +28,21 @@ class MockLLM(BaseLLM):
 
         if has_context:
             import re
+
             sources = re.findall(r"Source: (.+)", user_msg)
             source_list = sources[:5] if sources else ["unknown"]
 
             main_files = [s for s in source_list if s.endswith(".py")][:2]
             sup_files = [s for s in source_list if s not in main_files][:3]
 
-            main_block = "\n".join(
-                f"- `{f}` - core module" for f in main_files
-            ) or "- `app/` - application code"
-            sup_block = "\n".join(
-                f"- `{f}` - supporting module" for f in sup_files
-            ) or "- `app/` - supporting code"
+            main_block = (
+                "\n".join(f"- `{f}` - core module" for f in main_files)
+                or "- `app/` - application code"
+            )
+            sup_block = (
+                "\n".join(f"- `{f}` - supporting module" for f in sup_files)
+                or "- `app/` - supporting code"
+            )
             ref_block = "\n".join(f"- {f}" for f in source_list)
 
             content = (

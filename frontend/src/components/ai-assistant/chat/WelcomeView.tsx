@@ -31,8 +31,8 @@ function WelcomeView({ onSendPrompt }: WelcomeViewProps) {
           CorpusGuard AI
         </h1>
         <p className="mb-10 text-muted-foreground leading-relaxed max-w-lg">
-          Intelligent codebase companion powered by enterprise AI.
-          Ask questions about your architecture, code, and infrastructure.
+          Intelligent codebase companion powered by enterprise AI. Ask questions about your
+          architecture, code, and infrastructure.
         </p>
 
         <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3">

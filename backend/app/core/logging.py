@@ -1,7 +1,6 @@
 import logging
 import sys
 from contextvars import ContextVar
-from typing import Any
 
 from app.core.config import get_settings
 

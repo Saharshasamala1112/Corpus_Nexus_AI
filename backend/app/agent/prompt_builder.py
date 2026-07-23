@@ -1,9 +1,9 @@
 import json
 
-from app.schemas.agent import ToolCall, ToolType, SourceReference
-from app.citation import extract_citations, compute_confidence
-from app.llm import BaseLLM, LLMMessage, get_llm
+from app.citation import compute_confidence, extract_citations
 from app.core.logging import get_logger
+from app.llm import BaseLLM, LLMMessage, get_llm
+from app.schemas.agent import SourceReference, ToolCall
 
 logger = get_logger("agent.prompt_builder")
 
@@ -97,10 +97,12 @@ class AgentPromptBuilder:
         if citation_result.source_references:
             for ref in citation_result.source_references:
                 if not any(s.file_path == ref for s in sources):
-                    sources.append(SourceReference(
-                        file_path=ref,
-                        file_name=ref.split("/")[-1] if "/" in ref else ref,
-                    ))
+                    sources.append(
+                        SourceReference(
+                            file_path=ref,
+                            file_name=ref.split("/")[-1] if "/" in ref else ref,
+                        )
+                    )
 
         return answer, confidence, sources
 
@@ -108,10 +110,7 @@ class AgentPromptBuilder:
         parts = []
         for i, tc in enumerate(tool_calls, 1):
             if not tc.success:
-                parts.append(
-                    f"### Tool {i}: {tc.tool.value} (FAILED)\n"
-                    f"Error: {tc.error}\n"
-                )
+                parts.append(f"### Tool {i}: {tc.tool.value} (FAILED)\nError: {tc.error}\n")
                 continue
 
             result = tc.result
@@ -145,9 +144,20 @@ class AgentPromptBuilder:
             if not tc.success:
                 continue
             result = tc.result
-            for key in ["results", "endpoints", "tables", "projects", "setup_steps",
-                        "documentation_references", "setup_sources", "configs",
-                        "docker_configs", "redis_configs", "celery_configs", "other_configs"]:
+            for key in [
+                "results",
+                "endpoints",
+                "tables",
+                "projects",
+                "setup_steps",
+                "documentation_references",
+                "setup_sources",
+                "configs",
+                "docker_configs",
+                "redis_configs",
+                "celery_configs",
+                "other_configs",
+            ]:
                 items = result.get(key, [])
                 if isinstance(items, list):
                     for item in items:
@@ -155,11 +165,13 @@ class AgentPromptBuilder:
                             path = item.get("path", item.get("file_path", ""))
                             if path and path not in seen:
                                 seen.add(path)
-                                sources.append(SourceReference(
-                                    file_path=path,
-                                    file_name=path.split("/")[-1] if "/" in path else path,
-                                    score=item.get("score", 0.0),
-                                ))
+                                sources.append(
+                                    SourceReference(
+                                        file_path=path,
+                                        file_name=path.split("/")[-1] if "/" in path else path,
+                                        score=item.get("score", 0.0),
+                                    )
+                                )
         return sources
 
     def _extract_scores(self, tool_calls: list[ToolCall]) -> list[float]:

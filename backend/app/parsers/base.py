@@ -11,8 +11,7 @@ class ParsedDocument:
 
 class BaseParser(ABC):
     @abstractmethod
-    def parse(self, file_path: str) -> ParsedDocument:
-        ...
+    def parse(self, file_path: str) -> ParsedDocument: ...
 
     def _read_file(self, file_path: str) -> str:
         path = Path(file_path)

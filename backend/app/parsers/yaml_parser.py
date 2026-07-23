@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from app.parsers.base import BaseParser, ParsedDocument
 
 try:
@@ -11,10 +9,13 @@ except ImportError:
 class YamlParser(BaseParser):
     def parse(self, file_path: str) -> ParsedDocument:
         content = self._read_file(file_path)
-        metadata = self._build_metadata(file_path, {
-            "document_type": "configuration",
-            "language": "yaml",
-        })
+        metadata = self._build_metadata(
+            file_path,
+            {
+                "document_type": "configuration",
+                "language": "yaml",
+            },
+        )
 
         if yaml is None:
             return ParsedDocument(content=content, metadata=metadata)
@@ -24,7 +25,9 @@ class YamlParser(BaseParser):
             if len(docs) == 1 and isinstance(docs[0], dict):
                 text = self._dict_to_text(docs[0])
             elif docs:
-                text = "\n---\n".join(self._dict_to_text(d) if isinstance(d, dict) else str(d) for d in docs)
+                text = "\n---\n".join(
+                    self._dict_to_text(d) if isinstance(d, dict) else str(d) for d in docs
+                )
             else:
                 text = content
         except Exception:

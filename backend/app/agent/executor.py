@@ -1,9 +1,8 @@
 import time
-import traceback
 
 from app.agent.base import ToolRegistry, get_tool_registry
-from app.schemas.agent import ToolType, ToolCall
 from app.core.logging import get_logger
+from app.schemas.agent import ToolCall, ToolType
 
 logger = get_logger("agent.executor")
 
@@ -24,27 +23,31 @@ class ToolExecutor:
                 tool_type = ToolType(tool_type_str)
             except ValueError:
                 logger.warning("Unknown tool type: %s", tool_type_str)
-                tool_calls.append(ToolCall(
-                    tool=ToolType.REPOSITORY_SEARCH,
-                    reasoning=reasoning,
-                    parameters=parameters,
-                    result={"error": f"Unknown tool type: {tool_type_str}"},
-                    success=False,
-                    error=f"Unknown tool type: {tool_type_str}",
-                ))
+                tool_calls.append(
+                    ToolCall(
+                        tool=ToolType.REPOSITORY_SEARCH,
+                        reasoning=reasoning,
+                        parameters=parameters,
+                        result={"error": f"Unknown tool type: {tool_type_str}"},
+                        success=False,
+                        error=f"Unknown tool type: {tool_type_str}",
+                    )
+                )
                 continue
 
             tool = self.registry.get(tool_type)
             if tool is None:
                 logger.warning("Tool not registered: %s", tool_type_str)
-                tool_calls.append(ToolCall(
-                    tool=tool_type,
-                    reasoning=reasoning,
-                    parameters=parameters,
-                    result={"error": f"Tool not registered: {tool_type_str}"},
-                    success=False,
-                    error=f"Tool not registered: {tool_type_str}",
-                ))
+                tool_calls.append(
+                    ToolCall(
+                        tool=tool_type,
+                        reasoning=reasoning,
+                        parameters=parameters,
+                        result={"error": f"Tool not registered: {tool_type_str}"},
+                        success=False,
+                        error=f"Tool not registered: {tool_type_str}",
+                    )
+                )
                 continue
 
             start = time.perf_counter()
@@ -52,33 +55,38 @@ class ToolExecutor:
                 result = await tool.execute(parameters)
                 elapsed_ms = (time.perf_counter() - start) * 1000
 
-                tool_calls.append(ToolCall(
-                    tool=tool_type,
-                    reasoning=reasoning,
-                    parameters=parameters,
-                    result=result,
-                    execution_time_ms=round(elapsed_ms, 1),
-                    success=True,
-                ))
+                tool_calls.append(
+                    ToolCall(
+                        tool=tool_type,
+                        reasoning=reasoning,
+                        parameters=parameters,
+                        result=result,
+                        execution_time_ms=round(elapsed_ms, 1),
+                        success=True,
+                    )
+                )
 
                 logger.info(
                     "Tool executed: %s time=%.1fms success=True",
-                    tool_type.value, elapsed_ms,
+                    tool_type.value,
+                    elapsed_ms,
                 )
 
             except Exception as e:
                 elapsed_ms = (time.perf_counter() - start) * 1000
                 logger.exception("Tool execution failed: %s", tool_type_str)
 
-                tool_calls.append(ToolCall(
-                    tool=tool_type,
-                    reasoning=reasoning,
-                    parameters=parameters,
-                    result={"error": str(e)},
-                    execution_time_ms=round(elapsed_ms, 1),
-                    success=False,
-                    error=f"{type(e).__name__}: {e}",
-                ))
+                tool_calls.append(
+                    ToolCall(
+                        tool=tool_type,
+                        reasoning=reasoning,
+                        parameters=parameters,
+                        result={"error": str(e)},
+                        execution_time_ms=round(elapsed_ms, 1),
+                        success=False,
+                        error=f"{type(e).__name__}: {e}",
+                    )
+                )
 
         return tool_calls
 

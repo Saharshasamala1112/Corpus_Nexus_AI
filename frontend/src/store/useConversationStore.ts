@@ -1,6 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react'
 import type { Conversation, Message } from '@/types/chat'
-import { MOCK_CONVERSATIONS } from '@/lib/mock-data'
 
 interface ConversationStore {
   conversations: Conversation[]
@@ -8,7 +7,7 @@ interface ConversationStore {
 }
 
 let state: ConversationStore = {
-  conversations: [...MOCK_CONVERSATIONS],
+  conversations: [],
   activeConversationId: null,
 }
 
@@ -38,12 +37,14 @@ function setState(updater: (prev: ConversationStore) => ConversationStore) {
 
 let idCounter = 100
 
+export function getState() {
+  return state
+}
+
 export function useConversationStore() {
   const store = useSyncExternalStore(subscribe, getSnapshot)
 
-  const activeConversation = store.conversations.find(
-    (c) => c.id === store.activeConversationId
-  )
+  const activeConversation = store.conversations.find((c) => c.id === store.activeConversationId)
 
   const createConversation = useCallback((title?: string) => {
     const id = `conv_${++idCounter}`
@@ -90,9 +91,24 @@ export function useConversationStore() {
           c.id === conversationId
             ? {
                 ...c,
-                messages: c.messages.map((m) =>
-                  m.id === messageId ? { ...m, content } : m
-                ),
+                messages: c.messages.map((m) => (m.id === messageId ? { ...m, content } : m)),
+              }
+            : c
+        ),
+      }))
+    },
+    []
+  )
+
+  const updateMessageMetadata = useCallback(
+    (conversationId: string, messageId: string, metadata: Partial<Message>) => {
+      setState((prev) => ({
+        ...prev,
+        conversations: prev.conversations.map((c) =>
+          c.id === conversationId
+            ? {
+                ...c,
+                messages: c.messages.map((m) => (m.id === messageId ? { ...m, ...metadata } : m)),
               }
             : c
         ),
@@ -109,9 +125,7 @@ export function useConversationStore() {
           c.id === conversationId
             ? {
                 ...c,
-                messages: c.messages.map((m) =>
-                  m.id === messageId ? { ...m, isStreaming } : m
-                ),
+                messages: c.messages.map((m) => (m.id === messageId ? { ...m, isStreaming } : m)),
               }
             : c
         ),
@@ -120,23 +134,17 @@ export function useConversationStore() {
     []
   )
 
-  const updateConversationTitle = useCallback(
-    (conversationId: string, title: string) => {
-      setState((prev) => ({
-        ...prev,
-        conversations: prev.conversations.map((c) =>
-          c.id === conversationId ? { ...c, title } : c
-        ),
-      }))
-    },
-    []
-  )
+  const updateConversationTitle = useCallback((conversationId: string, title: string) => {
+    setState((prev) => ({
+      ...prev,
+      conversations: prev.conversations.map((c) => (c.id === conversationId ? { ...c, title } : c)),
+    }))
+  }, [])
 
   const deleteConversation = useCallback((id: string) => {
     setState((prev) => ({
       conversations: prev.conversations.filter((c) => c.id !== id),
-      activeConversationId:
-        prev.activeConversationId === id ? null : prev.activeConversationId,
+      activeConversationId: prev.activeConversationId === id ? null : prev.activeConversationId,
     }))
   }, [])
 
@@ -154,6 +162,7 @@ export function useConversationStore() {
     setActiveConversation,
     addMessage,
     updateMessage,
+    updateMessageMetadata,
     updateMessageStreaming,
     updateConversationTitle,
     deleteConversation,

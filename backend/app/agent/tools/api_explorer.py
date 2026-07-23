@@ -2,9 +2,9 @@ import re
 import time
 
 from app.agent.base import BaseTool, ToolDefinition
-from app.retrieval import SemanticSearch, RetrievalResult
-from app.schemas.agent import ToolType
 from app.core.logging import get_logger
+from app.retrieval import RetrievalResult, SemanticSearch
+from app.schemas.agent import ToolType
 
 logger = get_logger("agent.tools.api_explorer")
 
@@ -51,9 +51,26 @@ class APIExplorerTool(BaseTool):
                 "List all API routes",
             ],
             keywords=[
-                "api", "endpoint", "route", "rest", "http", "request", "response",
-                "get", "post", "put", "delete", "patch", "handler", "controller",
-                "fastapi", "router", "url", "path", "swagger", "openapi",
+                "api",
+                "endpoint",
+                "route",
+                "rest",
+                "http",
+                "request",
+                "response",
+                "get",
+                "post",
+                "put",
+                "delete",
+                "patch",
+                "handler",
+                "controller",
+                "fastapi",
+                "router",
+                "url",
+                "path",
+                "swagger",
+                "openapi",
             ],
         )
 
@@ -115,7 +132,9 @@ class APIExplorerTool(BaseTool):
         elapsed_ms = (time.perf_counter() - start) * 1000
         logger.info(
             "API explorer: query='%s' endpoints=%d time=%.1fms",
-            query[:50], len(unique_endpoints), elapsed_ms,
+            query[:50],
+            len(unique_endpoints),
+            elapsed_ms,
         )
 
         return {
@@ -129,8 +148,11 @@ class APIExplorerTool(BaseTool):
 def _extract_endpoints(content: str, file_path: str) -> list[dict]:
     endpoints = []
     method_map = {
-        "get": "GET", "post": "POST", "put": "PUT",
-        "patch": "PATCH", "delete": "DELETE",
+        "get": "GET",
+        "post": "POST",
+        "put": "PUT",
+        "patch": "PATCH",
+        "delete": "DELETE",
     }
     for match in ENDPOINT_PATTERN.finditer(content):
         method_raw = match.group(1).lower()
@@ -148,20 +170,22 @@ def _extract_endpoints(content: str, file_path: str) -> list[dict]:
         request_body = _extract_request_body(content, match.end())
         response_model = _extract_response_model(content, match.end())
 
-        endpoints.append({
-            "method": method,
-            "endpoint": endpoint,
-            "description": desc,
-            "file_path": file_path,
-            "request_body": request_body,
-            "response_model": response_model,
-        })
+        endpoints.append(
+            {
+                "method": method,
+                "endpoint": endpoint,
+                "description": desc,
+                "file_path": file_path,
+                "request_body": request_body,
+                "response_model": response_model,
+            }
+        )
 
     return endpoints
 
 
 def _extract_request_body(content: str, start: int) -> str:
-    snippet = content[start:start + 500]
+    snippet = content[start : start + 500]
     body_match = re.search(r"request[_-]?body|body:\s*(\w+)", snippet, re.IGNORECASE)
     if body_match:
         return body_match.group(1) if body_match.group(1) else "request body"
@@ -172,7 +196,7 @@ def _extract_request_body(content: str, start: int) -> str:
 
 
 def _extract_response_model(content: str, start: int) -> str:
-    snippet = content[start:start + 500]
+    snippet = content[start : start + 500]
     resp_match = re.search(r"response_model\s*=\s*(\w+)", snippet)
     if resp_match:
         return resp_match.group(1)

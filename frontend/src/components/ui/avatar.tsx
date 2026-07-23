@@ -20,11 +20,7 @@ function Avatar({ src, alt, fallback, size = 'md', className }: AvatarProps) {
       <img
         src={src}
         alt={alt || fallback}
-        className={cn(
-          'shrink-0 rounded-full object-cover',
-          sizeClasses[size],
-          className
-        )}
+        className={cn('shrink-0 rounded-full object-cover', sizeClasses[size], className)}
       />
     )
   }

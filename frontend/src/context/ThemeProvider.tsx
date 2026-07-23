@@ -58,9 +58,5 @@ export function ThemeProvider({
     [theme, resolvedTheme, storageKey]
   )
 
-  return (
-    <ThemeProviderContext.Provider value={value}>
-      {children}
-    </ThemeProviderContext.Provider>
-  )
+  return <ThemeProviderContext.Provider value={value}>{children}</ThemeProviderContext.Provider>
 }

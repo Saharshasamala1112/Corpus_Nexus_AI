@@ -94,11 +94,7 @@ function SidebarFooter() {
           </Button>
         </Tooltip>
         <Tooltip content="Account" side="top">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="text-muted-foreground"
-          >
+          <Button variant="ghost" size="icon-sm" className="text-muted-foreground">
             <LogOut className="size-4" />
           </Button>
         </Tooltip>

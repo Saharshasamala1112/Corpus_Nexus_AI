@@ -1,10 +1,10 @@
 import time
 
 from app.agent.base import BaseTool, ToolDefinition
-from app.retrieval import SemanticSearch, RetrievalResult
-from app.metadata import MetadataStore
-from app.schemas.agent import ToolType
 from app.core.logging import get_logger
+from app.metadata import MetadataStore
+from app.retrieval import RetrievalResult, SemanticSearch
+from app.schemas.agent import ToolType
 
 logger = get_logger("agent.tools.project_explorer")
 
@@ -40,17 +40,37 @@ class ProjectExplorerTool(BaseTool):
                 "Who owns the backend project?",
             ],
             keywords=[
-                "project", "owner", "description", "dependencies", "status",
-                "module", "package", "workspace", "monorepo", "microservice",
-                "technology", "stack", "framework", "library",
+                "project",
+                "owner",
+                "description",
+                "dependencies",
+                "status",
+                "module",
+                "package",
+                "workspace",
+                "monorepo",
+                "microservice",
+                "technology",
+                "stack",
+                "framework",
+                "library",
             ],
         )
 
     def matches_query(self, query: str) -> float:
         score = super().matches_query(query)
         query_lower = query.lower()
-        project_terms = ["project", "workspace", "module", "package", "repository",
-                          "monorepo", "microservice", "who owns", "dependencies"]
+        project_terms = [
+            "project",
+            "workspace",
+            "module",
+            "package",
+            "repository",
+            "monorepo",
+            "microservice",
+            "who owns",
+            "dependencies",
+        ]
         for term in project_terms:
             if term in query_lower:
                 score += 0.2
@@ -81,7 +101,9 @@ class ProjectExplorerTool(BaseTool):
         elapsed_ms = (time.perf_counter() - start) * 1000
         logger.info(
             "Project explorer: query='%s' projects=%d time=%.1fms",
-            query[:50], len(projects), elapsed_ms,
+            query[:50],
+            len(projects),
+            elapsed_ms,
         )
 
         return {
@@ -134,18 +156,26 @@ def _aggregate_projects(
 
         content_lower = r.content.lower()
         tech_keywords = {
-            "fastapi": "FastAPI", "django": "Django", "flask": "Flask",
-            "react": "React", "vue": "Vue", "angular": "Angular",
-            "postgresql": "PostgreSQL", "redis": "Redis", "celery": "Celery",
-            "docker": "Docker", "kubernetes": "Kubernetes",
-            "sqlalchemy": "SQLAlchemy", "pydantic": "Pydantic",
+            "fastapi": "FastAPI",
+            "django": "Django",
+            "flask": "Flask",
+            "react": "React",
+            "vue": "Vue",
+            "angular": "Angular",
+            "postgresql": "PostgreSQL",
+            "redis": "Redis",
+            "celery": "Celery",
+            "docker": "Docker",
+            "kubernetes": "Kubernetes",
+            "sqlalchemy": "SQLAlchemy",
+            "pydantic": "Pydantic",
         }
         for kw, tech in tech_keywords.items():
             if kw in content_lower:
                 project_map[repo]["technologies"].add(tech)
 
     projects = []
-    for repo_name, info in project_map.items():
+    for _repo_name, info in project_map.items():
         info["languages"] = sorted(info["languages"])
         info["technologies"] = sorted(info["technologies"])
         projects.append(info)

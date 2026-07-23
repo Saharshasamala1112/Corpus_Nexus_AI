@@ -1,9 +1,9 @@
 import { useCallback } from 'react'
 import { useConversationStore } from '@/store/useConversationStore'
 import { useChatStore } from '@/store/useChatStore'
-import { useStreamingSimulation } from '@/hooks/useStreamingSimulation'
-import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { sendChatMessage } from '@/services/api'
 import type { Message } from '@/types/chat'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
 import Sidebar from '@/components/ai-assistant/sidebar/Sidebar'
 import ChatArea from '@/components/ai-assistant/chat/ChatArea'
 import ContextPanel from '@/components/ai-assistant/context-panel/ContextPanel'
@@ -15,23 +15,12 @@ function AIAssistantPage() {
     createConversation,
     addMessage,
     updateMessage,
+    updateMessageMetadata,
     updateMessageStreaming,
+    setActiveConversation,
   } = useConversationStore()
 
-  const {
-    isGenerating,
-    setGenerating,
-    setStreaming,
-    toggleSidebar,
-    toggleContextPanel,
-  } = useChatStore()
-
-  const { simulateStreaming, stopStreaming } = useStreamingSimulation({
-    onComplete: () => {
-      setGenerating(false)
-      setStreaming(false)
-    },
-  })
+  const { isGenerating, setGenerating, setStreaming } = useChatStore()
 
   const handleSend = useCallback(
     async (content: string) => {
@@ -61,52 +50,73 @@ function AIAssistantPage() {
       setGenerating(true)
       setStreaming(true)
 
-      await simulateStreaming(content, (chunkedText) => {
-        updateMessage(convId!, assistantMessage.id, chunkedText)
-      })
+      try {
+        const response = await sendChatMessage({
+          message: content,
+          conversation_id:
+            convId !== activeConversationId ? convId : activeConversationId || undefined,
+        })
 
-      updateMessageStreaming(convId, assistantMessage.id, false)
-      setGenerating(false)
-      setStreaming(false)
+        updateMessage(convId, assistantMessage.id, response.message.content)
+
+        updateMessageMetadata(convId, assistantMessage.id, {
+          confidence_score: response.confidence_score,
+          sources_used: response.sources_used,
+          retrieved_documents: response.retrieved_documents,
+        })
+
+        updateMessageStreaming(convId, assistantMessage.id, false)
+
+        if (response.conversation_id && response.conversation_id !== convId) {
+          setActiveConversation(response.conversation_id)
+        }
+      } catch (error) {
+        const errorMsg =
+          error instanceof Error ? error.message : 'Failed to get response from server'
+        updateMessage(
+          convId,
+          assistantMessage.id,
+          `**Error:** ${errorMsg}\n\nPlease check that the backend server is running at \`http://localhost:8000\`.`
+        )
+        updateMessageStreaming(convId, assistantMessage.id, false)
+      } finally {
+        setGenerating(false)
+        setStreaming(false)
+      }
     },
     [
       activeConversationId,
       createConversation,
       addMessage,
+      updateMessage,
+      updateMessageMetadata,
+      updateMessageStreaming,
       setGenerating,
       setStreaming,
-      simulateStreaming,
-      updateMessage,
-      updateMessageStreaming,
+      setActiveConversation,
     ]
   )
 
   const handleStop = useCallback(() => {
-    stopStreaming()
     setGenerating(false)
     setStreaming(false)
-  }, [stopStreaming, setGenerating, setStreaming])
-
-  useKeyboardShortcuts({
-    newChat: () => createConversation(),
-    toggleSidebar,
-    toggleContext: toggleContextPanel,
-    stopGeneration: handleStop,
-  })
+  }, [setGenerating, setStreaming])
 
   const messages = activeConversation?.messages || []
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar />
-      <ChatArea
-        messages={messages}
-        isGenerating={isGenerating}
-        onSend={handleSend}
-        onStop={handleStop}
-      />
-      <ContextPanel />
-    </div>
+    <ErrorBoundary>
+      <div className="flex h-screen overflow-hidden bg-background">
+        <Sidebar />
+        <ChatArea
+          messages={messages}
+          isGenerating={isGenerating}
+          onSend={handleSend}
+          onStop={handleStop}
+        />
+        <ContextPanel />
+      </div>
+    </ErrorBoundary>
   )
 }
 

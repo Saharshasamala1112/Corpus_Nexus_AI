@@ -1,11 +1,14 @@
 from dataclasses import dataclass, field
 
-from app.context import BuiltContext, build_context_from_results
-from app.citation import CitationResult, compute_confidence, extract_citations
+from app.citation import CitationResult as CitationResult
+from app.citation import compute_confidence, extract_citations
+from app.context import BuiltContext as BuiltContext
+from app.context import build_context_from_results
+from app.core.logging import get_logger
 from app.llm import BaseLLM, LLMMessage, get_llm
 from app.prompt import build_system_prompt, build_user_prompt
-from app.retrieval import SemanticSearch, RetrievalResult
-from app.core.logging import get_logger
+from app.retrieval import RetrievalResult as RetrievalResult
+from app.retrieval import SemanticSearch
 
 logger = get_logger("generation")
 
@@ -17,6 +20,8 @@ class GeneratedResponse:
     sources_used: list[str]
     retrieved_documents: list[dict]
     model: str
+    related_documents: list[dict] = field(default_factory=list)
+    related_repositories: list[str] = field(default_factory=list)
     token_usage: dict = field(default_factory=dict)
 
 
@@ -105,6 +110,18 @@ class GenerationPipeline:
             for doc in built_context.documents
         ]
 
+        related_docs = doc_summaries[3:] if len(doc_summaries) > 3 else []
+
+        repos = list(
+            {
+                doc.get("repository", "") or doc.get("file_path", "").split("/")[0]
+                if "/" in doc.get("file_path", "")
+                else ""
+                for doc in retrieval_results
+            }
+        )
+        related_repos = [r for r in repos if r]
+
         logger.info(
             "Generation complete: confidence=%.2f sources=%d tokens=%s",
             confidence,
@@ -117,6 +134,8 @@ class GenerationPipeline:
             confidence_score=confidence,
             sources_used=sources_used,
             retrieved_documents=doc_summaries,
+            related_documents=related_docs,
+            related_repositories=related_repos,
             model=llm_response.model,
             token_usage=llm_response.usage,
         )

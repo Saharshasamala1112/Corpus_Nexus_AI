@@ -26,18 +26,17 @@ function SidebarHeader() {
         </div>
       ) : (
         <Tooltip content="New Chat" side="right" shortcut="⌘N">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="shrink-0"
-            onClick={handleNewChat}
-          >
+          <Button variant="ghost" size="icon" className="shrink-0" onClick={handleNewChat}>
             <Bot className="size-4" />
           </Button>
         </Tooltip>
       )}
 
-      <Tooltip content={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'} side="right" shortcut="⌘B">
+      <Tooltip
+        content={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+        side="right"
+        shortcut="⌘B"
+      >
         <Button
           variant="ghost"
           size="icon-sm"

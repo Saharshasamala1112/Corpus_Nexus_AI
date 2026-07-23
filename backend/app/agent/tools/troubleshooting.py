@@ -1,15 +1,21 @@
 import time
 
 from app.agent.base import BaseTool, ToolDefinition
-from app.retrieval import SemanticSearch, RetrievalResult
-from app.schemas.agent import ToolType
 from app.core.logging import get_logger
+from app.retrieval import RetrievalResult, SemanticSearch
+from app.schemas.agent import ToolType
 
 logger = get_logger("agent.tools.troubleshooting")
 
 COMMON_ISSUES = {
     "backend_not_starting": {
-        "keywords": ["backend not starting", "server won't start", "app won't start", "failed to start", "startup error"],
+        "keywords": [
+            "backend not starting",
+            "server won't start",
+            "app won't start",
+            "failed to start",
+            "startup error",
+        ],
         "diagnosis_steps": [
             "Check if all required environment variables are set (OPENAI_API_KEY, DATABASE_URL, etc.)",
             "Verify Python dependencies are installed: pip install -r requirements.txt",
@@ -19,7 +25,14 @@ COMMON_ISSUES = {
         ],
     },
     "database_connection_failed": {
-        "keywords": ["database connection failed", "cannot connect to database", "db connection", "connection refused", "psycopg2", "sqlalchemy"],
+        "keywords": [
+            "database connection failed",
+            "cannot connect to database",
+            "db connection",
+            "connection refused",
+            "psycopg2",
+            "sqlalchemy",
+        ],
         "diagnosis_steps": [
             "Verify DATABASE_URL is correctly set in environment or .env file",
             "For PostgreSQL: ensure the server is running and accepting connections",
@@ -29,7 +42,13 @@ COMMON_ISSUES = {
         ],
     },
     "docker_compose_failed": {
-        "keywords": ["docker compose failed", "docker-compose error", "container won't start", "docker build failed", "compose up failed"],
+        "keywords": [
+            "docker compose failed",
+            "docker-compose error",
+            "container won't start",
+            "docker build failed",
+            "compose up failed",
+        ],
         "diagnosis_steps": [
             "Run 'docker compose config' to validate the compose file syntax",
             "Check if required ports are available (not blocked by other services)",
@@ -39,7 +58,13 @@ COMMON_ISSUES = {
         ],
     },
     "redis_unavailable": {
-        "keywords": ["redis unavailable", "redis connection", "redis refused", "cache error", "redis not running"],
+        "keywords": [
+            "redis unavailable",
+            "redis connection",
+            "redis refused",
+            "cache error",
+            "redis not running",
+        ],
         "diagnosis_steps": [
             "Verify Redis is running: redis-cli ping (should return PONG)",
             "Check REDIS_URL configuration matches your Redis instance",
@@ -49,7 +74,13 @@ COMMON_ISSUES = {
         ],
     },
     "import_error": {
-        "keywords": ["import error", "module not found", "cannot import", "nameerror", "modulenotfounderror"],
+        "keywords": [
+            "import error",
+            "module not found",
+            "cannot import",
+            "nameerror",
+            "modulenotfounderror",
+        ],
         "diagnosis_steps": [
             "Verify the package is installed: pip list | grep <package>",
             "Install missing dependency: pip install <package_name>",
@@ -93,22 +124,47 @@ class TroubleshootingTool(BaseTool):
                 "I'm getting an import error",
             ],
             keywords=[
-                "error", "issue", "problem", "failed", "broken", "not working",
-                "troubleshoot", "debug", "fix", "resolve", "diagnose",
-                "backend not starting", "database connection", "docker compose",
-                "redis", "import error", "exception", "traceback",
+                "error",
+                "issue",
+                "problem",
+                "failed",
+                "broken",
+                "not working",
+                "troubleshoot",
+                "debug",
+                "fix",
+                "resolve",
+                "diagnose",
+                "backend not starting",
+                "database connection",
+                "docker compose",
+                "redis",
+                "import error",
+                "exception",
+                "traceback",
             ],
         )
 
     def matches_query(self, query: str) -> float:
         score = super().matches_query(query)
         query_lower = query.lower()
-        error_terms = ["error", "issue", "problem", "failed", "broken", "not working",
-                        "troubleshoot", "debug", "fix", "resolve", "exception"]
+        error_terms = [
+            "error",
+            "issue",
+            "problem",
+            "failed",
+            "broken",
+            "not working",
+            "troubleshoot",
+            "debug",
+            "fix",
+            "resolve",
+            "exception",
+        ]
         for term in error_terms:
             if term in query_lower:
                 score += 0.2
-        for issue_type, info in COMMON_ISSUES.items():
+        for _issue_type, info in COMMON_ISSUES.items():
             for kw in info["keywords"]:
                 if kw in query_lower:
                     score += 0.3
@@ -135,19 +191,23 @@ class TroubleshootingTool(BaseTool):
         matched_issues = _match_known_issues(query)
         documentation_context = []
         for r in results:
-            documentation_context.append({
-                "file": r.metadata.get("filename", ""),
-                "path": r.metadata.get("file_path", ""),
-                "score": round(r.score, 4),
-                "content": r.content,
-            })
+            documentation_context.append(
+                {
+                    "file": r.metadata.get("filename", ""),
+                    "path": r.metadata.get("file_path", ""),
+                    "score": round(r.score, 4),
+                    "content": r.content,
+                }
+            )
 
         diagnosis = _build_diagnosis(matched_issues, documentation_context)
 
         elapsed_ms = (time.perf_counter() - start) * 1000
         logger.info(
             "Troubleshooting: query='%s' issues=%d time=%.1fms",
-            query[:50], len(matched_issues), elapsed_ms,
+            query[:50],
+            len(matched_issues),
+            elapsed_ms,
         )
 
         return {

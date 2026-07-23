@@ -22,7 +22,8 @@ class InMemoryVectorStore(BaseVectorStore):
 
         if filter_metadata:
             candidates = [
-                r for r in candidates
+                r
+                for r in candidates
                 if all(r.metadata.get(k) == v for k, v in filter_metadata.items())
             ]
 
@@ -53,7 +54,8 @@ class InMemoryVectorStore(BaseVectorStore):
 
     async def delete_by_filter(self, filter_metadata: dict) -> int:
         to_delete = [
-            r.id for r in self._records.values()
+            r.id
+            for r in self._records.values()
             if all(r.metadata.get(k) == v for k, v in filter_metadata.items())
         ]
         for doc_id in to_delete:
@@ -67,7 +69,7 @@ class InMemoryVectorStore(BaseVectorStore):
     def _cosine_similarity(a: list[float], b: list[float]) -> float:
         if len(a) != len(b):
             return 0.0
-        dot = sum(x * y for x, y in zip(a, b))
+        dot = sum(x * y for x, y in zip(a, b, strict=False))
         norm_a = math.sqrt(sum(x * x for x in a))
         norm_b = math.sqrt(sum(x * x for x in b))
         if norm_a == 0 or norm_b == 0:

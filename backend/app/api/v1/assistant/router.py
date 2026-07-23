@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
+from app.core.logging import get_logger
 from app.database.session import get_async_session
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.schemas.common import (
     HealthResponse,
-    SuggestionsResponse,
     SuggestionItem,
+    SuggestionsResponse,
 )
 from app.schemas.conversation import (
     ConversationCreate,
@@ -14,9 +16,8 @@ from app.schemas.conversation import (
     ConversationResponse,
 )
 from app.services.chat import RAGChatService
+from app.services.chat_streaming import StreamingChatService
 from app.services.conversation_service import ConversationService
-from app.core.config import get_settings
-from app.core.logging import get_logger
 
 logger = get_logger("assistant.api")
 
@@ -27,12 +28,13 @@ router = APIRouter(prefix="/assistant", tags=["assistant"])
 # Dependency overrides (proper FastAPI DI wiring)
 # ---------------------------------------------------------------------------
 
+
 async def _get_chat_service(
     session: AsyncSession = Depends(get_async_session),
 ) -> RAGChatService:
+    from app.generation import GenerationPipeline
     from app.repositories.conversation_repository import ConversationRepository
     from app.repositories.message_repository import MessageRepository
-    from app.generation import GenerationPipeline
 
     return RAGChatService(
         conversation_repo=ConversationRepository(session),
@@ -55,6 +57,7 @@ async def _get_conversation_service(
 # Health
 # ---------------------------------------------------------------------------
 
+
 @router.get("/health", response_model=HealthResponse, summary="Health check")
 async def health_check() -> HealthResponse:
     settings = get_settings()
@@ -69,6 +72,7 @@ async def health_check() -> HealthResponse:
 # Chat
 # ---------------------------------------------------------------------------
 
+
 @router.post("/chat", response_model=ChatResponse, summary="Send a chat message")
 async def chat(
     request: ChatRequest,
@@ -78,9 +82,27 @@ async def chat(
     return await service.send_message(request)
 
 
+@router.post("/chat/stream", summary="Stream a chat message response")
+async def chat_stream(
+    request: ChatRequest,
+    session: AsyncSession = Depends(get_async_session),
+):
+    from app.generation import GenerationPipeline
+    from app.repositories.conversation_repository import ConversationRepository
+    from app.repositories.message_repository import MessageRepository
+
+    service = StreamingChatService(
+        conversation_repo=ConversationRepository(session),
+        message_repo=MessageRepository(session),
+        generation_pipeline=GenerationPipeline(),
+    )
+    return await service.stream_chat(request)
+
+
 # ---------------------------------------------------------------------------
 # Conversations
 # ---------------------------------------------------------------------------
+
 
 @router.get(
     "/conversations",
@@ -140,6 +162,4 @@ _SUGGESTIONS: list[dict[str, str]] = [
     summary="Get suggested prompts",
 )
 async def get_suggestions() -> SuggestionsResponse:
-    return SuggestionsResponse(
-        suggestions=[SuggestionItem(**s) for s in _SUGGESTIONS]
-    )
+    return SuggestionsResponse(suggestions=[SuggestionItem(**s) for s in _SUGGESTIONS])

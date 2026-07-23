@@ -20,10 +20,7 @@ function ChatMessageList({ messages, isGenerating }: ChatMessageListProps) {
   }, [messages, isGenerating, scrollIfAutoScrolling])
 
   return (
-    <div
-      ref={scrollRef}
-      className="flex-1 overflow-y-auto"
-    >
+    <div ref={scrollRef} className="flex-1 overflow-y-auto">
       <div className="py-4">
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />

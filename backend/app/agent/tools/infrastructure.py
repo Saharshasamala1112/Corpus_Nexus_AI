@@ -2,9 +2,9 @@ import re
 import time
 
 from app.agent.base import BaseTool, ToolDefinition
-from app.retrieval import SemanticSearch, RetrievalResult
-from app.schemas.agent import ToolType
 from app.core.logging import get_logger
+from app.retrieval import RetrievalResult, SemanticSearch
+from app.schemas.agent import ToolType
 
 logger = get_logger("agent.tools.infrastructure")
 
@@ -55,16 +55,30 @@ class InfrastructureTool(BaseTool):
                 "Show Celery setup",
             ],
             keywords=[
-                "docker", "dockerfile", "compose", "redis", "celery", "minio",
-                "nginx", "infrastructure", "deployment", "container", "environment",
-                "env", "config", "configuration", "setup", "devops", "ops",
+                "docker",
+                "dockerfile",
+                "compose",
+                "redis",
+                "celery",
+                "minio",
+                "nginx",
+                "infrastructure",
+                "deployment",
+                "container",
+                "environment",
+                "env",
+                "config",
+                "configuration",
+                "setup",
+                "devops",
+                "ops",
             ],
         )
 
     def matches_query(self, query: str) -> float:
         score = super().matches_query(query)
         query_lower = query.lower()
-        for component, keywords in INFRA_COMPONENTS.items():
+        for _component, keywords in INFRA_COMPONENTS.items():
             for kw in keywords:
                 if kw in query_lower:
                     score += 0.2
@@ -116,7 +130,9 @@ class InfrastructureTool(BaseTool):
 
             if "dockerfile" in file_lower or "docker-compose" in file_lower:
                 docker_configs.append(entry)
-            elif any(k in content_lower for k in ["redis", "cache"]) and any(k in content_lower for k in ["host", "port", "url"]):
+            elif any(k in content_lower for k in ["redis", "cache"]) and any(
+                k in content_lower for k in ["host", "port", "url"]
+            ):
                 redis_configs.append(entry)
             elif any(k in content_lower for k in ["celery", "broker", "worker"]):
                 celery_configs.append(entry)
@@ -152,7 +168,9 @@ class InfrastructureTool(BaseTool):
 
         logger.info(
             "Infrastructure search: query='%s' component=%s time=%.1fms",
-            query[:50], component or "all", elapsed_ms,
+            query[:50],
+            component or "all",
+            elapsed_ms,
         )
 
         return response
@@ -173,9 +191,13 @@ def _extract_env_vars(content: str) -> list[dict]:
             if name in seen or name.startswith("#") or len(name) < 3:
                 continue
             seen.add(name)
-            env_vars.append({
-                "name": name,
-                "value": value if len(value) < 100 else value[:100] + "...",
-                "has_secret": any(s in name.lower() for s in ["key", "secret", "password", "token"]),
-            })
+            env_vars.append(
+                {
+                    "name": name,
+                    "value": value if len(value) < 100 else value[:100] + "...",
+                    "has_secret": any(
+                        s in name.lower() for s in ["key", "secret", "password", "token"]
+                    ),
+                }
+            )
     return env_vars
