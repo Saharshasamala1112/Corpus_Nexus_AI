@@ -38,13 +38,16 @@ function Tooltip({ children, content, side = 'top', shortcut }: TooltipProps) {
 
   const child = React.Children.only(children) as React.ReactElement
 
-  const trigger = React.cloneElement(child as React.ReactElement, {
-    onMouseEnter: show,
-    onMouseLeave: hide,
-    onFocus: show,
-    onBlur: hide,
-    'aria-describedby': visible ? tooltipId : undefined,
-  } as React.HTMLAttributes<HTMLElement>)
+  const trigger = React.cloneElement(
+    child as React.ReactElement,
+    {
+      onMouseEnter: show,
+      onMouseLeave: hide,
+      onFocus: show,
+      onBlur: hide,
+      'aria-describedby': visible ? tooltipId : undefined,
+    } as React.HTMLAttributes<HTMLElement>
+  )
 
   return (
     <div className="relative inline-flex">

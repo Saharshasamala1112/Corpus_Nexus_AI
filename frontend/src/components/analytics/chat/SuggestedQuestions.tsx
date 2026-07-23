@@ -1,17 +1,13 @@
-import { suggestedQuestions } from "../../../mock/questions";
+import { suggestedQuestions } from '../../../mock/questions'
 
 interface SuggestedQuestionsProps {
-  onSelect: (question: string) => void;
+  onSelect: (question: string) => void
 }
 
-const SuggestedQuestions = ({
-  onSelect,
-}: SuggestedQuestionsProps) => {
+const SuggestedQuestions = ({ onSelect }: SuggestedQuestionsProps) => {
   return (
     <div className="rounded-xl border bg-white p-6 shadow-sm">
-      <h2 className="mb-4 text-xl font-semibold">
-        Suggested Questions
-      </h2>
+      <h2 className="mb-4 text-xl font-semibold">Suggested Questions</h2>
 
       <div className="flex flex-wrap gap-3">
         {suggestedQuestions.map((question) => (
@@ -25,7 +21,7 @@ const SuggestedQuestions = ({
         ))}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SuggestedQuestions;
+export default SuggestedQuestions

@@ -1,38 +1,31 @@
-.result-card{
+.result-card {
+  background: white;
 
-    background:white;
+  border-radius: 12px;
 
-    border-radius:12px;
+  padding: 20px;
 
-    padding:20px;
+  margin: 20px 0;
 
-    margin:20px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 
-    box-shadow:0 4px 12px rgba(0,0,0,.08);
+  cursor: pointer;
 
-    cursor:pointer;
-
-    transition:.3s;
+  transition: 0.3s;
 }
 
-.result-card:hover{
+.result-card:hover {
+  transform: translateY(-5px);
 
-    transform:translateY(-5px);
-
-    box-shadow:0 10px 25px rgba(0,0,0,.15);
-
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
-.result-card h3{
+.result-card h3 {
+  color: #2563eb;
 
-    color:#2563eb;
-
-    margin-bottom:10px;
-
+  margin-bottom: 10px;
 }
 
-.result-card p{
-
-    color:#555;
-
+.result-card p {
+  color: #555;
 }

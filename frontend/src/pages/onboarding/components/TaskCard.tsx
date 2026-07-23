@@ -1,47 +1,36 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom'
 
-import "../styles/TaskCard.css";
+import '../styles/TaskCard.css'
 
 type Props = {
-  id: number;
-  title: string;
-  status: string;
-};
+  id: number
+  title: string
+  status: string
+}
 
-function TaskCard({
-  id,
-  title,
-  status,
-}: Props) {
-  const navigate = useNavigate();
+function TaskCard({ id, title, status }: Props) {
+  const navigate = useNavigate()
 
   return (
     <div className="task-card">
       <h3>{title}</h3>
 
       <p>
-        Status:{" "}
+        Status:{' '}
         <strong
           style={{
-            color:
-              status === "Completed"
-                ? "green"
-                : "orange",
+            color: status === 'Completed' ? 'green' : 'orange',
           }}
         >
           {status}
         </strong>
       </p>
 
-      <button
-        onClick={() => navigate(`/onboarding/${id}`)}
-      >
-        {status === "Completed"
-          ? "View"
-          : "Start"}
+      <button onClick={() => navigate(`/onboarding/${id}`)}>
+        {status === 'Completed' ? 'View' : 'Start'}
       </button>
     </div>
-  );
+  )
 }
 
-export default TaskCard;
+export default TaskCard

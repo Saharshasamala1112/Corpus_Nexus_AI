@@ -1,23 +1,23 @@
 export interface TeamMember {
-    id: string;
-    name: string;
-    role: string;
-    skill: string;
-    availability: number;
+  id: string
+  name: string
+  role: string
+  skill: string
+  availability: number
 }
 
 export interface Project {
-    id: string;
-    name: string;
-    description: string;
+  id: string
+  name: string
+  description: string
 
-    sprintDuration: number;
-    teamSize: number;
+  sprintDuration: number
+  teamSize: number
 
-    members: TeamMember[];
+  members: TeamMember[]
 
-    generatedSprint?: string;
+  generatedSprint?: string
 
-    createdAt?: string;
-    updatedAt?: string;
+  createdAt?: string
+  updatedAt?: string
 }

@@ -1,35 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react'
 
-import { getLeaderboard } from "../../../services/leaderboardService";
-import type {
-  LeaderboardUser,
-} from "../../../services/leaderboardService";
+import { getLeaderboard } from '../../../services/leaderboardService'
+import type { LeaderboardUser } from '../../../services/leaderboardService'
 
 const LeaderboardTable = () => {
-  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadLeaderboard = async () => {
       try {
-        const data = await getLeaderboard();
-        setLeaderboard(data);
+        const data = await getLeaderboard()
+        setLeaderboard(data)
       } catch (error) {
-        console.error("Failed to load leaderboard:", error);
+        console.error('Failed to load leaderboard:', error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    loadLeaderboard();
-  }, []);
+    loadLeaderboard()
+  }, [])
 
   if (loading) {
-    return (
-      <div className="rounded-xl border bg-white p-6 shadow-sm">
-        Loading leaderboard...
-      </div>
-    );
+    return <div className="rounded-xl border bg-white p-6 shadow-sm">Loading leaderboard...</div>
   }
 
   return (
@@ -45,25 +39,18 @@ const LeaderboardTable = () => {
 
         <tbody>
           {leaderboard.map((user) => (
-            <tr
-              key={user.user_id}
-              className="border-t hover:bg-slate-50"
-            >
+            <tr key={user.user_id} className="border-t hover:bg-slate-50">
               <td className="px-6 py-4">{user.rank}</td>
 
-              <td className="px-6 py-4 font-medium">
-                {user.user_name}
-              </td>
+              <td className="px-6 py-4 font-medium">{user.user_name}</td>
 
-              <td className="px-6 py-4">
-                {Math.round(user.total_points).toLocaleString()}
-              </td>
+              <td className="px-6 py-4">{Math.round(user.total_points).toLocaleString()}</td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
-  );
-};
+  )
+}
 
-export default LeaderboardTable;
+export default LeaderboardTable

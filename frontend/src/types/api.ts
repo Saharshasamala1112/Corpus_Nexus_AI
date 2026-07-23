@@ -1,10 +1,10 @@
 export interface ApiError {
-  detail: string;
+  detail: string
 }
 
 export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  skip: number;
-  limit: number;
+  items: T[]
+  total: number
+  skip: number
+  limit: number
 }

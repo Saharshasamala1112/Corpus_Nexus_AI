@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react'
 
-import { getRecords } from "../../../services/recordsService";
+import { getRecords } from '../../../services/recordsService'
 
 import {
   ResponsiveContainer,
@@ -11,26 +11,26 @@ import {
   Tooltip,
   CartesianGrid,
   LabelList,
-} from "recharts";
+} from 'recharts'
 
 interface ChartData {
-  language: string;
-  count: number;
+  language: string
+  count: number
 }
 
 const LanguageChart = () => {
-  const [data, setData] = useState<ChartData[]>([]);
+  const [data, setData] = useState<ChartData[]>([])
 
   useEffect(() => {
     const fetchLanguageData = async () => {
       try {
-        const records = await getRecords();
+        const records = await getRecords()
 
-        const counts: Record<string, number> = {};
+        const counts: Record<string, number> = {}
 
         for (const record of records) {
-          const language = record.language || "Unknown";
-          counts[language] = (counts[language] || 0) + 1;
+          const language = record.language || 'Unknown'
+          counts[language] = (counts[language] || 0) + 1
         }
 
         const chartData = Object.entries(counts)
@@ -39,16 +39,16 @@ const LanguageChart = () => {
             count,
           }))
           .sort((a, b) => b.count - a.count)
-          .slice(0, 10);
+          .slice(0, 10)
 
-        setData(chartData);
+        setData(chartData)
       } catch (error) {
-        console.error("Failed to load language chart:", error);
+        console.error('Failed to load language chart:', error)
       }
-    };
+    }
 
-    fetchLanguageData();
-  }, []);
+    fetchLanguageData()
+  }, [])
 
   return (
     <ResponsiveContainer width="100%" height={350}>
@@ -66,11 +66,7 @@ const LanguageChart = () => {
 
         <XAxis type="number" />
 
-        <YAxis
-          type="category"
-          dataKey="language"
-          width={120}
-        />
+        <YAxis type="category" dataKey="language" width={120} />
 
         <Tooltip />
 
@@ -79,7 +75,7 @@ const LanguageChart = () => {
         </Bar>
       </BarChart>
     </ResponsiveContainer>
-  );
-};
+  )
+}
 
-export default LanguageChart;
+export default LanguageChart

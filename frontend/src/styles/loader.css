@@ -1,11 +1,7 @@
-.loader{
+.loader {
+  text-align: center;
 
+  padding: 30px;
 
-    text-align:center;
-
-    padding:30px;
-
-    font-size:20px;
-
-
+  font-size: 20px;
 }

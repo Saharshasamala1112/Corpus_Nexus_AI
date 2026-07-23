@@ -1,45 +1,35 @@
-.navbar{
+.navbar {
+  display: flex;
 
-    display:flex;
+  justify-content: space-between;
 
-    justify-content:space-between;
+  align-items: center;
 
-    align-items:center;
+  padding: 20px 60px;
 
-    padding:20px 60px;
+  background: white;
 
-    background:white;
-
-    box-shadow:0 2px 15px rgba(0,0,0,.08);
-
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
 }
 
-.navbar h2{
-
-    color:#2563eb;
-
+.navbar h2 {
+  color: #2563eb;
 }
 
-.navbar div{
+.navbar div {
+  display: flex;
 
-    display:flex;
-
-    gap:30px;
-
+  gap: 30px;
 }
 
-.navbar a{
+.navbar a {
+  text-decoration: none;
 
-    text-decoration:none;
+  color: #333;
 
-    color:#333;
-
-    font-weight:600;
-
+  font-weight: 600;
 }
 
-.navbar a:hover{
-
-    color:#2563eb;
-
+.navbar a:hover {
+  color: #2563eb;
 }

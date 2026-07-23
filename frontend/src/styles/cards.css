@@ -1,32 +1,21 @@
-.card{
+.card {
+  border: 1px solid #ddd;
 
+  border-radius: 10px;
 
-    border:1px solid #ddd;
+  padding: 20px;
 
-    border-radius:10px;
-
-    padding:20px;
-
-    background:white;
-
+  background: white;
 }
 
-
-.card h3{
-
-    margin-top:0;
-
+.card h3 {
+  margin-top: 0;
 }
 
+.card button {
+  padding: 8px 15px;
 
-.card button{
+  border: none;
 
-
-    padding:8px 15px;
-
-    border:none;
-
-    cursor:pointer;
-
-
+  cursor: pointer;
 }

@@ -1,16 +1,16 @@
-import AnswerCard from "../../components/analytics/chat/AnswerCard";
-import QuestionInput from "../../components/analytics/chat/QuestionInput";
-import SuggestedQuestions from "../../components/analytics/chat/SuggestedQuestions";
+import AnswerCard from '../../components/analytics/chat/AnswerCard'
+import QuestionInput from '../../components/analytics/chat/QuestionInput'
+import SuggestedQuestions from '../../components/analytics/chat/SuggestedQuestions'
 
-import MediaTypeChart from "../../components/analytics/charts/MediaTypeChart";
-import LanguageChart from "../../components/analytics/charts/LanguageChart";
+import MediaTypeChart from '../../components/analytics/charts/MediaTypeChart'
+import LanguageChart from '../../components/analytics/charts/LanguageChart'
 
-import MainLayout from "../../layouts/MainLayout";
+import MainLayout from '../../layouts/MainLayout'
 
-import { useInsights } from "../../hooks/useInsights";
+import { useInsights } from '../../hooks/useInsights'
 
 const AskCorpusPage = () => {
-  const { answer, chart, askQuestion } = useInsights();
+  const { answer, chart, askQuestion } = useInsights()
 
   return (
     <MainLayout>
@@ -28,26 +28,22 @@ const AskCorpusPage = () => {
 
         {answer && <AnswerCard answer={answer} />}
 
-        {chart === "mediaType" && (
+        {chart === 'mediaType' && (
           <div className="rounded-xl border bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-xl font-semibold">
-              Recordings by Media Type
-            </h2>
+            <h2 className="mb-4 text-xl font-semibold">Recordings by Media Type</h2>
             <MediaTypeChart />
           </div>
         )}
 
-        {chart === "language" && (
+        {chart === 'language' && (
           <div className="rounded-xl border bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-xl font-semibold">
-              Top Languages by Record Count
-            </h2>
+            <h2 className="mb-4 text-xl font-semibold">Top Languages by Record Count</h2>
             <LanguageChart />
           </div>
         )}
       </div>
     </MainLayout>
-  );
-};
+  )
+}
 
-export default AskCorpusPage;
+export default AskCorpusPage

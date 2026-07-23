@@ -1,20 +1,20 @@
-import { useState } from "react";
+import { useState } from 'react'
 
 interface QuestionInputProps {
-  onAsk: (question: string) => void;
+  onAsk: (question: string) => void
 }
 
 const QuestionInput = ({ onAsk }: QuestionInputProps) => {
-  const [question, setQuestion] = useState("");
+  const [question, setQuestion] = useState('')
 
   const handleSubmit = () => {
     if (!question.trim()) {
-      return;
+      return
     }
 
-    onAsk(question);
-    setQuestion("");
-  };
+    onAsk(question)
+    setQuestion('')
+  }
 
   return (
     <div className="rounded-xl border bg-white p-6 shadow-sm">
@@ -35,7 +35,7 @@ const QuestionInput = ({ onAsk }: QuestionInputProps) => {
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default QuestionInput;
+export default QuestionInput

@@ -1,29 +1,20 @@
-import "../styles/ProgressCard.css";
+import '../styles/ProgressCard.css'
 
 type ProgressCardProps = {
-  totalTasks: number;
-  completedTasks: number;
-};
+  totalTasks: number
+  completedTasks: number
+}
 
-function ProgressCard({
-  totalTasks,
-  completedTasks,
-}: ProgressCardProps) {
-  const pendingTasks = totalTasks - completedTasks;
+function ProgressCard({ totalTasks, completedTasks }: ProgressCardProps) {
+  const pendingTasks = totalTasks - completedTasks
 
-  const progress =
-    totalTasks === 0
-      ? 0
-      : (completedTasks / totalTasks) * 100;
+  const progress = totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100
 
   return (
     <div className="progress-card">
       <h2>Onboarding Progress</h2>
 
-      <progress
-        value={completedTasks}
-        max={totalTasks}
-      ></progress>
+      <progress value={completedTasks} max={totalTasks}></progress>
 
       <p>{progress.toFixed(0)}% Completed</p>
 
@@ -44,7 +35,7 @@ function ProgressCard({
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default ProgressCard;
+export default ProgressCard

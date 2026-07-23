@@ -1,15 +1,15 @@
-import api from "../../../lib/axios";
+import api from '../../../lib/axios'
 
 export type Task = {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  assigned_to: string;
-  created_at: string;
-};
+  id: string
+  title: string
+  description: string
+  status: string
+  assigned_to: string
+  created_at: string
+}
 
 export const getTasks = async (): Promise<Task[]> => {
-  const response = await api.get("/tasks/");
-  return response.data;
-};
+  const response = await api.get('/tasks/')
+  return response.data
+}
