@@ -1,54 +1,59 @@
-import { useState } from 'react'
-import { searchRecords } from '../../services/api'
-import ResultCard from '../../components/explorer/ResultCard'
-
-interface ExplorerRecord {
-  uid?: string | number
-  title?: string
-  description?: string
-  language?: string
-  creator?: string
-  username?: string
-  media_type?: string
-}
+import { useState } from "react";
+import { searchRecords } from "../../services/api";
+import ResultCard from "../../components/explorer/ResultCard";
 
 export default function Search() {
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<ExplorerRecord[]>([])
-  const [error, setError] = useState('')
+    const [query, setQuery] = useState("");
+    const [results, setResults] = useState([]);
+    const [error, setError] = useState("");
 
-  async function handleSearch() {
-    try {
-      setError('')
+    async function handleSearch() {
+        try {
+            setError("");
 
-      const data = await searchRecords(query)
+            const data = await searchRecords(query);
 
-      console.log('Received:', data)
+            console.log("Received:", data);
 
-      setResults(Array.isArray(data) ? (data as ExplorerRecord[]) : [])
-    } catch (err) {
-      console.error(err)
-      setError('Unable to fetch records')
+            setResults(data);
+        } catch (err) {
+            console.error(err);
+            setError("Unable to fetch records");
+        }
     }
-  }
 
-  return (
-    <div className="container">
-      <h1>Search Page</h1>
+    return (
+        <div className="container">
+            <h1>Search Page</h1>
 
-      <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search here" />
+            <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search here"
+            />
 
-      <button onClick={handleSearch}>Search</button>
+            <button onClick={handleSearch}>
+                Search
+            </button>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+            {error && (
+                <p style={{ color: "red" }}>
+                    {error}
+                </p>
+            )}
 
-      <div>
-        {results.length === 0 ? (
-          <p>No records found.</p>
-        ) : (
-          results.map((item, index) => <ResultCard key={String(item.uid ?? index)} item={item} />)
-        )}
-      </div>
-    </div>
-  )
+            <div>
+                {results.length === 0 ? (
+                    <p>No records found.</p>
+                ) : (
+                    results.map((item: any) => (
+                        <ResultCard
+                            key={item.uid}
+                            item={item}
+                        />
+                    ))
+                )}
+            </div>
+        </div>
+    );
 }
