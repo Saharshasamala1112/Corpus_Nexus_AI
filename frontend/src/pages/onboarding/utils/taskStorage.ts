@@ -1,25 +1,34 @@
-export const STORAGE_KEY = 'onboarding-progress'
+export const STORAGE_KEY = "onboarding-progress";
 
 export type CompletedTask = {
-  completed: boolean
-  images: string[]
-}
+    completed: boolean;
+    image: string;
+};
 
 export function getProgress(): Record<number, CompletedTask> {
-  const data = localStorage.getItem(STORAGE_KEY)
+    try {
+        const data = localStorage.getItem(STORAGE_KEY);
 
-  if (!data) return {}
+        if (!data) {
+            return {};
+        }
 
-  return JSON.parse(data)
+        return JSON.parse(data);
+    } catch {
+        return {};
+    }
 }
 
-export function saveTask(id: number, images: string[]) {
-  const progress = getProgress()
+export function saveTask(id: number, image: string) {
+    const progress = getProgress();
 
-  progress[id] = {
-    completed: true,
-    images,
-  }
+    progress[id] = {
+        completed: true,
+        image,
+    };
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(progress)
+    );
 }

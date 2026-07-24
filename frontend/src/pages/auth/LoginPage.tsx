@@ -1,44 +1,44 @@
-import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-import { login as loginRequest } from '../../services/authService'
-import { useAuth } from '../../hooks/useauth'
+import { login as loginRequest } from "../../services/authService";
+import { useAuth } from "../../hooks/useauth";
 
 const LoginPage = () => {
-  const navigate = useNavigate()
-  const { login } = useAuth()
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const [phone, setPhone] = useState('')
-  const [password, setPassword] = useState('')
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+    event.preventDefault();
 
-    setLoading(true)
-    setError('')
+    setLoading(true);
+    setError("");
 
     try {
       const response = await loginRequest({
         phone,
         password,
-      })
+      });
 
       login(response.access_token, {
         user_id: response.user_id,
-        username: response.username ?? '',
-      })
+        username: response.username ?? "",
+      });
 
-      navigate('/')
+      navigate("/");
     } catch (error) {
-      console.error(error)
-      setError('Invalid phone number or password.')
+      console.error(error);
+      setError("Invalid phone number or password.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.18),transparent_38%),linear-gradient(135deg,_#09090b_0%,_#111827_100%)] px-4 py-10 sm:px-6 lg:px-8">
@@ -53,7 +53,9 @@ const LoginPage = () => {
             <h1 className="mt-6 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               Corpus Nexus AI
             </h1>
-            <p className="mt-3 text-lg text-zinc-400">Unified Corpus Client Platform</p>
+            <p className="mt-3 text-lg text-zinc-400">
+              Unified Corpus Client Platform
+            </p>
             <p className="mt-6 max-w-md text-base leading-7 text-zinc-500">
               Sign in to continue to your corpus operations, insights, and contributor workflows.
             </p>
@@ -62,11 +64,16 @@ const LoginPage = () => {
           <div className="flex items-center justify-center p-6 sm:p-8 lg:p-10">
             <div className="w-full max-w-md rounded-[24px] border border-zinc-800 bg-zinc-900/80 p-6 shadow-lg shadow-black/20 sm:p-8">
               <h2 className="text-2xl font-semibold text-white">Welcome back</h2>
-              <p className="mt-2 text-sm text-zinc-400">Access your Corpus Nexus workspace.</p>
+              <p className="mt-2 text-sm text-zinc-400">
+                Access your Corpus Nexus workspace.
+              </p>
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <div>
-                  <label htmlFor="phone" className="mb-2 block text-sm font-medium text-zinc-300">
+                  <label
+                    htmlFor="phone"
+                    className="mb-2 block text-sm font-medium text-zinc-300"
+                  >
                     Phone Number
                   </label>
 
@@ -107,7 +114,7 @@ const LoginPage = () => {
                   disabled={loading}
                   className="w-full rounded-2xl bg-violet-600 py-3 font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-violet-400"
                 >
-                  {loading ? 'Signing In...' : 'Sign In'}
+                  {loading ? "Signing In..." : "Sign In"}
                 </button>
 
                 <p className="text-center text-sm text-zinc-500">
@@ -124,7 +131,7 @@ const LoginPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginPage
+export default LoginPage;
