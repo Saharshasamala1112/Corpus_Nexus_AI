@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react'
-import { getProfile } from '../../services/api'
+import { getProfile } from '../../services/api.ts'
 
-interface ProfileRole {
-  name: string
-}
-
-interface ProfileData {
+type ProfileData = {
   username?: string
   phone?: string
   email?: string
@@ -13,7 +9,7 @@ interface ProfileData {
   profession?: string
   organisation?: string
   current_place?: string
-  roles?: ProfileRole[]
+  roles?: Array<{ name?: string }>
 }
 
 export default function Profile() {
@@ -25,13 +21,11 @@ export default function Profile() {
     async function loadProfile() {
       try {
         const data = await getProfile()
-        setProfile(data as ProfileData)
+        const profileData = data as ProfileData
+        setProfile(profileData)
       } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err.message)
-        } else {
-          setError('Failed to load profile')
-        }
+        const message = err instanceof Error ? err.message : 'Failed to load profile'
+        setError(message)
       } finally {
         setLoading(false)
       }
@@ -56,6 +50,10 @@ export default function Profile() {
     )
   }
 
+  if (!profile) {
+    return null
+  }
+
   return (
     <div
       style={{
@@ -78,35 +76,35 @@ export default function Profile() {
         <hr />
 
         <p>
-          <strong>Username:</strong> {profile?.username}
+          <strong>Username:</strong> {profile.username}
         </p>
 
         <p>
-          <strong>Phone:</strong> {profile?.phone}
+          <strong>Phone:</strong> {profile.phone}
         </p>
 
         <p>
-          <strong>Email:</strong> {profile?.email || 'Not Available'}
+          <strong>Email:</strong> {profile.email || 'Not Available'}
         </p>
 
         <p>
-          <strong>Name:</strong> {profile?.name || 'Not Available'}
+          <strong>Name:</strong> {profile.name || 'Not Available'}
         </p>
 
         <p>
-          <strong>Profession:</strong> {profile?.profession || 'Not Available'}
+          <strong>Profession:</strong> {profile.profession || 'Not Available'}
         </p>
 
         <p>
-          <strong>Organisation:</strong> {profile?.organisation || 'Not Available'}
+          <strong>Organisation:</strong> {profile.organisation || 'Not Available'}
         </p>
 
         <p>
-          <strong>Location:</strong> {profile?.current_place || 'Not Available'}
+          <strong>Location:</strong> {profile.current_place || 'Not Available'}
         </p>
 
         <p>
-          <strong>Roles:</strong> {profile?.roles?.map((role) => role.name).join(', ')}
+          <strong>Roles:</strong> {profile.roles?.map((role) => role.name).join(', ')}
         </p>
       </div>
     </div>
