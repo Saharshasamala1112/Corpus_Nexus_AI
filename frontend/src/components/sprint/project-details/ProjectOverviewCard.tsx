@@ -44,7 +44,7 @@ export default function ProjectOverviewCard({
                     </div>
 
                     <p className="mt-3 text-2xl font-bold text-white">
-                        {project.members.length}
+                        {project.members?.length ?? 0}
                     </p>
                 </div>
 
