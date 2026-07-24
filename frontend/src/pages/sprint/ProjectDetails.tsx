@@ -12,6 +12,8 @@ import SprintCard from "@/components/sprint/project-details/SprintCard";
 import { getProject } from "@/services/project";
 import type { Project } from "@/services/project/types";
 
+import { generateSprint } from "@/services/sprint";
+
 export default function ProjectDetails() {
     const { projectId } = useParams<{
         projectId: string;
@@ -19,25 +21,44 @@ export default function ProjectDetails() {
 
     const [project, setProject] = useState<Project | null>(null);
     const [loading, setLoading] = useState(true);
+    const [generating, setGenerating] = useState(false);
 
-    useEffect(() => {
-        async function loadProject() {
-            if (!projectId) {
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const data = await getProject(projectId);
-                setProject(data);
-            } catch (error) {
-                console.error("Failed to load project:", error);
-                setProject(null);
-            } finally {
-                setLoading(false);
-            }
+    async function loadProject() {
+        if (!projectId) {
+            setLoading(false);
+            return;
         }
 
+        try {
+            const data = await getProject(projectId);
+            setProject(data);
+        } catch (error) {
+            console.error("Failed to load project:", error);
+            setProject(null);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function handleGenerateSprint() {
+        if (!projectId) {
+            return;
+        }
+
+        try {
+            setGenerating(true);
+
+            await generateSprint(projectId);
+
+            await loadProject();
+        } catch (error) {
+            console.error("Failed to generate sprint:", error);
+        } finally {
+            setGenerating(false);
+        }
+    }
+
+    useEffect(() => {
         loadProject();
     }, [projectId]);
 
@@ -108,7 +129,12 @@ export default function ProjectDetails() {
 
             <div className="grid gap-6 lg:grid-cols-2">
                 <MembersCard project={project} />
-                <SprintCard project={project} />
+
+                <SprintCard
+                    project={project}
+                    onGenerateSprint={handleGenerateSprint}
+                    generating={generating}
+                />
             </div>
         </div>
     );

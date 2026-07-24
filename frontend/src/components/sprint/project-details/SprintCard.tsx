@@ -1,14 +1,17 @@
 import { CheckSquare } from "lucide-react";
-import { Link } from "react-router-dom";
 
 import type { Project } from "@/services/project/types";
 
 type SprintCardProps = {
     project: Project;
+    onGenerateSprint: () => void;
+    generating?: boolean;
 };
 
 export default function SprintCard({
     project,
+    onGenerateSprint,
+    generating = false,
 }: SprintCardProps) {
     const sprint = project.generatedSprint;
 
@@ -39,12 +42,14 @@ export default function SprintCard({
                         SprintWise AI.
                     </p>
 
-                    <Link
-                        to="/sprintwise-ai/generator"
-                        className="mt-6 inline-flex items-center rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-400"
+                    <button
+                        type="button"
+                        onClick={onGenerateSprint}
+                        disabled={generating}
+                        className="mt-6 inline-flex items-center rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        Generate Sprint
-                    </Link>
+                        {generating ? "Generating..." : "Generate Sprint"}
+                    </button>
                 </div>
             ) : (
                 <div className="mt-6 space-y-6">
