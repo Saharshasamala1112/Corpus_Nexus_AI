@@ -53,9 +53,7 @@ export async function getProfile() {
 /* ---------------- Search ---------------- */
 
 export async function searchRecords(query: string) {
-    return apiFetch(
-        `${API_URL}/search?q=${encodeURIComponent(query)}`
-    );
+    return apiFetch(`${API_URL}/search?q=${encodeURIComponent(query)}`);
 }
 
 /* ---------------- Languages ---------------- */
@@ -82,10 +80,7 @@ export async function getRecord(id: string | number) {
 
 /* ---------------- AI Assistant ---------------- */
 
-export async function askAssistant(
-    record: any,
-    question: string
-) {
+export async function askAssistant(record: any, question: string) {
     return apiFetch(`${API_URL}/assistant/ask`, {
         method: "POST",
         body: JSON.stringify({

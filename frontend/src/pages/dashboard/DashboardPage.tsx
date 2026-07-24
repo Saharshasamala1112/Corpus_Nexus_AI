@@ -1,22 +1,19 @@
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import api from "@/api/axios";
 import {
-    Activity,
     BrainCircuit,
+    CheckCircle2,
+    Circle,
+    ClipboardList,
     FileText,
     Globe2,
-    Layers3,
+    PencilLine,
+    Plus,
     ShieldCheck,
     Sparkles,
-    Users,
+    Trash2,
 } from "lucide-react";
-import {
-    CartesianGrid,
-    Line,
-    LineChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from "recharts";
+import { useAuth } from "@/hooks/useauth";
 import {
     Card,
     CardContent,
@@ -24,247 +21,332 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 
-const kpiCards = [
-    { label: "Ingested Records", value: "24.8K", subtitle: "+14.2% vs last week", icon: FileText, tone: "border-violet-500/30 bg-violet-500/10 text-violet-300" },
-    { label: "Active Operators", value: "186", subtitle: "+9 active today", icon: Users, tone: "border-sky-500/30 bg-sky-500/10 text-sky-300" },
-    { label: "Overall Corpus Health", value: "97.4%", subtitle: "Stable and improving", icon: ShieldCheck, tone: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" },
-    { label: "Indexed Languages", value: "42", subtitle: "Across 8 regions", icon: Globe2, tone: "border-amber-500/30 bg-amber-500/10 text-amber-300" },
-];
-
-const chartData = [
-    { name: "Mon", value: 48 },
-    { name: "Tue", value: 64 },
-    { name: "Wed", value: 58 },
-    { name: "Thu", value: 81 },
-    { name: "Fri", value: 74 },
-    { name: "Sat", value: 91 },
-    { name: "Sun", value: 88 },
-];
-
-const insights = [
-    { title: "Model drift watch", description: "Low variance detected in multilingual retrieval patterns.", time: "8 min ago", icon: BrainCircuit },
-    { title: "Policy confidence", description: "Guardrails are holding steady across 97% of active jobs.", time: "24 min ago", icon: Layers3 },
-    { title: "Operator overload", description: "Three queues are approaching review capacity thresholds.", time: "41 min ago", icon: Activity },
-];
-
-const recentIngestions = [
-    { document: "Quarterly report v3", language: "English", operator: "Maya Chen", status: "Reviewed" },
-    { document: "Policy digest", language: "French", operator: "Liam Ortiz", status: "In Review" },
-    { document: "Product launch notes", language: "German", operator: "Sana Patel", status: "Synced" },
-    { document: "Customer support logs", language: "Japanese", operator: "Noah Reed", status: "Queued" },
-];
-
-const leaderboard = [
-    { name: "Maya Chen", audits: "184 audits", xp: "XP 94", progress: 84, initials: "MC" },
-    { name: "Liam Ortiz", audits: "171 audits", xp: "XP 91", progress: 78, initials: "LO" },
-    { name: "Sana Patel", audits: "162 audits", xp: "XP 89", progress: 72, initials: "SP" },
-];
+interface TaskItem {
+    id: string;
+    text: string;
+    completed: boolean;
+}
 
 function DashboardPage() {
+    const { user } = useAuth();
+    const [tasks, setTasks] = useState<TaskItem[]>(() => {
+        if (typeof window === "undefined") {
+            return [];
+        }
+
+        const storedTasks = window.localStorage.getItem("dashboard-tasks");
+        if (!storedTasks) {
+            return [];
+        }
+
+        try {
+            return JSON.parse(storedTasks) as TaskItem[];
+        } catch {
+            return [];
+        }
+    });
+    const [newTask, setNewTask] = useState("");
+    const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+    const [editingText, setEditingText] = useState("");
+    const [isTodoOpen, setIsTodoOpen] = useState(false);
+    const [institutionName, setInstitutionName] = useState("Loading...");
+    const [now, setNow] = useState(() => new Date());
+
+    useEffect(() => {
+        window.localStorage.setItem("dashboard-tasks", JSON.stringify(tasks));
+    }, [tasks]);
+
+    useEffect(() => {
+        const timer = window.setInterval(() => setNow(new Date()), 1000);
+        return () => window.clearInterval(timer);
+    }, []);
+
+    useEffect(() => {
+        const loadInstitutionName = async () => {
+            try {
+                const userResponse = await api.get<{ institution_id?: string | null }>('/auth/me');
+                const institutionId = userResponse.data?.institution_id;
+
+                if (!institutionId) {
+                    setInstitutionName("Not available");
+                    return;
+                }
+
+                try {
+                    const institutionResponse = await api.get<{ college_name?: string; university_name?: string }>('/institutions/' + institutionId);
+                    const institutionData = institutionResponse.data;
+                    setInstitutionName(institutionData?.college_name || institutionData?.university_name || "Not available");
+                } catch {
+                    setInstitutionName("Not available");
+                }
+            } catch {
+                setInstitutionName("Not available");
+            }
+        };
+
+        void loadInstitutionName();
+    }, []);
+
+    const username = user?.username || "there";
+    const completedCount = tasks.filter((task) => task.completed).length;
+    const progressPercent = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
+
+    const todayLabel = useMemo(
+        () =>
+            now.toLocaleDateString("en", {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+            }),
+        [now],
+    );
+
+    const timeLabel = useMemo(
+        () =>
+            now.toLocaleTimeString("en", {
+                hour: "numeric",
+                minute: "2-digit",
+            }),
+        [now],
+    );
+
+    const addTask = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const trimmedTask = newTask.trim();
+
+        if (!trimmedTask) {
+            return;
+        }
+
+        setTasks((currentTasks) => [
+            ...currentTasks,
+            {
+                id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+                text: trimmedTask,
+                completed: false,
+            },
+        ]);
+        setNewTask("");
+    };
+
+    const toggleTaskCompletion = (taskId: string) => {
+        setTasks((currentTasks) =>
+            currentTasks.map((task) =>
+                task.id === taskId ? { ...task, completed: !task.completed } : task,
+            ),
+        );
+    };
+
+    const deleteTask = (taskId: string) => {
+        setTasks((currentTasks) => currentTasks.filter((task) => task.id !== taskId));
+        if (editingTaskId === taskId) {
+            setEditingTaskId(null);
+            setEditingText("");
+        }
+    };
+
+    const startEditing = (task: TaskItem) => {
+        setEditingTaskId(task.id);
+        setEditingText(task.text);
+    };
+
+    const saveTaskEdit = (taskId: string) => {
+        const trimmedText = editingText.trim();
+        if (!trimmedText) {
+            return;
+        }
+
+        setTasks((currentTasks) =>
+            currentTasks.map((task) => (task.id === taskId ? { ...task, text: trimmedText } : task)),
+        );
+        setEditingTaskId(null);
+        setEditingText("");
+    };
+
     return (
         <div className="space-y-6">
-            <Card className="overflow-hidden border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 shadow-2xl shadow-black/20">
-                <CardContent className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.3fr_0.7fr] lg:p-10">
-                    <div className="space-y-5">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-sm font-medium text-violet-300">
+            <section>
+                <Card className="overflow-hidden border border-border/60 bg-card shadow-sm">
+                    <CardContent className="p-6 sm:p-8 lg:p-10">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
                             <Sparkles className="h-4 w-4" />
-                            Premium command center
+                            Personalized home
                         </div>
-                        <div className="space-y-3">
-                            <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                                Keep every team aligned with one intelligent operating layer.
-                            </h1>
-                            <p className="max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
-                                Monitor knowledge health, automate insights, and stay ahead with a multi-surface AI workspace designed for enterprise execution.
-                            </p>
-                        </div>
-                        <div className="flex flex-wrap gap-3">
-                            <button className="rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500">
-                                Open briefing
-                            </button>
-                            <button className="rounded-2xl border border-zinc-700 bg-zinc-900/70 px-4 py-2.5 text-sm font-semibold text-zinc-200 transition hover:border-violet-500 hover:text-white">
-                                View health
-                            </button>
-                        </div>
-                    </div>
+                        <div className="mt-5 space-y-4">
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="space-y-3">
+                                    <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                                        Welcome, {username} 👋
+                                    </h1>
+                                    <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+                                        Welcome to Corpus Nexus AI — your unified platform for corpus exploration, analytics, AI-powered assistance, onboarding, SprintWise AI, and CorpusGuard.
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsTodoOpen((current) => !current)}
+                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-border/60 bg-background/70 text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+                                    aria-label="Toggle To-Do"
+                                >
+                                    <ClipboardList className="h-5 w-5" />
+                                </button>
+                            </div>
 
-                    <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-5">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-zinc-400">Live status</p>
-                                <p className="mt-1 text-2xl font-semibold text-white">All systems healthy</p>
-                            </div>
-                            <div className="rounded-2xl bg-emerald-500/15 p-3 text-emerald-400">
-                                <ShieldCheck className="h-5 w-5" />
-                            </div>
-                        </div>
-                        <div className="mt-6 space-y-4">
-                            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
-                                <div className="flex items-center justify-between text-sm text-zinc-400">
-                                    <span>Knowledge coverage</span>
-                                    <span className="font-semibold text-white">94%</span>
+                            <div className="grid gap-3 rounded-3xl border border-border/60 bg-muted/40 p-4 sm:grid-cols-2">
+                                <div className="space-y-1">
+                                    <p className="text-sm text-muted-foreground">Institution Name</p>
+                                    <p className="font-medium text-foreground">{institutionName}</p>
                                 </div>
-                                <div className="mt-3 h-2 rounded-full bg-zinc-800">
-                                    <div className="h-2 w-[94%] rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" />
+                                <div className="space-y-1">
+                                    <p className="text-sm text-muted-foreground">Role</p>
+                                    <p className="font-medium text-foreground">Intern</p>
                                 </div>
-                            </div>
-                            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
-                                <div className="flex items-center justify-between text-sm text-zinc-400">
-                                    <span>Model confidence</span>
-                                    <span className="font-semibold text-white">High</span>
+                                <div className="space-y-1">
+                                    <p className="text-sm text-muted-foreground">Today&apos;s Date</p>
+                                    <p className="font-medium text-foreground">{todayLabel}</p>
                                 </div>
-                                <div className="mt-3 flex items-center gap-2 text-sm text-zinc-300">
-                                    <BrainCircuit className="h-4 w-4 text-violet-400" />
-                                    8 tuned agents in active rotation
+                                <div className="space-y-1">
+                                    <p className="text-sm text-muted-foreground">Current Time</p>
+                                    <p className="font-medium text-foreground">{timeLabel}</p>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
 
-            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                {kpiCards.map((card) => {
-                    const Icon = card.icon;
-                    return (
-                        <Card key={card.label} className="group border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20 transition duration-200 hover:-translate-y-1 hover:border-violet-500/40">
-                            <CardContent className="flex h-full flex-col justify-between p-5">
-                                <div className="flex items-center justify-between">
-                                    <p className="text-sm text-zinc-400">{card.label}</p>
-                                    <div className={`rounded-2xl border p-2 ${card.tone}`}>
-                                        <Icon className="h-4 w-4" />
-                                    </div>
-                                </div>
-                                <div className="mt-6">
-                                    <p className="text-3xl font-semibold tracking-tight text-white">{card.value}</p>
-                                    <p className="mt-2 text-sm text-zinc-400">{card.subtitle}</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    );
-                })}
-            </section>
-
-            <section className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
-                <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
-                    <CardHeader className="px-6 pb-2 pt-6">
-                        <CardTitle className="text-lg text-white">Today&apos;s Ingestion Activity</CardTitle>
-                        <CardDescription>Daily volume across the knowledge pipeline.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-6 pt-2">
-                        <div className="h-72 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-3">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={chartData}>
-                                    <CartesianGrid vertical={false} stroke="#27272a" strokeDasharray="3 3" />
-                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 12 }} />
-                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 12 }} />
-                                    <Tooltip />
-                                    <Line type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4, fill: "#c084fc" }} activeDot={{ r: 6 }} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
-                    <CardHeader className="px-6 pb-2 pt-6">
-                        <CardTitle className="text-lg text-white">AI Insights Analyst</CardTitle>
-                        <CardDescription>Signals being surfaced for the current shift.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3 p-6 pt-2">
-                        {insights.map((item) => {
-                            const Icon = item.icon;
-                            return (
-                                <div key={item.title} className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
-                                    <div className="flex items-start gap-3">
-                                        <div className="rounded-2xl border border-violet-500/20 bg-violet-500/10 p-2 text-violet-300">
-                                            <Icon className="h-4 w-4" />
+                            <div className={`overflow-hidden rounded-3xl border border-border/60 bg-muted/40 transition-all duration-300 ${isTodoOpen ? "max-h-[600px] opacity-100" : "max-h-0 border-transparent opacity-0"}`}>
+                                <div className="p-4 sm:p-5">
+                                    <div className="mb-4 flex items-center justify-between">
+                                        <div>
+                                            <p className="text-base font-semibold text-foreground">My To-Do</p>
+                                            <p className="text-sm text-muted-foreground">{completedCount}/{tasks.length} completed</p>
                                         </div>
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex items-center justify-between gap-2">
-                                                <p className="text-sm font-semibold text-white">{item.title}</p>
-                                                <span className="text-xs text-zinc-500">{item.time}</span>
-                                            </div>
-                                            <p className="mt-1 text-sm text-zinc-400">{item.description}</p>
+                                        <div className="h-2.5 w-24 rounded-full bg-background/70">
+                                            <div className="h-2.5 rounded-full bg-gradient-to-r from-primary to-violet-500" style={{ width: `${progressPercent}%` }} />
                                         </div>
                                     </div>
+
+                                    <form onSubmit={addTask} className="mb-4 flex gap-2">
+                                        <input
+                                            value={newTask}
+                                            onChange={(event) => setNewTask(event.target.value)}
+                                            placeholder="Add a new task"
+                                            className="flex-1 rounded-2xl border border-border/60 bg-background/70 px-3 py-2 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary"
+                                        />
+                                        <button type="submit" className="rounded-2xl bg-primary p-2.5 text-primary-foreground transition hover:bg-primary/90">
+                                            <Plus className="h-4 w-4" />
+                                        </button>
+                                    </form>
+
+                                    <div className="space-y-2">
+                                        {tasks.length === 0 ? (
+                                            <p className="rounded-2xl border border-dashed border-border/60 px-3 py-4 text-sm text-muted-foreground">
+                                                No tasks yet. Add your first item to stay organized.
+                                            </p>
+                                        ) : (
+                                            tasks.map((task) => (
+                                                <div key={task.id} className="flex items-start gap-2 rounded-2xl border border-border/60 bg-background/50 px-3 py-3">
+                                                    <button type="button" onClick={() => toggleTaskCompletion(task.id)} className="mt-0.5 text-primary">
+                                                        {task.completed ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
+                                                    </button>
+
+                                                    <div className="min-w-0 flex-1">
+                                                        {editingTaskId === task.id ? (
+                                                            <div className="flex gap-2">
+                                                                <input
+                                                                    value={editingText}
+                                                                    onChange={(event) => setEditingText(event.target.value)}
+                                                                    className="flex-1 rounded-xl border border-border/60 bg-background/70 px-2 py-1.5 text-sm text-foreground outline-none focus:border-primary"
+                                                                />
+                                                                <button type="button" onClick={() => saveTaskEdit(task.id)} className="rounded-xl bg-primary px-2.5 py-1.5 text-sm font-medium text-primary-foreground">
+                                                                    Save
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <p className={`text-sm ${task.completed ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                                                                {task.text}
+                                                            </p>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex items-center gap-1">
+                                                        <button type="button" onClick={() => startEditing(task)} className="rounded-xl p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground">
+                                                            <PencilLine className="h-4 w-4" />
+                                                        </button>
+                                                        <button type="button" onClick={() => deleteTask(task.id)} className="rounded-xl p-1.5 text-muted-foreground transition hover:bg-muted hover:text-destructive">
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
                                 </div>
-                            );
-                        })}
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
             </section>
 
-            <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-                <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
+            <section className="grid gap-6 lg:grid-cols-2">
+                <Card className="border border-border/60 bg-card shadow-sm">
                     <CardHeader className="px-6 pb-2 pt-6">
-                        <CardTitle className="text-lg text-white">Recent Ingestion</CardTitle>
-                        <CardDescription>Latest records flowing into the corpus.</CardDescription>
+                        <CardTitle className="text-lg text-foreground">About Corpus Nexus AI</CardTitle>
+                        <CardDescription>Everything you need for a streamlined corpus experience.</CardDescription>
                     </CardHeader>
-                    <CardContent className="p-6 pt-2">
-                        <div className="overflow-hidden rounded-2xl border border-zinc-800">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Document</TableHead>
-                                        <TableHead>Language</TableHead>
-                                        <TableHead>Operator</TableHead>
-                                        <TableHead>Status</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {recentIngestions.map((entry) => (
-                                        <TableRow key={entry.document}>
-                                            <TableCell>{entry.document}</TableCell>
-                                            <TableCell>{entry.language}</TableCell>
-                                            <TableCell>{entry.operator}</TableCell>
-                                            <TableCell>
-                                                <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-300">
-                                                    {entry.status}
-                                                </span>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                    <CardContent className="space-y-4 p-6 pt-2">
+                        <div className="rounded-2xl border border-border/60 bg-muted/40 p-4">
+                            <div className="flex items-start gap-3">
+                                <div className="rounded-2xl border border-primary/25 bg-primary/10 p-2 text-primary">
+                                    <FileText className="h-4 w-4" />
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-foreground">Explore your corpus confidently</p>
+                                    <p className="mt-1 text-sm text-muted-foreground">Search, discover, and understand records from a single elegant workspace.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="rounded-2xl border border-border/60 bg-muted/40 p-4">
+                            <div className="flex items-start gap-3">
+                                <div className="rounded-2xl border border-sky-500/20 bg-sky-500/10 p-2 text-sky-300">
+                                    <BrainCircuit className="h-4 w-4" />
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-foreground">Work with AI assistance</p>
+                                    <p className="mt-1 text-sm text-muted-foreground">Ask questions, get summaries, and accelerate your workflow with built-in intelligence.</p>
+                                </div>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
+                <Card className="border border-border/60 bg-card shadow-sm">
                     <CardHeader className="px-6 pb-2 pt-6">
-                        <CardTitle className="text-lg text-white">Operator Leaderboard</CardTitle>
-                        <CardDescription>Top contributors this sprint.</CardDescription>
+                        <CardTitle className="text-lg text-foreground">What you can do here</CardTitle>
+                        <CardDescription>Stay focused on the work that matters most.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-3 p-6 pt-2">
-                        {leaderboard.map((person) => (
-                            <div key={person.name} className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 font-semibold text-white">
-                                        {person.initials}
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <div className="flex items-center justify-between gap-3">
-                                            <p className="text-sm font-semibold text-white">{person.name}</p>
-                                            <span className="text-sm font-medium text-violet-300">{person.xp}</span>
-                                        </div>
-                                        <p className="mt-1 text-sm text-zinc-400">{person.audits}</p>
-                                        <div className="mt-3 h-2 rounded-full bg-zinc-800">
-                                            <div className={`h-2 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500`} style={{ width: `${person.progress}%` }} />
-                                        </div>
-                                    </div>
+                    <CardContent className="space-y-4 p-6 pt-2">
+                        <div className="rounded-2xl border border-border/60 bg-muted/40 p-4">
+                            <div className="flex items-start gap-3">
+                                <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-2 text-emerald-300">
+                                    <ShieldCheck className="h-4 w-4" />
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-foreground">Track progress and insights</p>
+                                    <p className="mt-1 text-sm text-muted-foreground">Monitor activity, review analytics, and stay aligned with your team&apos;s momentum.</p>
                                 </div>
                             </div>
-                        ))}
+                        </div>
+                        <div className="rounded-2xl border border-border/60 bg-muted/40 p-4">
+                            <div className="flex items-start gap-3">
+                                <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-2 text-amber-300">
+                                    <Globe2 className="h-4 w-4" />
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-foreground">Move from onboarding to delivery</p>
+                                    <p className="mt-1 text-sm text-muted-foreground">Use the platform to guide onboarding, organize sprints, and protect quality across workflows.</p>
+                                </div>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
             </section>

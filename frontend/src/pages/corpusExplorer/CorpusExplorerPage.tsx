@@ -1,4 +1,4 @@
-import { ArrowRight, BriefcaseBusiness, FileSearch, Globe2, UserRound } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, FileSearch, Globe2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,12 +22,6 @@ const homeCards = [
         description: "Jump into curated content categories to narrow discovery.",
         to: "/corpus-explorer/categories",
         icon: BriefcaseBusiness,
-    },
-    {
-        title: "My Profile",
-        description: "Review your account details and organisation membership.",
-        to: "/corpus-explorer/profile",
-        icon: UserRound,
     },
 ];
 
@@ -82,7 +76,7 @@ export default function CorpusExplorerPage() {
                 </div>
             ) : null}
 
-            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {homeCards.map((card) => {
                     const Icon = card.icon;
 

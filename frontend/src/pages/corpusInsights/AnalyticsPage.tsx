@@ -77,7 +77,7 @@ const AnalyticsPage = () => {
           />
         </div>
 
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-border/60 bg-card p-6 shadow-sm">
           <h2 className="mb-4 text-xl font-semibold">
             Dataset Summary
           </h2>
