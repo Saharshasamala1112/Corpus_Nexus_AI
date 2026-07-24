@@ -1,9 +1,78 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@100..900&family=Noto+Sans+Hindi:wght@100..900&family=Noto+Sans+Kannada:wght@100..900&family=Noto+Sans+Tamil:wght@100..900&family=Noto+Sans+Malayalam:wght@100..900&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
 @custom-variant dark (&:is(.dark *));
+
+/* Multilingual font stack for Indian scripts */
+.multilingual-text,
+.telugu-text,
+.hindi-text,
+.kannada-text,
+.tamil-text,
+.malayalam-text {
+    font-family:
+        "Noto Sans Telugu",
+        "Noto Sans Hindi",
+        "Noto Sans Kannada",
+        "Noto Sans Tamil",
+        "Noto Sans Malayalam",
+        "Noto Sans",
+        ui-sans-serif,
+        system-ui,
+        sans-serif;
+    word-break: break-word;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+/* Specific language variants */
+.telugu-text {
+    font-family:
+        "Noto Sans Telugu",
+        "Noto Sans",
+        ui-sans-serif,
+        system-ui,
+        sans-serif;
+}
+
+.hindi-text {
+    font-family:
+        "Noto Sans Hindi",
+        "Noto Sans",
+        ui-sans-serif,
+        system-ui,
+        sans-serif;
+}
+
+.kannada-text {
+    font-family:
+        "Noto Sans Kannada",
+        "Noto Sans",
+        ui-sans-serif,
+        system-ui,
+        sans-serif;
+}
+
+.tamil-text {
+    font-family:
+        "Noto Sans Tamil",
+        "Noto Sans",
+        ui-sans-serif,
+        system-ui,
+        sans-serif;
+}
+
+.malayalam-text {
+    font-family:
+        "Noto Sans Malayalam",
+        "Noto Sans",
+        ui-sans-serif,
+        system-ui,
+        sans-serif;
+}
 
 html,
 body,

@@ -15,6 +15,13 @@ type ExplorerBackendRecord = {
         latitude?: number;
         longitude?: number;
     };
+    // Multilingual content fields
+    sentence?: string;
+    text?: string;
+    transcription?: string;
+    transcript?: string;
+    prompt?: string;
+    content?: string;
 };
 
 function normalizeListPayload<T>(payload: unknown): T[] {
@@ -64,6 +71,28 @@ export async function searchRecords(query: string): Promise<CorpusRecord[]> {
     const records = await getCorpusRecords(0, 1000);
     const normalizedQuery = query.trim().toLowerCase();
 
+    // DEBUG: Log raw backend response
+    const hindiRecords = (records as ExplorerBackendRecord[]).filter(
+        (r) => r.language && r.language.toLowerCase().includes("hindi")
+    );
+    if (hindiRecords.length > 0) {
+        console.debug("[API] Hindi records from backend after mapping:", {
+            count: hindiRecords.length,
+            totalRecords: records.length,
+            samples: hindiRecords.slice(0, 3).map((r, idx) => ({
+                index: idx,
+                id: r.id,
+                language: r.language,
+                title: r.title,
+                description: r.description ? `${r.description.substring(0, 50)}...` : "N/A",
+                sentence: r.sentence ? `[${r.sentence.length} chars] ${r.sentence.substring(0, 50)}...` : "N/A",
+                text: r.text ? `[${r.text.length} chars] ${r.text.substring(0, 50)}...` : "N/A",
+                transcription: r.transcription ? `[${r.transcription.length} chars] ${r.transcription.substring(0, 50)}...` : "N/A",
+                transcript: r.transcript ? `[${r.transcript.length} chars] ${r.transcript.substring(0, 50)}...` : "N/A",
+            })),
+        });
+    }
+
     const explorerRecords: CorpusRecord[] = (records as ExplorerBackendRecord[]).map((record, index) => ({
         id: record.id ?? index + 1,
         title: record.title ?? `Record ${index + 1}`,
@@ -72,6 +101,13 @@ export async function searchRecords(query: string): Promise<CorpusRecord[]> {
         category: record.category ?? "General",
         metadata: record.metadata ?? {},
         downloadLinks: [],
+        // Preserve multilingual fields from backend
+        sentence: record.sentence,
+        text: record.text,
+        transcription: record.transcription,
+        transcript: record.transcript,
+        prompt: record.prompt,
+        content: record.content,
     }));
 
     if (!normalizedQuery || normalizedQuery === "*") {
@@ -79,7 +115,20 @@ export async function searchRecords(query: string): Promise<CorpusRecord[]> {
     }
 
     return explorerRecords.filter((record) => {
-        const haystack = [record.title, record.description, record.language, record.category, JSON.stringify(record.metadata)]
+        const haystack = [
+            record.title,
+            record.description,
+            record.sentence,
+            record.text,
+            record.transcription,
+            record.transcript,
+            record.prompt,
+            record.content,
+            record.language,
+            record.category,
+            JSON.stringify(record.metadata),
+        ]
+            .filter((val) => val != null && val !== "")
             .join(" ")
             .toLowerCase();
 

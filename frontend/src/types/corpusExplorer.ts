@@ -11,6 +11,13 @@ export interface CorpusRecord {
     category: string;
     metadata: Record<string, string | number | boolean | null>;
     downloadLinks?: DownloadLink[];
+    // Multilingual content fields from backend
+    sentence?: string;
+    text?: string;
+    transcription?: string;
+    transcript?: string;
+    prompt?: string;
+    content?: string;
 }
 
 export interface LanguageItem {
