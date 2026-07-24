@@ -1,57 +1,39 @@
-import { loadProjects, saveProjects } from "./storage";
+import { api } from "@/api/client";
 
-import type { Project } from "./types";
+import type {
+    CreateProjectInput,
+    Project,
+    UpdateProjectInput,
+} from "./types";
 
-export function getProjects(): Project[] {
-    return loadProjects();
+export async function getProjects(): Promise<Project[]> {
+    return api.get<Project[]>("/projects/");
 }
 
-export function createProject(
-    project: Omit<Project, "id" | "createdAt" | "updatedAt">
-): Project {
-    const projects = loadProjects();
-
-    const newProject: Project = {
-        ...project,
-        id: crypto.randomUUID(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    };
-
-    projects.push(newProject);
-
-    saveProjects(projects);
-
-    return newProject;
+export async function getProject(
+    projectId: string,
+): Promise<Project> {
+    return api.get<Project>(`/projects/${projectId}`);
 }
 
-export function updateProject(project: Project): void {
-    const projects = loadProjects();
-
-    const updated = projects.map((item) =>
-        item.id === project.id
-            ? {
-                ...project,
-                updatedAt: new Date().toISOString(),
-            }
-            : item
-    );
-
-    saveProjects(updated);
+export async function createProject(
+    project: CreateProjectInput,
+): Promise<Project> {
+    return api.post<Project>("/projects/", project);
 }
 
-export function deleteProject(projectId: string): void {
-    const projects = loadProjects();
-
-    saveProjects(
-        projects.filter((project) => project.id !== projectId)
+export async function updateProject(
+    projectId: string,
+    project: UpdateProjectInput,
+): Promise<Project> {
+    return api.put<Project>(
+        `/projects/${projectId}`,
+        project,
     );
 }
 
-export function getProject(
-    projectId: string
-): Project | undefined {
-    return loadProjects().find(
-        (project) => project.id === projectId
-    );
+export async function deleteProject(
+    projectId: string,
+): Promise<void> {
+    await api.delete(`/projects/${projectId}`);
 }

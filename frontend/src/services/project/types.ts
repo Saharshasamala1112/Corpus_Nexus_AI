@@ -19,15 +19,32 @@ export interface Project {
     name: string;
     description: string;
 
+    // Stored as working days
     sprintDuration: number;
     teamSize: number;
 
     status: ProjectStatus;
 
-    members: TeamMember[];
+    members?: TeamMember[];
 
     generatedSprint?: SprintResult;
 
     createdAt: string;
     updatedAt: string;
+}
+
+export interface CreateProjectInput {
+    name: string;
+    description: string;
+    sprintDuration: number;
+    teamSize: number;
+    status: ProjectStatus;
+}
+
+export interface UpdateProjectInput {
+    name: string;
+    description: string;
+    sprintDuration: number;
+    teamSize: number;
+    status: ProjectStatus;
 }

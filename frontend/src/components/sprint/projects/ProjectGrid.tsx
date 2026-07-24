@@ -7,12 +7,15 @@ import { cn } from "@/lib/utils";
 type ProjectGridProps = {
     className?: string;
     projects: Project[];
-    onProjectsChange: React.Dispatch<React.SetStateAction<Project[]>>;
+    onEditProject: (project: Project) => void;
+    onDeleteProject: (project: Project) => void;
 };
 
 export default function ProjectGrid({
     className,
     projects,
+    onEditProject,
+    onDeleteProject,
 }: ProjectGridProps) {
     if (projects.length === 0) {
         return (
@@ -46,6 +49,8 @@ export default function ProjectGrid({
                 <ProjectCard
                     key={project.id}
                     project={project}
+                    onEdit={onEditProject}
+                    onDelete={onDeleteProject}
                 />
             ))}
         </section>

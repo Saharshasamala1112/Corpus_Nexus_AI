@@ -1,4 +1,12 @@
-import { ArrowRight, CheckSquare, FolderKanban, Users } from "lucide-react";
+import {
+    ArrowRight,
+    CheckSquare,
+    FolderKanban,
+    Pencil,
+    Trash2,
+    Users,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import type { Project } from "@/services/project/types";
 
@@ -7,6 +15,8 @@ import { cn } from "@/lib/utils";
 type ProjectCardProps = {
     project: Project;
     className?: string;
+    onEdit?: (project: Project) => void;
+    onDelete?: (project: Project) => void;
 };
 
 const statusStyles: Record<Project["status"], string> = {
@@ -18,15 +28,33 @@ const statusStyles: Record<Project["status"], string> = {
 export default function ProjectCard({
     project,
     className,
+    onEdit,
+    onDelete,
 }: ProjectCardProps) {
+    const navigate = useNavigate();
+
     const taskCount = project.generatedSprint?.tasks.length ?? 0;
+    const memberCount = project.members?.length ?? 0;
 
     const lastUpdated = new Date(project.updatedAt).toLocaleDateString();
 
+    function handleOpenProject() {
+        navigate(`/sprintwise-ai/projects/${project.id}`);
+    }
+
     return (
         <article
+            role="button"
+            tabIndex={0}
+            onClick={handleOpenProject}
+            onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    handleOpenProject();
+                }
+            }}
             className={cn(
-                "group rounded-xl border border-white/10 bg-slate-950/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-400/20 hover:shadow-lg hover:shadow-cyan-500/10",
+                "group cursor-pointer rounded-xl border border-white/10 bg-slate-950/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-400/20 hover:shadow-lg hover:shadow-cyan-500/10 focus:outline-none focus:ring-2 focus:ring-cyan-400/50",
                 className
             )}
         >
@@ -50,7 +78,7 @@ export default function ProjectCard({
                     {project.name}
                 </h3>
 
-                <p className="mt-2 text-sm leading-6 text-slate-400">
+                <p className="mt-2 text-sm leading-6 text-slate-400 line-clamp-3">
                     {project.description}
                 </p>
             </div>
@@ -58,7 +86,7 @@ export default function ProjectCard({
             <div className="mt-4 flex items-center gap-4 text-sm text-slate-400">
                 <div className="flex items-center gap-1.5">
                     <Users className="h-4 w-4" />
-                    <span>{project.members.length}</span>
+                    <span>{memberCount}</span>
                 </div>
 
                 <div className="flex items-center gap-1.5">
@@ -67,12 +95,46 @@ export default function ProjectCard({
                 </div>
             </div>
 
-            <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-3 text-sm">
-                <span className="text-slate-500">
-                    Last updated {lastUpdated}
-                </span>
+            <div className="mt-5 border-t border-white/10 pt-3">
+                <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-500">
+                        Last updated {lastUpdated}
+                    </span>
 
-                <ArrowRight className="h-4 w-4 text-slate-500 transition-colors group-hover:text-slate-300" />
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit?.(project);
+                            }}
+                            className="rounded-md p-2 text-slate-400 transition hover:bg-slate-800 hover:text-cyan-300"
+                            title="Edit Project"
+                        >
+                            <Pencil className="h-4 w-4" />
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete?.(project);
+                            }}
+                            className="rounded-md p-2 text-slate-400 transition hover:bg-slate-800 hover:text-red-400"
+                            title="Delete Project"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </button>
+
+                        <div className="flex items-center gap-2 text-slate-500 transition-colors group-hover:text-cyan-300">
+                            <span className="text-sm font-medium">
+                                View
+                            </span>
+
+                            <ArrowRight className="h-4 w-4" />
+                        </div>
+                    </div>
+                </div>
             </div>
         </article>
     );

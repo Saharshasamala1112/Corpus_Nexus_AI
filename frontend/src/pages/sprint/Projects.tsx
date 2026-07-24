@@ -1,47 +1,82 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import PageHeader from "@/components/sprint/common/PageHeader";
 import SprintNavigation from "@/components/sprint/common/SprintNavigation";
 import ProjectsSection from "@/components/sprint/projects/ProjectsSection";
 import CreateProjectDialog from "@/components/sprint/projects/dialogs/CreateProjectDialog";
 
-import { createProject, getProjects } from "@/services/project";
+import { useProjects } from "@/hooks/useProjects";
+
 import type { Project } from "@/services/project/types";
 
 export default function Projects() {
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+    const {
+        projects,
+        createProject,
+        updateProject,
+        deleteProject,
+    } = useProjects();
 
-    useEffect(() => {
-        refreshProjects();
-    }, []);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [editingProject, setEditingProject] =
+        useState<Project | null>(null);
 
-    function refreshProjects() {
-        setProjects(getProjects());
-    }
-
-    function handleCreateProject(data: {
+    async function handleSubmit(data: {
         name: string;
         description: string;
         sprintDuration: number;
         teamSize: number;
     }) {
-        createProject({
-            name: data.name,
-            description: data.description,
-            sprintDuration: data.sprintDuration,
-            teamSize: data.teamSize,
+        try {
+            if (editingProject) {
+                await updateProject(editingProject.id, {
+                    name: data.name,
+                    description: data.description,
+                    sprintDuration: data.sprintDuration,
+                    teamSize: data.teamSize,
+                    status: editingProject.status,
+                });
+            } else {
+                await createProject({
+                    name: data.name,
+                    description: data.description,
+                    sprintDuration: data.sprintDuration,
+                    teamSize: data.teamSize,
+                    status: "Planning",
+                });
+            }
 
-            status: "Planning",
+            setEditingProject(null);
+            setIsDialogOpen(false);
+        } catch (error) {
+            console.error("Failed to save project:", error);
+        }
+    }
 
-            members: [],
+    function handleCreate() {
+        setEditingProject(null);
+        setIsDialogOpen(true);
+    }
 
-            generatedSprint: undefined,
-        });
+    function handleEdit(project: Project) {
+        setEditingProject(project);
+        setIsDialogOpen(true);
+    }
 
-        refreshProjects();
+    async function handleDelete(project: Project) {
+        const confirmed = window.confirm(
+            `Delete "${project.name}"?`
+        );
 
-        setIsCreateDialogOpen(false);
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            await deleteProject(project.id);
+        } catch (error) {
+            console.error("Failed to delete project:", error);
+        }
     }
 
     return (
@@ -51,21 +86,31 @@ export default function Projects() {
                     title="Projects"
                     description="Manage your AI software projects and sprint planning."
                     actionLabel="New Project"
-                    onAction={() => setIsCreateDialogOpen(true)}
+                    onAction={handleCreate}
                 />
 
                 <SprintNavigation />
 
                 <ProjectsSection
                     projects={projects}
-                    setProjects={setProjects}
+                    onEditProject={handleEdit}
+                    onDeleteProject={handleDelete}
                 />
             </div>
 
             <CreateProjectDialog
-                open={isCreateDialogOpen}
-                onClose={() => setIsCreateDialogOpen(false)}
-                onCreate={handleCreateProject}
+                open={isDialogOpen}
+                onClose={() => {
+                    setEditingProject(null);
+                    setIsDialogOpen(false);
+                }}
+                onCreate={handleSubmit}
+                project={editingProject ?? undefined}
+                mode={
+                    editingProject
+                        ? "edit"
+                        : "create"
+                }
             />
         </>
     );

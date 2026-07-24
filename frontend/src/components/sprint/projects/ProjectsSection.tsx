@@ -10,13 +10,15 @@ import { cn } from "@/lib/utils";
 type ProjectsSectionProps = {
     className?: string;
     projects: Project[];
-    setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
+    onEditProject: (project: Project) => void;
+    onDeleteProject: (project: Project) => void;
 };
 
 export default function ProjectsSection({
     className,
     projects,
-    setProjects,
+    onEditProject,
+    onDeleteProject,
 }: ProjectsSectionProps) {
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("All");
@@ -50,7 +52,8 @@ export default function ProjectsSection({
 
             <ProjectGrid
                 projects={filteredProjects}
-                onProjectsChange={setProjects}
+                onEditProject={onEditProject}
+                onDeleteProject={onDeleteProject}
             />
         </section>
     );
