@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.team_member import TeamMemberResponse
+
 
 class ProjectBase(BaseModel):
     name: str
@@ -24,9 +26,15 @@ class ProjectUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
 
-    sprint_duration: int | None = Field(default=None, alias="sprintDuration")
+    sprint_duration: int | None = Field(
+        default=None,
+        alias="sprintDuration",
+    )
 
-    team_size: int | None = Field(default=None, alias="teamSize")
+    team_size: int | None = Field(
+        default=None,
+        alias="teamSize",
+    )
 
     status: str | None = None
 
@@ -40,9 +48,14 @@ class ProjectResponse(ProjectBase):
 
     updated_at: datetime = Field(alias="updatedAt")
 
-    members: list = []
+    members: list[TeamMemberResponse] = Field(
+        default_factory=list,
+    )
 
-    generatedSprint: dict | None = None
+    generated_sprint: dict | None = Field(
+        default=None,
+        alias="generatedSprint",
+    )
 
     model_config = ConfigDict(
         from_attributes=True,

@@ -1,4 +1,9 @@
+import { useState } from "react";
 import { Users } from "lucide-react";
+
+import AddMemberDialog from "./AddMemberDialog";
+
+import { useMembers } from "@/hooks/useMembers";
 
 import type { Project } from "@/services/project/types";
 
@@ -9,6 +14,24 @@ type MembersCardProps = {
 export default function MembersCard({
     project,
 }: MembersCardProps) {
+    const {
+        members,
+        loading,
+        createMember,
+    } = useMembers(project.id);
+
+    const [isDialogOpen, setIsDialogOpen] =
+        useState(false);
+
+    async function handleCreateMember(data: {
+        name: string;
+        role: string;
+        skill: string;
+        availability: number;
+    }) {
+        await createMember(data);
+    }
+
     return (
         <section className="rounded-xl border border-white/10 bg-slate-950/70 p-6">
             <div className="flex items-center justify-between">
@@ -18,13 +41,18 @@ export default function MembersCard({
 
                 <button
                     type="button"
+                    onClick={() => setIsDialogOpen(true)}
                     className="rounded-lg bg-cyan-500 px-3 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-400"
                 >
                     + Add Member
                 </button>
             </div>
 
-            {project.members.length === 0 ? (
+            {loading ? (
+                <p className="mt-6 text-slate-400">
+                    Loading members...
+                </p>
+            ) : members.length === 0 ? (
                 <div className="mt-8 flex flex-col items-center justify-center rounded-lg border border-dashed border-white/10 py-10 text-center">
                     <Users className="h-10 w-10 text-slate-500" />
 
@@ -39,10 +67,10 @@ export default function MembersCard({
                 </div>
             ) : (
                 <div className="mt-6 space-y-3">
-                    {project.members.map((member) => (
+                    {members.map((member) => (
                         <div
                             key={member.id}
-                            className="rounded-lg border border-white/10 bg-slate-900/60 p-4 transition hover:border-cyan-400/20"
+                            className="rounded-lg border border-white/10 bg-slate-900/60 p-4"
                         >
                             <div className="flex items-center justify-between">
                                 <div>
@@ -71,6 +99,12 @@ export default function MembersCard({
                     ))}
                 </div>
             )}
+
+            <AddMemberDialog
+                open={isDialogOpen}
+                onClose={() => setIsDialogOpen(false)}
+                onSave={handleCreateMember}
+            />
         </section>
     );
 }

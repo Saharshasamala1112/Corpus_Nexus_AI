@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.members import router as member_router
 from app.api.projects import router as project_router
+from app.api.sprints import router as sprint_router
 from app.core.config import settings
 
 app = FastAPI(
@@ -20,8 +22,12 @@ app.add_middleware(
 )
 
 app.include_router(project_router)
+app.include_router(member_router)
+app.include_router(sprint_router)
 
 
 @app.get("/")
 def root():
-    return {"message": "SprintWise AI API is running!"}
+    return {
+        "message": "SprintWise AI API is running!",
+    }
