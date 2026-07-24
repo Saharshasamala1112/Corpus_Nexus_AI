@@ -86,11 +86,20 @@ export async function askAssistant(
     record: any,
     question: string
 ) {
-    return apiFetch(`${API_URL}/assistant/ask`, {
+    const context = [
+        record?.title && `Title: ${record.title}`,
+        record?.description && `Description: ${record.description}`,
+        record?.category && `Category: ${record.category}`,
+        record?.language && `Language: ${record.language}`,
+    ]
+        .filter(Boolean)
+        .join("\n");
+
+    return apiFetch(`${API_URL}/assistant/chat`, {
         method: "POST",
         body: JSON.stringify({
-            record,
             question,
+            context,
         }),
     });
 }

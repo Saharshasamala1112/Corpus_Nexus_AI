@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { askAssistant } from "../../api/assistant";
+import { askAssistant } from "@/services/assistantService";
 
 interface Props {
     record: any;
@@ -22,7 +22,16 @@ export default function AIAssistant({ record }: Props) {
             setLoading(true);
             setAnswer("");
 
-            const res = await askAssistant(record, question);
+            const context = [
+                record.title && `Title: ${record.title}`,
+                record.description && `Description: ${record.description}`,
+                record.category && `Category: ${record.category}`,
+                record.language && `Language: ${record.language}`,
+            ]
+                .filter(Boolean)
+                .join("\n");
+
+            const res = await askAssistant(question, [], undefined, undefined, context);
 
             setAnswer(res.answer);
 

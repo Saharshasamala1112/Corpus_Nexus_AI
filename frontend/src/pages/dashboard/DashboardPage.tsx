@@ -32,6 +32,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { AssistantPanel } from "@/components/aiAssistant";
 
 const kpiCards = [
     { label: "Ingested Records", value: "24.8K", subtitle: "+14.2% vs last week", icon: FileText, tone: "border-violet-500/30 bg-violet-500/10 text-violet-300" },
@@ -72,6 +73,7 @@ const leaderboard = [
 function DashboardPage() {
     return (
         <div className="space-y-6">
+            <AssistantPanel />
             <Card className="overflow-hidden border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 shadow-2xl shadow-black/20">
                 <CardContent className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.3fr_0.7fr] lg:p-10">
                     <div className="space-y-5">

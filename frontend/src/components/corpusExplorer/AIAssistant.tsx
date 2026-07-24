@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Bot, Send } from "lucide-react";
 
-import { askAssistant } from "@/services/corpusExplorer/assistant";
+import { askAssistant } from "@/services/assistantService";
 
 export default function AIAssistant() {
     const [question, setQuestion] = useState("");
@@ -15,7 +15,7 @@ export default function AIAssistant() {
 
         setLoading(true);
         try {
-            const response = await askAssistant();
+            const response = await askAssistant(question);
             setAnswer(response.answer);
         } catch (error) {
             setAnswer(error instanceof Error ? error.message : "Unable to answer right now.");
