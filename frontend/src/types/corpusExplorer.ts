@@ -39,3 +39,10 @@ export interface CorpusProfile {
 export interface AssistantAnswer {
     answer: string;
 }
+
+export interface CorpusExplorerSummary {
+    totalRecords: number;
+    totalLanguages: number;
+    totalCategories: number;
+    profileName: string;
+}

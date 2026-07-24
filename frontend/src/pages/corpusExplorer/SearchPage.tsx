@@ -6,7 +6,7 @@ import FilterPanel from "@/components/corpusExplorer/FilterPanel";
 import Loader from "@/components/corpusExplorer/Loader";
 import ResultCard from "@/components/corpusExplorer/ResultCard";
 import SearchBar from "@/components/corpusExplorer/SearchBar";
-import { searchRecords } from "@/services/corpusExplorer/corpus";
+import { searchCorpusExplorerRecords } from "@/services/corpusExplorerService";
 import type { CorpusRecord } from "@/types/corpusExplorer";
 
 export default function SearchPage() {
@@ -22,7 +22,7 @@ export default function SearchPage() {
         setError("");
 
         try {
-            const result = await searchRecords(nextQuery);
+            const result = await searchCorpusExplorerRecords(nextQuery);
             setRecords(result);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Unable to load records");
@@ -38,12 +38,8 @@ export default function SearchPage() {
     const filteredRecords = records.filter((record) => {
         const matchesLanguage = selectedLanguage === "All" || record.language === selectedLanguage;
         const matchesCategory = selectedCategory === "All" || record.category === selectedCategory;
-        const matchesQuery = !query || [record.title, record.description, record.language, record.category]
-            .join(" ")
-            .toLowerCase()
-            .includes(query.toLowerCase());
 
-        return matchesLanguage && matchesCategory && matchesQuery;
+        return matchesLanguage && matchesCategory;
     });
 
     return (
