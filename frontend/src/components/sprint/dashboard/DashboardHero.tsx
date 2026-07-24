@@ -3,13 +3,37 @@ import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useDashboard } from "@/hooks/useDashboard";
 
 type DashboardHeroProps = {
     className?: string;
 };
 
-export default function DashboardHero({ className }: DashboardHeroProps) {
+export default function DashboardHero({
+    className,
+}: DashboardHeroProps) {
     const navigate = useNavigate();
+
+    const { stats, loading } = useDashboard();
+
+    const cards = [
+        {
+            label: "Projects",
+            value: loading ? "..." : String(stats.projects),
+        },
+        {
+            label: "Team Members",
+            value: loading ? "..." : String(stats.members),
+        },
+        {
+            label: "Sprint Plans",
+            value: loading ? "..." : String(stats.sprint_plans),
+        },
+        {
+            label: "AI Suggestions",
+            value: loading ? "..." : String(stats.ai_suggestions),
+        },
+    ];
 
     return (
         <section
@@ -19,13 +43,16 @@ export default function DashboardHero({ className }: DashboardHeroProps) {
             )}
         >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(34,211,238,0.16),_transparent_28%)]" />
+
             <div className="absolute -left-12 top-8 h-28 w-28 rounded-full bg-fuchsia-500/20 blur-3xl" />
+
             <div className="absolute bottom-0 right-0 h-36 w-36 rounded-full bg-cyan-400/20 blur-3xl" />
 
             <div className="relative grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
                 <div className="max-w-2xl">
                     <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm font-medium text-slate-100 backdrop-blur">
                         <Sparkles className="h-4 w-4 text-cyan-300" />
+
                         <span>SprintWise AI</span>
                     </div>
 
@@ -43,7 +70,9 @@ export default function DashboardHero({ className }: DashboardHeroProps) {
                         <Button
                             type="button"
                             className="w-full sm:w-auto"
-                            onClick={() => navigate("/sprintwise-ai/projects")}
+                            onClick={() =>
+                                navigate("/sprintwise-ai/projects")
+                            }
                         >
                             <Sparkles className="h-4 w-4" />
                             New Project
@@ -53,7 +82,9 @@ export default function DashboardHero({ className }: DashboardHeroProps) {
                             type="button"
                             variant="outline"
                             className="w-full sm:w-auto"
-                            onClick={() => navigate("/sprintwise-ai/projects")}
+                            onClick={() =>
+                                navigate("/sprintwise-ai/projects")
+                            }
                         >
                             Explore Projects
                             <ArrowRight className="h-4 w-4" />
@@ -79,22 +110,17 @@ export default function DashboardHero({ className }: DashboardHeroProps) {
                     </div>
 
                     <div className="mt-6 grid grid-cols-2 gap-3">
-                        {[
-                            ["Projects", "0"],
-                            ["Team Members", "0"],
-                            ["Sprint Plans", "0"],
-                            ["AI Suggestions", "0"],
-                        ].map(([label, value]) => (
+                        {cards.map((card) => (
                             <div
-                                key={label}
+                                key={card.label}
                                 className="rounded-xl border border-white/10 bg-white/5 p-4"
                             >
                                 <p className="text-xs text-slate-400">
-                                    {label}
+                                    {card.label}
                                 </p>
 
                                 <p className="mt-1 text-xl font-semibold text-white">
-                                    {value}
+                                    {card.value}
                                 </p>
                             </div>
                         ))}
@@ -106,8 +132,15 @@ export default function DashboardHero({ className }: DashboardHeroProps) {
                         </p>
 
                         <p className="mt-1 text-sm text-slate-400">
-                            Create your first project to start planning AI-powered
-                            sprints and collaborating with your team.
+                            {loading
+                                ? "Loading workspace..."
+                                : `You have ${stats.projects} project${
+                                      stats.projects !== 1 ? "s" : ""
+                                  }, ${stats.members} team member${
+                                      stats.members !== 1 ? "s" : ""
+                                  }, and ${stats.sprint_plans} sprint plan${
+                                      stats.sprint_plans !== 1 ? "s" : ""
+                                  }.`}
                         </p>
                     </div>
                 </div>

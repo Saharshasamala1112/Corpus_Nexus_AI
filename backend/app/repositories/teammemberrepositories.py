@@ -7,6 +7,9 @@ class TeamMemberRepository:
     def __init__(self, db: Session):
         self.db = db
 
+    def get_all(self) -> list[TeamMember]:
+        return self.db.query(TeamMember).order_by(TeamMember.created_at.asc()).all()
+
     def get_all_by_project(self, project_id: str) -> list[TeamMember]:
         return (
             self.db.query(TeamMember)
