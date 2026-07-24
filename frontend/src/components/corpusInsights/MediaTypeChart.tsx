@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react'
 
-import { getRecords } from "../../services/recordsService";
+import { getRecords } from '../../services/recordsService'
 
 import {
   BarChart,
@@ -12,43 +12,43 @@ import {
   CartesianGrid,
   ResponsiveContainer,
   Cell,
-} from "recharts";
+} from 'recharts'
 
 interface MediaTypeData {
-  mediaType: string;
-  recordings: number;
+  mediaType: string
+  recordings: number
 }
 
 const MEDIA_COLORS: Record<string, string> = {
-  audio: "#3B82F6",
-  video: "#8B5CF6",
-  text: "#10B981",
-  image: "#F59E0B",
-  document: "#06B6D4",
-};
+  audio: '#3B82F6',
+  video: '#8B5CF6',
+  text: '#10B981',
+  image: '#F59E0B',
+  document: '#06B6D4',
+}
 
 const MEDIA_LABELS: Record<string, string> = {
-  audio: "Audio",
-  video: "Video",
-  text: "Text",
-  image: "Image",
-  document: "Document",
-};
+  audio: 'Audio',
+  video: 'Video',
+  text: 'Text',
+  image: 'Image',
+  document: 'Document',
+}
 
 const MediaTypeChart = () => {
-  const [chartData, setChartData] = useState<MediaTypeData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState<MediaTypeData[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const records = await getRecords();
+        const records = await getRecords()
 
-        const counts: Record<string, number> = {};
+        const counts: Record<string, number> = {}
 
         for (const record of records) {
-          const mt = record.media_type || "Unknown";
-          counts[mt] = (counts[mt] || 0) + 1;
+          const mt = record.media_type || 'Unknown'
+          counts[mt] = (counts[mt] || 0) + 1
         }
 
         const formattedData = Object.entries(MEDIA_LABELS)
@@ -56,25 +56,25 @@ const MediaTypeChart = () => {
             mediaType: label,
             recordings: counts[key] ?? 0,
           }))
-          .sort((a, b) => b.recordings - a.recordings);
+          .sort((a, b) => b.recordings - a.recordings)
 
-        setChartData(formattedData);
+        setChartData(formattedData)
       } catch (error) {
-        console.error("Failed to load chart data:", error);
+        console.error('Failed to load chart data:', error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   if (loading) {
     return (
       <div className="flex h-[280px] items-center justify-center text-sm text-slate-400">
         Loading chart...
       </div>
-    );
+    )
   }
 
   return (
@@ -86,22 +86,18 @@ const MediaTypeChart = () => {
           dataKey="mediaType"
           axisLine={false}
           tickLine={false}
-          tick={{ fill: "#cbd5e1", fontSize: 12 }}
+          tick={{ fill: '#cbd5e1', fontSize: 12 }}
         />
 
-        <YAxis
-          axisLine={false}
-          tickLine={false}
-          tick={{ fill: "#94a3b8", fontSize: 12 }}
-        />
+        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
 
         <Tooltip
-          cursor={{ fill: "rgba(59, 130, 246, 0.08)" }}
+          cursor={{ fill: 'rgba(59, 130, 246, 0.08)' }}
           contentStyle={{
-            backgroundColor: "#111827",
-            border: "1px solid #334155",
+            backgroundColor: '#111827',
+            border: '1px solid #334155',
             borderRadius: 12,
-            color: "#f8fafc",
+            color: '#f8fafc',
           }}
         />
 
@@ -110,13 +106,13 @@ const MediaTypeChart = () => {
           {chartData.map((entry) => (
             <Cell
               key={entry.mediaType}
-              fill={MEDIA_COLORS[entry.mediaType.toLowerCase()] || "#3B82F6"}
+              fill={MEDIA_COLORS[entry.mediaType.toLowerCase()] || '#3B82F6'}
             />
           ))}
         </Bar>
       </BarChart>
     </ResponsiveContainer>
-  );
-};
+  )
+}
 
-export default MediaTypeChart;
+export default MediaTypeChart

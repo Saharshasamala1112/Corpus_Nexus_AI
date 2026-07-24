@@ -1,34 +1,49 @@
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom'
 
-export default function ResultCard({ item }: { item: any }) {
-    return (
-        <div className="card">
-            <h2>{item.title}</h2>
+interface ExplorerRecord {
+  title?: string
+  description?: string
+  language?: string
+  creator?: string
+  username?: string
+  media_type?: string
+  uid?: string | number
+}
 
-            <p>
-                <strong>Description:</strong><br />
-                {item.description}
-            </p>
+interface ResultCardProps {
+  item: ExplorerRecord
+}
 
-            <p>
-                <strong>Language:</strong> {item.language}
-            </p>
+export default function ResultCard({ item }: ResultCardProps) {
+  return (
+    <div className="card">
+      <h2>{item.title}</h2>
 
-            <p>
-                <strong>Creator:</strong> {item.creator}
-            </p>
+      <p>
+        <strong>Description:</strong>
+        <br />
+        {item.description}
+      </p>
 
-            <p>
-                <strong>Username:</strong> {item.username}
-            </p>
+      <p>
+        <strong>Language:</strong> {item.language}
+      </p>
 
-            <p>
-                <strong>Media Type:</strong> {item.media_type}
-            </p>
+      <p>
+        <strong>Creator:</strong> {item.creator}
+      </p>
 
-            <Link to={`/record/${item.uid}`}>
-                <button>View Details</button>
-            </Link>
-        </div>
-    );
+      <p>
+        <strong>Username:</strong> {item.username}
+      </p>
+
+      <p>
+        <strong>Media Type:</strong> {item.media_type}
+      </p>
+
+      <Link to={`/record/${item.uid}`} state={item}>
+        <button>View Details</button>
+      </Link>
+    </div>
+  )
 }

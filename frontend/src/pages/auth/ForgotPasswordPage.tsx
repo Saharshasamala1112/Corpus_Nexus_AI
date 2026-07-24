@@ -1,91 +1,79 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 
-import {
-  forgotPasswordInit,
-  forgotPasswordConfirm,
-} from "../../services/authService";
+import { forgotPasswordInit, forgotPasswordConfirm } from '../../services/authService'
 
 const ForgotPasswordPage = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  const [step, setStep] = useState<"phone" | "otp">("phone");
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [step, setStep] = useState<'phone' | 'otp'>('phone')
+  const [phone, setPhone] = useState('')
+  const [otp, setOtp] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
 
   const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+    e.preventDefault()
+    setLoading(true)
+    setError('')
 
     try {
-      const res = await forgotPasswordInit(phone);
-      setMessage(res.message);
-      setStep("otp");
+      const res = await forgotPasswordInit(phone)
+      setMessage(res.message)
+      setStep('otp')
     } catch {
-      setError("Failed to send OTP. Check the phone number.");
+      setError('Failed to send OTP. Check the phone number.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleReset = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+    e.preventDefault()
+    setLoading(true)
+    setError('')
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
-      setLoading(false);
-      return;
+      setError('Passwords do not match.')
+      setLoading(false)
+      return
     }
 
     try {
-      await forgotPasswordConfirm(phone, otp, newPassword, confirmPassword);
-      navigate("/login", {
-        state: { message: "Password reset successfully. Sign in." },
-      });
+      await forgotPasswordConfirm(phone, otp, newPassword, confirmPassword)
+      navigate('/login', {
+        state: { message: 'Password reset successfully. Sign in.' },
+      })
     } catch {
-      setError("Failed to reset password. Check the OTP and try again.");
+      setError('Failed to reset password. Check the OTP and try again.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100">
       <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
-        <h1 className="mb-2 text-center text-3xl font-bold text-slate-800">
-          Reset Password
-        </h1>
+        <h1 className="mb-2 text-center text-3xl font-bold text-slate-800">Reset Password</h1>
 
         <p className="mb-8 text-center text-slate-500">
-          {step === "phone"
-            ? "Enter your phone number to receive an OTP."
-            : "Enter the OTP sent to your phone."}
+          {step === 'phone'
+            ? 'Enter your phone number to receive an OTP.'
+            : 'Enter the OTP sent to your phone.'}
         </p>
 
-        {message && (
-          <p className="mb-4 text-sm text-green-600">{message}</p>
-        )}
+        {message && <p className="mb-4 text-sm text-green-600">{message}</p>}
 
-        {error && (
-          <p className="mb-4 text-sm text-red-600">{error}</p>
-        )}
+        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-        {step === "phone" ? (
+        {step === 'phone' ? (
           <form onSubmit={handleSendOtp}>
             <div className="mb-5">
-              <label
-                htmlFor="phone"
-                className="mb-2 block text-sm font-medium text-slate-700"
-              >
+              <label htmlFor="phone" className="mb-2 block text-sm font-medium text-slate-700">
                 Phone Number
               </label>
               <input
@@ -104,16 +92,13 @@ const ForgotPasswordPage = () => {
               disabled={loading}
               className="w-full rounded-md bg-blue-600 py-3 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
             >
-              {loading ? "Sending OTP..." : "Send OTP"}
+              {loading ? 'Sending OTP...' : 'Send OTP'}
             </button>
           </form>
         ) : (
           <form onSubmit={handleReset}>
             <div className="mb-5">
-              <label
-                htmlFor="otp"
-                className="mb-2 block text-sm font-medium text-slate-700"
-              >
+              <label htmlFor="otp" className="mb-2 block text-sm font-medium text-slate-700">
                 OTP Code
               </label>
               <input
@@ -168,22 +153,19 @@ const ForgotPasswordPage = () => {
               disabled={loading}
               className="w-full rounded-md bg-blue-600 py-3 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
             >
-              {loading ? "Resetting..." : "Reset Password"}
+              {loading ? 'Resetting...' : 'Reset Password'}
             </button>
           </form>
         )}
 
         <p className="mt-6 text-center text-sm text-slate-500">
-          <Link
-            to="/login"
-            className="font-medium text-blue-600 hover:text-blue-800"
-          >
+          <Link to="/login" className="font-medium text-blue-600 hover:text-blue-800">
             Back to Sign In
           </Link>
         </p>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ForgotPasswordPage;
+export default ForgotPasswordPage

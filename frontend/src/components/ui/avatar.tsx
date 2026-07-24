@@ -1,46 +1,42 @@
-import * as React from "react";
+import { cn } from '@/lib/utils'
 
-import { cn } from "@/lib/utils";
+interface AvatarProps {
+  src?: string
+  alt?: string
+  fallback: string
+  size?: 'sm' | 'md' | 'lg'
+  className?: string
+}
 
-const Avatar = React.forwardRef<
-    HTMLSpanElement,
-    React.ComponentProps<"span">
->(({ className, ...props }, ref) => (
-    <span
-        ref={ref}
-        className={cn(
-            "relative flex h-9 w-9 shrink-0 overflow-hidden rounded-full",
-            className
-        )}
-        {...props}
-    />
-));
+const sizeClasses = {
+  sm: 'size-7 text-xs',
+  md: 'size-9 text-sm',
+  lg: 'size-11 text-base',
+}
 
-Avatar.displayName = "Avatar";
+function Avatar({ src, alt, fallback, size = 'md', className }: AvatarProps) {
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={alt || fallback}
+        className={cn('shrink-0 rounded-full object-cover', sizeClasses[size], className)}
+      />
+    )
+  }
 
-const AvatarImage = React.forwardRef<
-    HTMLImageElement,
-    React.ComponentProps<"img">
->(({ className, ...props }, ref) => (
-    <img ref={ref} className={cn("aspect-square h-full w-full", className)} {...props} />
-));
+  return (
+    <div
+      className={cn(
+        'flex shrink-0 items-center justify-center rounded-full bg-muted font-medium text-muted-foreground',
+        sizeClasses[size],
+        className
+      )}
+      title={alt || fallback}
+    >
+      {fallback}
+    </div>
+  )
+}
 
-AvatarImage.displayName = "AvatarImage";
-
-const AvatarFallback = React.forwardRef<
-    HTMLSpanElement,
-    React.ComponentProps<"span">
->(({ className, ...props }, ref) => (
-    <span
-        ref={ref}
-        className={cn(
-            "flex h-full w-full items-center justify-center rounded-full bg-slate-800 text-sm font-medium text-slate-200",
-            className
-        )}
-        {...props}
-    />
-));
-
-AvatarFallback.displayName = "AvatarFallback";
-
-export { Avatar, AvatarImage, AvatarFallback };
+export default Avatar

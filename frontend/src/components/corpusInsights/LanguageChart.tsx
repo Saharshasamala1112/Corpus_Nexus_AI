@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react'
 
-import { getRecords } from "../../services/recordsService";
+import { getRecords } from '../../services/recordsService'
 
 import {
   ResponsiveContainer,
@@ -11,26 +11,26 @@ import {
   Tooltip,
   CartesianGrid,
   LabelList,
-} from "recharts";
+} from 'recharts'
 
 interface ChartData {
-  language: string;
-  count: number;
+  language: string
+  count: number
 }
 
 const LanguageChart = () => {
-  const [data, setData] = useState<ChartData[]>([]);
+  const [data, setData] = useState<ChartData[]>([])
 
   useEffect(() => {
     const fetchLanguageData = async () => {
       try {
-        const records = await getRecords();
+        const records = await getRecords()
 
-        const counts: Record<string, number> = {};
+        const counts: Record<string, number> = {}
 
         for (const record of records) {
-          const language = record.language || "Unknown";
-          counts[language] = (counts[language] || 0) + 1;
+          const language = record.language || 'Unknown'
+          counts[language] = (counts[language] || 0) + 1
         }
 
         const chartData = Object.entries(counts)
@@ -39,16 +39,16 @@ const LanguageChart = () => {
             count,
           }))
           .sort((a, b) => b.count - a.count)
-          .slice(0, 10);
+          .slice(0, 10)
 
-        setData(chartData);
+        setData(chartData)
       } catch (error) {
-        console.error("Failed to load language chart:", error);
+        console.error('Failed to load language chart:', error)
       }
-    };
+    }
 
-    fetchLanguageData();
-  }, []);
+    fetchLanguageData()
+  }, [])
 
   return (
     <ResponsiveContainer width="100%" height={280}>
@@ -68,8 +68,8 @@ const LanguageChart = () => {
           type="number"
           axisLine={false}
           tickLine={false}
-          tick={{ fill: "#94a3b8", fontSize: 12 }}
-          domain={[0, "dataMax + 2"]}
+          tick={{ fill: '#94a3b8', fontSize: 12 }}
+          domain={[0, 'dataMax + 2']}
         />
 
         <YAxis
@@ -78,16 +78,16 @@ const LanguageChart = () => {
           width={110}
           axisLine={false}
           tickLine={false}
-          tick={{ fill: "#cbd5e1", fontSize: 12 }}
+          tick={{ fill: '#cbd5e1', fontSize: 12 }}
         />
 
         <Tooltip
-          cursor={{ fill: "rgba(139, 92, 246, 0.08)" }}
+          cursor={{ fill: 'rgba(139, 92, 246, 0.08)' }}
           contentStyle={{
-            backgroundColor: "#111827",
-            border: "1px solid #334155",
+            backgroundColor: '#111827',
+            border: '1px solid #334155',
             borderRadius: 12,
-            color: "#f8fafc",
+            color: '#f8fafc',
           }}
         />
 
@@ -96,7 +96,7 @@ const LanguageChart = () => {
         </Bar>
       </BarChart>
     </ResponsiveContainer>
-  );
-};
+  )
+}
 
-export default LanguageChart;
+export default LanguageChart

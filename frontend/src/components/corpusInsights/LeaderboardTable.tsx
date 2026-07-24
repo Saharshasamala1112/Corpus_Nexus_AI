@@ -1,35 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react'
 
-import { getLeaderboard } from "../../services/leaderboardService";
-import type {
-  LeaderboardUser,
-} from "../../services/leaderboardService";
+import { getLeaderboard } from '../../services/leaderboardService'
+import type { LeaderboardUser } from '../../services/leaderboardService'
 
 const LeaderboardTable = () => {
-  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadLeaderboard = async () => {
       try {
-        const data = await getLeaderboard();
-        setLeaderboard(data);
+        const data = await getLeaderboard()
+        setLeaderboard(data)
       } catch (error) {
-        console.error("Failed to load leaderboard:", error);
+        console.error('Failed to load leaderboard:', error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    loadLeaderboard();
-  }, []);
+    loadLeaderboard()
+  }, [])
 
   if (loading) {
     return (
       <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 text-sm text-slate-400 shadow-sm">
         Loading leaderboard...
       </div>
-    );
+    )
   }
 
   return (
@@ -52,20 +50,16 @@ const LeaderboardTable = () => {
               >
                 <td className="px-6 py-4">{user.rank}</td>
 
-                <td className="px-6 py-4 font-medium text-white">
-                  {user.user_name}
-                </td>
+                <td className="px-6 py-4 font-medium text-white">{user.user_name}</td>
 
-                <td className="px-6 py-4">
-                  {Math.round(user.total_points).toLocaleString()}
-                </td>
+                <td className="px-6 py-4">{Math.round(user.total_points).toLocaleString()}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LeaderboardTable;
+export default LeaderboardTable

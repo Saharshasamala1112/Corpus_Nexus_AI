@@ -1,101 +1,69 @@
-import { useState } from "react";
-import { askAssistant } from "../../api/assistant";
+import { useState } from 'react'
+import { askAssistant } from '../../services/api'
 
-interface Props {
-    record: any;
+interface ExplorerRecord {
+  [key: string]: unknown
+  title?: string
+  username?: string
+  description?: string
+  language?: string
+  category?: string
+  uid?: string | number
 }
 
-export default function AIAssistant({ record }: Props) {
+interface AIAssistantProps {
+  record: ExplorerRecord
+}
 
-    const [question, setQuestion] = useState("");
-    const [answer, setAnswer] = useState("");
-    const [loading, setLoading] = useState(false);
+export default function AIAssistant({ record }: AIAssistantProps) {
+  const [question, setQuestion] = useState('')
+  const [answer, setAnswer] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-    async function handleAsk() {
-
-        if (!question.trim()) {
-            return;
-        }
-
-        try {
-
-            setLoading(true);
-            setAnswer("");
-
-            const res = await askAssistant(record, question);
-
-            setAnswer(res.answer);
-
-        } catch (error) {
-
-            console.error(error);
-
-            setAnswer(
-                "Unable to get an AI response. Please try again."
-            );
-
-        } finally {
-
-            setLoading(false);
-
-        }
-
+  async function handleAsk() {
+    if (!question.trim()) {
+      return
     }
 
-    return (
+    setLoading(true)
+    setError('')
 
-        <div
-            style={{
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                padding: "16px",
-                marginTop: "20px",
-            }}
-        >
+    try {
+      const data = (await askAssistant(record, question)) as {
+        answer?: string
+        detail?: string
+      }
+      setAnswer(data.answer || data.detail || 'No answer returned.')
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Unable to get assistant reply.')
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
 
-            <h2>🤖 AI Assistant</h2>
-
-            <input
-                type="text"
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Ask about this record..."
-                style={{
-                    width: "100%",
-                    padding: "10px",
-                    marginBottom: "10px",
-                }}
-            />
-
-            <button
-                onClick={handleAsk}
-                disabled={loading}
-            >
-                {loading ? "Thinking..." : "Ask"}
-            </button>
-
-            {loading && (
-                <p>Thinking...</p>
-            )}
-
-            {answer && (
-
-                <div
-                    style={{
-                        marginTop: "15px",
-                    }}
-                >
-
-                    <strong>Answer:</strong>
-
-                    <p>{answer}</p>
-
-                </div>
-
-            )}
-
-        </div>
-
-    );
-
+  return (
+    <div style={{ marginTop: 24 }}>
+      <h3>AI Assistant</h3>
+      <textarea
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        placeholder="Ask about this record"
+        style={{ width: '100%', minHeight: 80, marginBottom: 10 }}
+      />
+      <button onClick={handleAsk} disabled={loading}>
+        {loading ? 'Loading...' : 'Ask'}
+      </button>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {answer && (
+        <p>
+          <strong>Answer:</strong> {answer}
+        </p>
+      )}
+    </div>
+  )
 }

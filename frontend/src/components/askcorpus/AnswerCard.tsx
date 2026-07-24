@@ -1,5 +1,5 @@
 interface AnswerCardProps {
-  answer: string;
+  answer: string
 }
 
 const AnswerCard = ({ answer }: AnswerCardProps) => {
@@ -16,11 +16,9 @@ const AnswerCard = ({ answer }: AnswerCardProps) => {
         </div>
       </div>
 
-      <p className="whitespace-pre-line text-base leading-7 text-zinc-300">
-        {answer}
-      </p>
+      <p className="whitespace-pre-line text-base leading-7 text-zinc-300">{answer}</p>
     </div>
-  );
-};
+  )
+}
 
-export default AnswerCard;
+export default AnswerCard

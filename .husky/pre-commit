@@ -1,0 +1,40 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+REPO_ROOT="$(cd "$(dirname -- "$0")/.." && pwd)"
+
+# Backend: ruff lint
+echo "🧹 Backend ruff lint..."
+cd "$REPO_ROOT/backend" && ruff check .
+if [ $? -ne 0 ]; then
+  echo "❌ Backend lint failed"
+  exit 1
+fi
+
+# Frontend: lint-staged (eslint + prettier on staged files)
+echo "🧹 Frontend lint-staged..."
+cd "$REPO_ROOT/frontend" && npx lint-staged
+if [ $? -ne 0 ]; then
+  echo "❌ Frontend lint-staged failed"
+  exit 1
+fi
+
+# Frontend: typecheck
+echo "📝 TypeScript typecheck..."
+cd "$REPO_ROOT/frontend" && npx tsc --noEmit
+if [ $? -ne 0 ]; then
+  echo "❌ Frontend typecheck failed"
+  exit 1
+fi
+
+# Frontend: vitest
+echo "🧪 Running frontend tests..."
+cd "$REPO_ROOT/frontend" && npx vitest run --reporter=verbose
+if [ $? -ne 0 ]; then
+  echo "❌ Frontend tests failed"
+  exit 1
+fi
+
+echo "✅ All pre-commit checks passed"

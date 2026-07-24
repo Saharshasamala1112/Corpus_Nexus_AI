@@ -1,6 +1,9 @@
-import { askAssistant as askAssistantRequest } from "./api";
-import type { AssistantAnswer } from "@/types/corpusExplorer";
+import { askAssistant as askAssistantRequest } from './api'
+import type { AssistantAnswer, CorpusRecord } from '@/types/corpusExplorer'
 
-export async function askAssistant(): Promise<AssistantAnswer> {
-    return askAssistantRequest();
+export async function askAssistant(
+  record: CorpusRecord,
+  question: string
+): Promise<AssistantAnswer> {
+  return askAssistantRequest(record, question)
 }

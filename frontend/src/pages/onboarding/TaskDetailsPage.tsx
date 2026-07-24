@@ -1,167 +1,148 @@
-import { useState } from "react";
-import type { ChangeEvent } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useState } from 'react'
+import type { ChangeEvent } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
-import { onboardingTasks } from "./data/onboardingTasks";
-import { getProgress, saveTask } from "./utils/taskStorage";
+import { onboardingTasks } from './data/onboardingTasks'
+import { getProgress, saveTask } from './utils/taskStorage'
 
 function TaskDetailsPage() {
-    const { id } = useParams();
-    const navigate = useNavigate();
+  const { id } = useParams()
+  const navigate = useNavigate()
 
-    const task = onboardingTasks.find(
-        (task) => task.id === Number(id)
-    );
+  const task = onboardingTasks.find((task) => task.id === Number(id))
 
-    if (!task) {
-        return (
-            <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-10">
-                <h2 className="text-2xl font-semibold text-white">
-                    Task not found
-                </h2>
-            </div>
-        );
-    }
+  const progress = getProgress()
+  const completedTask = task ? progress[task.id] : undefined
 
-    const currentTask = task;
+  const isCompleted = completedTask?.completed ?? false
 
-    const progress = getProgress();
-    const completedTask = progress[currentTask.id];
+  const [image, setImage] = useState<string>(completedTask?.images?.[0] || '')
 
-    const isCompleted = completedTask?.completed ?? false;
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
-    const [image, setImage] = useState<string>(
-        completedTask?.image || ""
-    );
-
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
-    async function handleImageChange(
-        event: ChangeEvent<HTMLInputElement>
-    ) {
-        if (!event.target.files?.length) {
-            return;
-        }
-
-        const file = event.target.files[0];
-
-        const base64 = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-
-            reader.readAsDataURL(file);
-        });
-
-        setImage(base64);
-    }
-
-    function handleComplete() {
-        if (!image) {
-            alert("Please upload a screenshot.");
-            return;
-        }
-
-        saveTask(currentTask.id, image);
-
-        alert("Task marked as completed.");
-
-        navigate("/onboarding");
-    }
-
+  if (!task) {
     return (
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-10 shadow-2xl shadow-black/20">
-            <Link
-                to="/onboarding"
-                className="text-violet-400 hover:text-violet-300"
-            >
-                ← Back to Checklist
-            </Link>
+      <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-10">
+        <h2 className="text-2xl font-semibold text-white">Task not found</h2>
+      </div>
+    )
+  }
 
-            <p className="mt-8 text-sm font-medium uppercase tracking-[0.35em] text-violet-400">
-                Onboarding Task
-            </p>
+  const currentTask = task
 
-            <h1 className="mt-4 text-3xl font-semibold text-white">
-                {currentTask.title}
-            </h1>
+  async function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
+    if (!event.target.files?.length) {
+      return
+    }
 
-            <p className="mt-6 max-w-3xl text-base leading-8 text-zinc-400">
-                {currentTask.description}
-            </p>
+    const file = event.target.files[0]
 
-            <a
-                href="https://code.swecha.org/internships/intern-instructions/-/blob/main/workbench-setup.md"
-                target="_blank"
-                rel="noreferrer"
-                className="mt-8 inline-flex rounded-full border border-violet-500/30 bg-violet-500/10 px-5 py-3 text-sm font-medium text-violet-300 hover:bg-violet-500/20"
-            >
-                Open Official Workbench Guide
-            </a>
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
 
-            {!isCompleted && (
-                <>
-                    <div className="mt-8">
-                        <label className="mb-2 block text-sm font-medium text-white">
-                            Upload Screenshot (Required)
-                        </label>
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
 
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className="block w-full rounded-lg border border-zinc-700 bg-zinc-900 p-3 text-sm text-zinc-300"
-                        />
-                    </div>
+      reader.readAsDataURL(file)
+    })
 
-                    {image && (
-                        <img
-                            src={image}
-                            alt="Preview"
-                            onClick={() => setSelectedImage(image)}
-                            className="mt-6 max-h-72 cursor-pointer rounded-xl border border-zinc-800"
-                        />
-                    )}
+    setImage(base64)
+  }
 
-                    <button
-                        onClick={handleComplete}
-                        className="mt-8 rounded-full bg-violet-600 px-6 py-3 font-medium text-white hover:bg-violet-500"
-                    >
-                        Mark as Completed
-                    </button>
-                </>
-            )}
+  function handleComplete() {
+    if (!image) {
+      alert('Please upload a screenshot.')
+      return
+    }
 
-            {isCompleted && (
-                <>
-                    <div className="mt-8 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-300">
-                        ✅ This task has been completed.
-                    </div>
+    saveTask(currentTask.id, [image])
 
-                    <img
-                        src={image}
-                        alt="Evidence"
-                        onClick={() => setSelectedImage(image)}
-                        className="mt-6 max-h-72 cursor-pointer rounded-xl border border-zinc-800"
-                    />
-                </>
-            )}
+    alert('Task marked as completed.')
 
-            {selectedImage && (
-                <div
-                    onClick={() => setSelectedImage(null)}
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
-                >
-                    <img
-                        src={selectedImage}
-                        alt="Preview"
-                        className="max-h-[90vh] max-w-[90vw] rounded-xl"
-                    />
-                </div>
-            )}
+    navigate('/onboarding')
+  }
+
+  return (
+    <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-10 shadow-2xl shadow-black/20">
+      <Link to="/onboarding" className="text-violet-400 hover:text-violet-300">
+        ← Back to Checklist
+      </Link>
+
+      <p className="mt-8 text-sm font-medium uppercase tracking-[0.35em] text-violet-400">
+        Onboarding Task
+      </p>
+
+      <h1 className="mt-4 text-3xl font-semibold text-white">{currentTask.title}</h1>
+
+      <p className="mt-6 max-w-3xl text-base leading-8 text-zinc-400">{currentTask.description}</p>
+
+      <a
+        href="https://code.swecha.org/internships/intern-instructions/-/blob/main/workbench-setup.md"
+        target="_blank"
+        rel="noreferrer"
+        className="mt-8 inline-flex rounded-full border border-violet-500/30 bg-violet-500/10 px-5 py-3 text-sm font-medium text-violet-300 hover:bg-violet-500/20"
+      >
+        Open Official Workbench Guide
+      </a>
+
+      {!isCompleted && (
+        <>
+          <div className="mt-8">
+            <label className="mb-2 block text-sm font-medium text-white">
+              Upload Screenshot (Required)
+            </label>
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="block w-full rounded-lg border border-zinc-700 bg-zinc-900 p-3 text-sm text-zinc-300"
+            />
+          </div>
+
+          {image && (
+            <img
+              src={image}
+              alt="Preview"
+              onClick={() => setSelectedImage(image)}
+              className="mt-6 max-h-72 cursor-pointer rounded-xl border border-zinc-800"
+            />
+          )}
+
+          <button
+            onClick={handleComplete}
+            className="mt-8 rounded-full bg-violet-600 px-6 py-3 font-medium text-white hover:bg-violet-500"
+          >
+            Mark as Completed
+          </button>
+        </>
+      )}
+
+      {isCompleted && (
+        <>
+          <div className="mt-8 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-300">
+            ✅ This task has been completed.
+          </div>
+
+          <img
+            src={image}
+            alt="Evidence"
+            onClick={() => setSelectedImage(image)}
+            className="mt-6 max-h-72 cursor-pointer rounded-xl border border-zinc-800"
+          />
+        </>
+      )}
+
+      {selectedImage && (
+        <div
+          onClick={() => setSelectedImage(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+        >
+          <img src={selectedImage} alt="Preview" className="max-h-[90vh] max-w-[90vw] rounded-xl" />
         </div>
-    );
+      )}
+    </div>
+  )
 }
 
-export default TaskDetailsPage;
+export default TaskDetailsPage

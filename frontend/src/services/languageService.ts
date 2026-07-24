@@ -1,11 +1,16 @@
-import api from "../api/axios";
+import api from '../api/axios'
 
 export interface Language {
-  id: string;
-  name: string;
+  name: string
+  code: string | null
 }
 
 export const getLanguages = async (): Promise<Language[]> => {
-  const response = await api.get<Language[]>("/languages");
-  return response.data;
-};
+  try {
+    const response = await api.get<Language[]>('/languages')
+    return response.data
+  } catch (error) {
+    console.error('Failed to fetch languages:', error)
+    return []
+  }
+}

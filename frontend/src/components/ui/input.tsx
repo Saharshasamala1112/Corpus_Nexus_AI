@@ -1,19 +1,29 @@
-import * as React from "react";
+import { forwardRef } from 'react'
+import { cn } from '@/lib/utils'
 
-import { cn } from "@/lib/utils";
-
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
-    return (
-        <input
-            type={type}
-            data-slot="input"
-            className={cn(
-                "flex h-9 w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 shadow-sm outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-400/40 focus:ring-2 focus:ring-cyan-400/20",
-                className
-            )}
-            {...props}
-        />
-    );
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  icon?: React.ReactNode
 }
 
-export { Input };
+const Input = forwardRef<HTMLInputElement, InputProps>(({ className, icon, ...props }, ref) => {
+  return (
+    <div className="relative flex items-center">
+      {icon && (
+        <div className="pointer-events-none absolute left-3 text-muted-foreground">{icon}</div>
+      )}
+      <input
+        ref={ref}
+        className={cn(
+          'flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1.5 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+          icon && 'pl-9',
+          className
+        )}
+        {...props}
+      />
+    </div>
+  )
+})
+Input.displayName = 'Input'
+
+export { Input }
+export default Input
