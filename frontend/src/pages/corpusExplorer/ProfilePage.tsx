@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Building2, Mail, MapPin, Phone, UserRound, BriefcaseBusiness, ShieldCheck } from "lucide-react";
 
 import Loader from "@/components/corpusExplorer/Loader";
-import { getProfile } from "@/services/corpusExplorer/auth";
+import { getCorpusExplorerProfile } from "@/services/corpusExplorerService";
 import type { CorpusProfile } from "@/types/corpusExplorer";
 
 export default function ProfilePage() {
@@ -13,7 +13,7 @@ export default function ProfilePage() {
     useEffect(() => {
         async function loadProfile() {
             try {
-                const result = await getProfile();
+                const result = await getCorpusExplorerProfile();
                 setProfile(result);
             } catch (err) {
                 setError(err instanceof Error ? err.message : "Unable to load profile");

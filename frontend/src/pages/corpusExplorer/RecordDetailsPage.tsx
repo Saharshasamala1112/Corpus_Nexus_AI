@@ -118,7 +118,7 @@ export default function RecordDetailsPage() {
                 </article>
             </section>
 
-            <AIAssistant record={record} />
+            <AIAssistant />
 
             <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-200">
                 <div className="flex items-center gap-2">

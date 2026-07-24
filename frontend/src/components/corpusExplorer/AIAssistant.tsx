@@ -2,13 +2,8 @@ import { useState } from "react";
 import { Bot, Send } from "lucide-react";
 
 import { askAssistant } from "@/services/corpusExplorer/assistant";
-import type { CorpusRecord } from "@/types/corpusExplorer";
 
-interface AIAssistantProps {
-    record: CorpusRecord;
-}
-
-export default function AIAssistant({ record }: AIAssistantProps) {
+export default function AIAssistant() {
     const [question, setQuestion] = useState("");
     const [answer, setAnswer] = useState("");
     const [loading, setLoading] = useState(false);
@@ -20,7 +15,7 @@ export default function AIAssistant({ record }: AIAssistantProps) {
 
         setLoading(true);
         try {
-            const response = await askAssistant(record, question);
+            const response = await askAssistant();
             setAnswer(response.answer);
         } catch (error) {
             setAnswer(error instanceof Error ? error.message : "Unable to answer right now.");

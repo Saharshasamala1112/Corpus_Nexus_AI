@@ -2,6 +2,7 @@ import { ArrowRight, BriefcaseBusiness, FileSearch, Globe2, UserRound } from "lu
 import { Link } from "react-router-dom";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { useCorpusExplorerSummary } from "@/hooks/useCorpusExplorerSummary";
 
 const homeCards = [
     {
@@ -31,6 +32,8 @@ const homeCards = [
 ];
 
 export default function CorpusExplorerPage() {
+    const { summary, loading, error } = useCorpusExplorerSummary();
+
     return (
         <div className="space-y-6">
             <div className="rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 p-6 shadow-2xl shadow-black/20 sm:p-8">
@@ -45,6 +48,39 @@ export default function CorpusExplorerPage() {
                     Search records, browse by language or category, and open the AI-powered context layer for any selected document.
                 </p>
             </div>
+
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
+                    <CardContent className="p-5">
+                        <p className="text-sm text-zinc-400">Available records</p>
+                        <p className="mt-3 text-3xl font-semibold text-white">{loading ? "—" : summary.totalRecords}</p>
+                    </CardContent>
+                </Card>
+                <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
+                    <CardContent className="p-5">
+                        <p className="text-sm text-zinc-400">Languages</p>
+                        <p className="mt-3 text-3xl font-semibold text-white">{loading ? "—" : summary.totalLanguages}</p>
+                    </CardContent>
+                </Card>
+                <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
+                    <CardContent className="p-5">
+                        <p className="text-sm text-zinc-400">Categories</p>
+                        <p className="mt-3 text-3xl font-semibold text-white">{loading ? "—" : summary.totalCategories}</p>
+                    </CardContent>
+                 </Card>
+                <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
+                    <CardContent className="p-5">
+                        <p className="text-sm text-zinc-400">Profile</p>
+                        <p className="mt-3 text-2xl font-semibold text-white">{loading ? "—" : summary.profileName}</p>
+                    </CardContent>
+                </Card>
+            </section>
+
+            {error ? (
+                <div className="rounded-3xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-200">
+                    {error}
+                </div>
+            ) : null}
 
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {homeCards.map((card) => {
