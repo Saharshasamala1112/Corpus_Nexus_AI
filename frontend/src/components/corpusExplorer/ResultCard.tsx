@@ -27,7 +27,7 @@ export default function ResultCard({ record }: ResultCardProps) {
                     </p>
                 </div>
                 <Link
-                    to={`/corpus-explorer/record/${record.id}`}
+                    to={`/corpus-explorer/record/${record.uid ?? record.id}`}
                     className="rounded-2xl border border-zinc-700 bg-zinc-900/90 p-2 text-zinc-300 transition hover:border-violet-500 hover:text-white"
                     aria-label={`Open ${record.title}`}
                 >

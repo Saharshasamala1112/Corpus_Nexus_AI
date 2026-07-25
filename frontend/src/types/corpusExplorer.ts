@@ -5,6 +5,7 @@ export interface DownloadLink {
 
 export interface CorpusRecord {
     id: string | number;
+    uid?: string;
     title: string;
     description: string;
     language: string;

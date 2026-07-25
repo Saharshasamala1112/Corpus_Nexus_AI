@@ -5,6 +5,7 @@ import type { CategoryItem, CorpusExplorerSummary, CorpusProfile, CorpusRecord, 
 
 type ExplorerBackendRecord = {
   id?: string | number;
+  uid?: string;
   title?: string;
   description?: string;
   language?: string;
@@ -53,15 +54,21 @@ export const searchCorpusExplorerRecords = async (query: string): Promise<Corpus
   const records = await getCorpusRecords(0, 1000);
   const normalizedQuery = query.trim().toLowerCase();
 
-  const explorerRecords: CorpusRecord[] = (records as ExplorerBackendRecord[]).map((record, index) => ({
-    id: record.id ?? index + 1,
-    title: record.title ?? `Record ${index + 1}`,
+  const explorerRecords: CorpusRecord[] = (records as ExplorerBackendRecord[]).map((record) => {
+    const identifier = record.uid ?? record.id ?? "";
+    const uid = typeof identifier === "string" ? identifier : String(identifier);
+
+    return {
+      id: uid,
+      uid,
+      title: record.title ?? "Untitled record",
     description: record.description ?? "No description available",
     language: record.language ?? "Unknown",
     category: record.category ?? "General",
-    metadata: record.metadata ?? {},
-    downloadLinks: [],
-  }));
+      metadata: record.metadata ?? {},
+      downloadLinks: [],
+    };
+  });
 
   if (!normalizedQuery || normalizedQuery === "*") {
     return explorerRecords;
@@ -86,8 +93,8 @@ export const getCorpusExplorerCategories = async (): Promise<CategoryItem[]> => 
   return normalizeListPayload<CategoryItem>(response.data);
 };
 
-export const getCorpusExplorerRecord = async (id: string): Promise<CorpusRecord> => {
-  const response = await api.get<CorpusRecord>(`/records/${id}`);
+export const getCorpusExplorerRecord = async (uid: string): Promise<CorpusRecord> => {
+  const response = await api.get<CorpusRecord>(`/records/${uid}`);
   return response.data;
 };
 

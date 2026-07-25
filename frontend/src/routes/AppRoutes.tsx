@@ -89,7 +89,7 @@ function AppRoutes() {
             />
 
             <Route
-                path="/corpus-explorer/record/:id"
+                path="/corpus-explorer/record/:uid"
                 element={
                     <ProtectedRoute>
                         <RecordDetailsPage />
