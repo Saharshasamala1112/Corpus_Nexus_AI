@@ -8,8 +8,11 @@ __pycache__/
 .venv/
 venv/
 
-# Environment variables
+# Environment files
 .env
+**/.env
+.env.local
+.env.production
 
 # IDE
 .vscode/
