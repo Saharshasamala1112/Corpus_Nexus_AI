@@ -1,0 +1,21 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<rect width="160" height="160" rx="32" fill="url(#a)"/>
+<g filter="url(#b)">
+  <rect x="20" y="24" width="120" height="112" rx="20" fill="#061025"/>
+  <g transform="translate(34,36)">
+    <circle cx="38" cy="28" r="22" fill="#0EA5E9"/>
+    <rect x="10" y="56" width="56" height="22" rx="6" fill="#073047"/>
+    <circle cx="26" cy="24" r="4" fill="#012" opacity="0.9"/>
+    <circle cx="50" cy="24" r="4" fill="#012" opacity="0.9"/>
+  </g>
+</g>
+<defs>
+  <linearGradient id="a" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#0b1220"/>
+    <stop offset="1" stop-color="#071126"/>
+  </linearGradient>
+  <filter id="b" x="0" y="0" width="160" height="160" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <feDropShadow dx="0" dy="8" stdDeviation="20" flood-opacity="0.18" flood-color="#000"/>
+  </filter>
+</defs>
+</svg>

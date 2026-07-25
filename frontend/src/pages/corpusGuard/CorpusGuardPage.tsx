@@ -1,11 +1,16 @@
-function CorpusGuardPage() {
-    return (
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-10 shadow-2xl shadow-black/20">
-            <p className="text-sm font-medium uppercase tracking-[0.35em] text-violet-400">CorpusGuard</p>
-            <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">Governance and guardrails</h1>
-            <p className="mt-3 max-w-2xl text-base text-zinc-400">Placeholder content for the shared application shell.</p>
-        </div>
-    );
-}
+import { Card, CardContent } from '@/components/ui/card'
+import { AssistantPanel } from '@/components/aiAssistant'
 
-export default CorpusGuardPage;
+export default function CorpusGuardPage() {
+    return (
+        <div className="space-y-6">
+            <AssistantPanel />
+            <Card className="border-zinc-800 bg-zinc-900/60">
+                <CardContent>
+                    <h2 className="text-lg font-semibold text-white">CorpusGuard</h2>
+                    <p className="text-sm text-zinc-400">Central view for monitoring and querying your corpus.</p>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
