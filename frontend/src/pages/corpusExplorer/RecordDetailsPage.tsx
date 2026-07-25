@@ -9,21 +9,21 @@ import { getRecord } from "@/services/corpusExplorer/corpus";
 import type { CorpusRecord } from "@/types/corpusExplorer";
 
 export default function RecordDetailsPage() {
-    const { id } = useParams();
+    const { uid } = useParams<{ uid: string }>();
     const [record, setRecord] = useState<CorpusRecord | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
         async function loadRecord() {
-            if (!id) {
+            if (!uid) {
                 setError("Missing record identifier");
                 setLoading(false);
                 return;
             }
 
             try {
-                const result = await getRecord(id);
+                const result = await getRecord(uid);
                 setRecord(result);
             } catch (err) {
                 setError(err instanceof Error ? err.message : "Unable to load record");
@@ -33,7 +33,7 @@ export default function RecordDetailsPage() {
         }
 
         void loadRecord();
-    }, [id]);
+    }, [uid]);
 
     if (loading) {
         return <Loader />;

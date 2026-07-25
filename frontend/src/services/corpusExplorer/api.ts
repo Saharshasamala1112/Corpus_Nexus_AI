@@ -5,6 +5,7 @@ import type { AssistantAnswer, CorpusProfile, CorpusRecord, CategoryItem, Langua
 
 type ExplorerBackendRecord = {
     id?: string | number;
+    uid?: string;
     title?: string;
     description?: string;
     language?: string;
@@ -93,22 +94,28 @@ export async function searchRecords(query: string): Promise<CorpusRecord[]> {
         });
     }
 
-    const explorerRecords: CorpusRecord[] = (records as ExplorerBackendRecord[]).map((record, index) => ({
-        id: record.id ?? index + 1,
-        title: record.title ?? `Record ${index + 1}`,
+    const explorerRecords: CorpusRecord[] = (records as ExplorerBackendRecord[]).map((record) => {
+        const identifier = record.uid ?? record.id ?? "";
+        const uid = typeof identifier === "string" ? identifier : String(identifier);
+
+        return {
+            id: uid,
+            uid,
+            title: record.title ?? "Untitled record",
         description: record.description ?? "No description available",
         language: record.language ?? "Unknown",
         category: record.category ?? "General",
         metadata: record.metadata ?? {},
-        downloadLinks: [],
-        // Preserve multilingual fields from backend
-        sentence: record.sentence,
-        text: record.text,
-        transcription: record.transcription,
-        transcript: record.transcript,
-        prompt: record.prompt,
-        content: record.content,
-    }));
+            downloadLinks: [],
+            // Preserve multilingual fields from backend
+            sentence: record.sentence,
+            text: record.text,
+            transcription: record.transcription,
+            transcript: record.transcript,
+            prompt: record.prompt,
+            content: record.content,
+        };
+    });
 
     if (!normalizedQuery || normalizedQuery === "*") {
         return explorerRecords;
@@ -146,8 +153,8 @@ export async function getCategories(): Promise<CategoryItem[]> {
     return normalizeListPayload<CategoryItem>(response.data);
 }
 
-export async function getRecord(id: string): Promise<CorpusRecord> {
-    const response = await api.get<CorpusRecord>(`/records/${id}`);
+export async function getRecord(uid: string): Promise<CorpusRecord> {
+    const response = await api.get<CorpusRecord>(`/records/${uid}`);
     return response.data;
 }
 

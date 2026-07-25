@@ -16,7 +16,7 @@ export default function RecordCard({ record }: RecordCardProps) {
                     <p className="mt-2 text-sm text-zinc-400">{record.description}</p>
                 </div>
                 <Link
-                    to={`/corpus-explorer/record/${record.id}`}
+                    to={`/corpus-explorer/record/${record.uid ?? record.id}`}
                     className="rounded-xl border border-zinc-700 bg-zinc-900 p-2 text-zinc-300 transition hover:border-violet-500 hover:text-white"
                 >
                     <ArrowUpRight className="h-4 w-4" />
