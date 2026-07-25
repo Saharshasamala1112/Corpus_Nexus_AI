@@ -6,6 +6,7 @@ import re
 from typing import Any, List
 
 from app.services.embeddings import embed_texts
+from app.services.rag_pipeline import build_query_variants
 
 
 def _tokenize(text: str) -> list[str]:
@@ -45,6 +46,19 @@ def _cosine_similarity(a: list[float], b: list[float]) -> float:
     return dot / (norm_a * norm_b)
 
 
+def _matches_filters(metadata: dict[str, Any], filters: dict[str, Any] | None) -> bool:
+    if not filters:
+        return True
+    for key, expected in filters.items():
+        actual = metadata.get(key)
+        if isinstance(expected, (list, tuple, set)):
+            if actual not in expected:
+                return False
+        elif actual != expected:
+            return False
+    return True
+
+
 async def _embed_text(text: str) -> list[float]:
     embeddings = await asyncio.to_thread(embed_texts, [text])
     return embeddings[0] if embeddings else []
@@ -66,7 +80,7 @@ class InMemoryVectorStore:
     async def delete(self, doc_id: str):
         self._docs = [d for d in self._docs if d["id"] != doc_id]
 
-    async def search(self, query: str, top_k: int = 5) -> List[dict[str, Any]]:
+    async def search(self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None) -> List[dict[str, Any]]:
         if not self._docs:
             return []
 
@@ -75,6 +89,8 @@ class InMemoryVectorStore:
 
         results: list[tuple[float, dict[str, Any]]] = []
         for d in self._docs:
+            if not _matches_filters(d.get("metadata", {}) or {}, filters):
+                continue
             bm25 = _bm25_score(query, d["text"])
             similarity = 0.0
             if has_dense and d.get("embedding"):
@@ -104,9 +120,27 @@ except Exception:
     pass
 
 
-async def search_docs(query: str, top_k: int = 5) -> List[dict[str, Any]]:
+async def search_docs(query: str, top_k: int = 5, filters: dict[str, Any] | None = None) -> List[dict[str, Any]]:
     if isinstance(vector_store, InMemoryVectorStore):
-        return await vector_store.search(query, top_k)
+        variants = build_query_variants(query)
+        combined: list[dict[str, Any]] = []
+        seen_ids: set[str] = set()
+        for variant in variants:
+            docs = await vector_store.search(variant, top_k=max(3, top_k), filters=filters)
+            for doc in docs:
+                doc_id = str(doc.get("id") or "")
+                if not doc_id or doc_id in seen_ids:
+                    continue
+                seen_ids.add(doc_id)
+                combined.append(doc)
+        if len(combined) < top_k:
+            fallback_docs = await vector_store.search(query, top_k=top_k, filters=filters)
+            for doc in fallback_docs:
+                doc_id = str(doc.get("id") or "")
+                if doc_id and doc_id not in seen_ids:
+                    seen_ids.add(doc_id)
+                    combined.append(doc)
+        return combined[:top_k]
 
     try:
         emb = await asyncio.to_thread(embed_texts, [query])

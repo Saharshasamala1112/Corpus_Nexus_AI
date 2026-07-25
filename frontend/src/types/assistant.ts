@@ -9,6 +9,8 @@ export interface AssistantMessage {
     usedCorpus?: boolean;
     sourceCount?: number;
     confidence?: number;
+    model?: string;
+    mode?: string;
 }
 
 export interface AssistantConversation {

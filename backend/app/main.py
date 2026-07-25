@@ -6,6 +6,7 @@ load_dotenv()
 
 from app.api.assistant import router as assistant_router
 from app.services.indexer import indexer
+from app.services.local_indexer import ingest_local
 import os
 import asyncio
 from app.services.embedding_worker import EmbeddingWorker
@@ -32,6 +33,11 @@ app = create_app()
 
 @app.on_event("startup")
 async def startup_event():
+	try:
+		await ingest_local()
+	except Exception as exc:
+		print(f"Local corpus ingestion skipped: {exc}")
+
 	# optional corpus sync worker
 	enable = os.environ.get("ENABLE_CORPUS_SYNC", "false").lower() in ("1", "true", "yes")
 	if enable:

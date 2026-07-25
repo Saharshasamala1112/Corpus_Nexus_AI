@@ -1,10 +1,18 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Send, X, Loader, Paperclip, Mic } from "lucide-react";
+import { Send, X, Loader, Paperclip, Mic, Download, Trash2, Pencil, RotateCw } from "lucide-react";
 import RobotSvg from '@/assets/robot.svg';
 import { askAssistant, getAssistantSuggestions, streamAssistant, createConversationOnServer, createMessageOnServer, fetchConversations } from "@/services/assistantService";
 import type { AssistantConversation, AssistantMessage } from "@/types/assistant";
 import ChatMessageList from "./chat/ChatMessageList";
+
+interface ServerConversationPayload {
+    id: string;
+    title?: string;
+    messages?: AssistantMessage[];
+    createdAt?: string;
+    updatedAt?: string;
+}
 
 function createMessage(content: string, role: "user" | "assistant", id: string): AssistantMessage {
     return {
@@ -21,7 +29,20 @@ export default function AssistantPanel() {
     const [question, setQuestion] = useState("");
     const [loading, setLoading] = useState(false);
     const [streaming, setStreaming] = useState(false);
-    const [conversations, setConversations] = useState<AssistantConversation[]>([]);
+    const [conversations, setConversations] = useState<AssistantConversation[]>(() => {
+        try {
+            const raw = localStorage.getItem("assistant:conversations");
+            if (raw) {
+                const parsed = JSON.parse(raw) as AssistantConversation[];
+                if (Array.isArray(parsed)) {
+                    return parsed;
+                }
+            }
+        } catch {
+            // ignore malformed local cache
+        }
+        return [];
+    });
     const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const inputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -31,20 +52,23 @@ export default function AssistantPanel() {
         getAssistantSuggestions().then(setSuggestions);
 
         // load persisted conversations
-        try {
-            const raw = localStorage.getItem('assistant:conversations')
-            if (raw) setConversations(JSON.parse(raw))
-        } catch {}
-
         // try to load from server and merge
         (async () => {
             try {
-                const serverConvs = await fetchConversations()
+                const serverConvs = await fetchConversations();
                 if (serverConvs && serverConvs.length > 0) {
-                    // prefer server conversations over local cache
-                    setConversations(serverConvs as any)
+                    const normalized = serverConvs.map((conv: ServerConversationPayload) => ({
+                        id: conv.id,
+                        title: conv.title || "Conversation",
+                        messages: conv.messages || [],
+                        createdAt: conv.createdAt || new Date().toISOString(),
+                        updatedAt: conv.updatedAt || new Date().toISOString(),
+                    })) as AssistantConversation[];
+                    setConversations(normalized);
                 }
-            } catch {}
+            } catch {
+                // ignore server sync failures
+            }
         })();
 
         // start outbox retry loop
@@ -60,16 +84,22 @@ export default function AssistantPanel() {
                         if (res) {
                             localStorage.setItem('assistant:outbox', JSON.stringify(rest))
                         }
-                    } catch {}
+                    } catch {
+                        // ignore outbox retry failures
+                    }
                 }
-            } catch {}
+            } catch {
+                // ignore outbox retry failures
+            }
         }, 3000)
         return () => clearInterval(interval)
     }, []);
     useEffect(() => {
         try {
             localStorage.setItem('assistant:conversations', JSON.stringify(conversations))
-        } catch {}
+        } catch {
+            // ignore persistence failures
+        }
     }, [conversations]);
 
     const activeConversation = useMemo(
@@ -77,10 +107,11 @@ export default function AssistantPanel() {
         [conversations, activeConversationId],
     );
 
-    const handleSend = async () => {
-        const trimmed = question.trim();
+    const handleSend = async (overrideQuestion?: string) => {
+        const trimmed = (overrideQuestion ?? question).trim();
         if (!trimmed) return;
 
+        const regenerate = Boolean(overrideQuestion && activeConversation);
         const existingConversation =
             activeConversation ??
             ({
@@ -93,7 +124,7 @@ export default function AssistantPanel() {
 
         const nextConversation: AssistantConversation = {
             ...existingConversation,
-            messages: [...existingConversation.messages, createMessage(trimmed, "user", `msg-${Date.now()}-user`)],
+            messages: regenerate ? existingConversation.messages : [...existingConversation.messages, createMessage(trimmed, "user", `msg-${Date.now()}-user`)],
             updatedAt: new Date().toISOString(),
         };
 
@@ -106,7 +137,9 @@ export default function AssistantPanel() {
             await createConversationOnServer({ id: nextConversation.id, title: nextConversation.title });
             const userMsg = nextConversation.messages.find((m) => m.role === 'user');
             if (userMsg) await createMessageOnServer(nextConversation.id, { id: userMsg.id, role: 'user', content: userMsg.content });
-        } catch {}
+        } catch {
+            // Best-effort persistence; ignore failures.
+        }
         setActiveConversationId(nextConversation.id);
         setQuestion("");
         setLoading(true);
@@ -124,7 +157,7 @@ export default function AssistantPanel() {
             ),
         );
 
-        const history = nextConversation.messages.map((m) => ({ role: m.role, content: m.content }));
+        const history = nextConversation.messages.filter((m) => m.id !== assistantId).map((m) => ({ role: m.role, content: m.content }));
 
         // optimistic enqueue helper will be used when persisting messages fails
 
@@ -133,7 +166,7 @@ export default function AssistantPanel() {
             try {
                 // create abort controller for this stream
                 controllerRef.current = new AbortController();
-                for await (const chunk of streamAssistant(trimmed, history, nextConversation.id, controllerRef.current.signal)) {
+                for await (const chunk of streamAssistant(trimmed, history, nextConversation.id, undefined, controllerRef.current.signal)) {
                     accumulated += String(chunk);
                     setConversations((prev) =>
                         prev.map((c) =>
@@ -158,26 +191,63 @@ export default function AssistantPanel() {
                 // persist assistant message
                 try {
                     await createMessageOnServer(nextConversation.id, { id: assistantId, role: 'assistant', content: accumulated });
-                } catch {}
-            } catch (err) {
+                } catch {
+                    // Best-effort persistence; ignore failures.
+                }
+            } catch {
                 const reply = await askAssistant(trimmed, history, nextConversation.id, nextConversation.title);
                 accumulated = reply.answer;
                 setConversations((prev) =>
                     prev.map((c) =>
                         c.id === nextConversation.id
-                            ? { ...c, messages: c.messages.map((m) => (m.id === assistantId ? { ...m, content: accumulated, isStreaming: false } : m)), updatedAt: new Date().toISOString() }
+                            ? { ...c, messages: c.messages.map((m) => (m.id === assistantId ? { ...m, content: accumulated, isStreaming: false, usedCorpus: reply.usedCorpus, sourceCount: reply.sourceCount, confidence: reply.confidence } : m)), updatedAt: new Date().toISOString() }
                             : c,
                     ),
                 );
                 try {
                     await createMessageOnServer(nextConversation.id, { id: assistantId, role: 'assistant', content: accumulated });
-                } catch {}
+                } catch {
+                    // Best-effort persistence; ignore failures.
+                }
             }
         } finally {
             setLoading(false);
             setStreaming(false);
             controllerRef.current = null;
         }
+    };
+
+    const handleRegenerate = () => {
+        if (!activeConversation) return;
+        const lastUserMessage = [...activeConversation.messages].reverse().find((message) => message.role === "user");
+        if (!lastUserMessage) return;
+        void handleSend(lastUserMessage.content);
+    };
+
+    const handleRenameConversation = () => {
+        if (!activeConversation) return;
+        const nextTitle = window.prompt("Rename conversation", activeConversation.title);
+        if (!nextTitle) return;
+        setConversations((prev) => prev.map((conversation) => conversation.id === activeConversation.id ? { ...conversation, title: nextTitle.trim() || activeConversation.title } : conversation));
+    };
+
+    const handleDeleteConversation = () => {
+        if (!activeConversation) return;
+        const confirmed = window.confirm("Delete this conversation?");
+        if (!confirmed) return;
+        setConversations((prev) => prev.filter((conversation) => conversation.id !== activeConversation.id));
+        setActiveConversationId(null);
+    };
+
+    const handleExportConversation = () => {
+        if (!activeConversation) return;
+        const blob = new Blob([JSON.stringify(activeConversation, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${activeConversation.title || "conversation"}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
     };
 
     const handleStopStream = () => {
@@ -238,16 +308,30 @@ export default function AssistantPanel() {
                                                 {activeConversation.messages.length} message{activeConversation.messages.length === 1 ? '' : 's'} · updated {new Date(activeConversation.updatedAt).toLocaleString()}
                                             </div>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setActiveConversationId(null)
-                                                setQuestion("")
-                                            }}
-                                            className="inline-flex items-center rounded-full border border-zinc-800 bg-zinc-900/70 px-3 py-2 text-xs text-zinc-200 transition hover:border-cyan-500 hover:text-white"
-                                        >
-                                            New chat
-                                        </button>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setActiveConversationId(null)
+                                                    setQuestion("")
+                                                }}
+                                                className="inline-flex items-center rounded-full border border-zinc-800 bg-zinc-900/70 px-3 py-2 text-xs text-zinc-200 transition hover:border-cyan-500 hover:text-white"
+                                            >
+                                                New chat
+                                            </button>
+                                            <button type="button" onClick={handleRegenerate} className="inline-flex items-center rounded-full border border-zinc-800 bg-zinc-900/70 p-2 text-zinc-200 transition hover:border-cyan-500 hover:text-white" aria-label="Regenerate response">
+                                                <RotateCw className="h-3.5 w-3.5" />
+                                            </button>
+                                            <button type="button" onClick={handleRenameConversation} className="inline-flex items-center rounded-full border border-zinc-800 bg-zinc-900/70 p-2 text-zinc-200 transition hover:border-cyan-500 hover:text-white" aria-label="Rename conversation">
+                                                <Pencil className="h-3.5 w-3.5" />
+                                            </button>
+                                            <button type="button" onClick={handleExportConversation} className="inline-flex items-center rounded-full border border-zinc-800 bg-zinc-900/70 p-2 text-zinc-200 transition hover:border-cyan-500 hover:text-white" aria-label="Export conversation">
+                                                <Download className="h-3.5 w-3.5" />
+                                            </button>
+                                            <button type="button" onClick={handleDeleteConversation} className="inline-flex items-center rounded-full border border-zinc-800 bg-zinc-900/70 p-2 text-zinc-200 transition hover:border-red-500 hover:text-white" aria-label="Delete conversation">
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ) : null}
@@ -318,7 +402,9 @@ export default function AssistantPanel() {
                                         try {
                                             await fetch(`${API_URL}/assistant/upload`, { method: 'POST', body: form, headers: { 'x-user-id': userId } })
                                             // could integrate file link into conversation; skipping for now
-                                        } catch (err) { /* ignore */ }
+                                        } catch {
+                                            // ignore upload failures
+                                        }
                                     }} />
                                     <label htmlFor="assistant-file-input" className="rounded-full p-2 text-zinc-300 hover:text-white cursor-pointer" aria-label="Attach file">
                                         <Paperclip className="h-4 w-4" />
@@ -340,8 +426,8 @@ export default function AssistantPanel() {
                                             const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8001'
                                             const userId = localStorage.getItem('assistant:user') || 'anonymous'
                                             await fetch(`${API_URL}/assistant/upload`, { method: 'POST', body: form, headers: { 'x-user-id': userId } })
-                                        } catch (err) {
-                                            console.error('record failed', err)
+                                        } catch {
+                                            // ignore recording failures
                                         }
                                     }} className="rounded-full p-2 text-zinc-300 hover:text-white" aria-label="Record voice">
                                         <Mic className="h-4 w-4" />
@@ -351,7 +437,7 @@ export default function AssistantPanel() {
                                             <X className="h-4 w-4" />
                                         </button>
                                     ) : (
-                                        <button type="button" onClick={handleSend} disabled={loading || !question.trim()} className="inline-flex items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 p-2 text-white disabled:opacity-60">
+                                        <button type="button" onClick={() => void handleSend()} disabled={loading || !question.trim()} className="inline-flex items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 p-2 text-white disabled:opacity-60">
                                             {loading ? <Loader className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                                         </button>
                                     )}

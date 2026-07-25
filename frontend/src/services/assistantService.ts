@@ -169,7 +169,15 @@ export async function getAssistantSuggestions(): Promise<string[]> {
 }
 
 // Conversation persistence helpers
-export async function fetchConversations(): Promise<any[]> {
+interface ConversationPayload {
+    id: string;
+    title?: string;
+    messages?: Array<{ id: string; role: string; content: string }>;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export async function fetchConversations(): Promise<ConversationPayload[]> {
     try {
         const user = localStorage.getItem('assistant:user') || 'anonymous';
         const res = await fetch(`${API_URL}/assistant/conversations`, { headers: { 'x-user-id': user } });

@@ -26,6 +26,13 @@ export default function MessageBubble({ message }: Props) {
                 <div className="mt-3 text-sm leading-7">
                     <MarkdownContent content={message.content} />
                 </div>
+                {!isUser && (message.usedCorpus || typeof message.confidence === 'number' || message.sourceCount) ? (
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-zinc-400">
+                        {message.usedCorpus ? <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-cyan-200">Corpus-backed</span> : <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-1 text-amber-200">General knowledge</span>}
+                        {typeof message.confidence === 'number' ? <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1">Confidence {message.confidence.toFixed(2)}</span> : null}
+                        {message.sourceCount ? <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1">{message.sourceCount} source{message.sourceCount === 1 ? '' : 's'}</span> : null}
+                    </div>
+                ) : null}
                 {message.isStreaming ? (
                     <div className="mt-3 flex items-center gap-2 text-xs text-zinc-400">
                         <Loader className="h-4 w-4 animate-spin" /> Streaming response...
