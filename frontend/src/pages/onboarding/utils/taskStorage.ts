@@ -19,12 +19,15 @@ export function getProgress(): Record<number, CompletedTask> {
     }
 }
 
-export function saveTask(id: number, image: string) {
+export function saveTask(
+    id: number,
+    imageUrl: string
+) {
     const progress = getProgress();
 
     progress[id] = {
         completed: true,
-        image,
+        image: imageUrl,
     };
 
     localStorage.setItem(
