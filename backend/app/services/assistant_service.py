@@ -1,10 +1,38 @@
 from typing import AsyncGenerator
 
-from app.services.llm import build_provider_for_question, get_default_provider
+from app.services.llm import (
+    LLMProvider,
+    build_provider_for_question,
+    get_default_provider,
+    get_fallback_provider,
+)
 from app.services.vector_store import search_docs
 from app.services.prompt_builder import build_retrieval_prompt
 from app.services.rag_pipeline import build_query_variants, compress_context, detect_prompt_injection, sanitize_question
-from app.services.local_indexer import ingest_local
+
+
+async def _generate_with_fallback(provider: LLMProvider, prompt: str) -> str:
+    try:
+        return await provider.generate(prompt)
+    except Exception:
+        fallback = get_fallback_provider(provider)
+        if fallback is provider:
+            raise
+        return await fallback.generate(prompt)
+
+
+async def _stream_with_fallback(provider: LLMProvider, prompt: str) -> AsyncGenerator[str, None]:
+    try:
+        async for chunk in provider.stream(prompt):
+            yield chunk
+        return
+    except Exception:
+        fallback = get_fallback_provider(provider)
+        if fallback is provider:
+            raise
+        text = await fallback.generate(prompt)
+        if text:
+            yield text
 
 
 def _compute_confidence(found: bool, source_count: int, has_context: bool) -> float:
@@ -56,13 +84,6 @@ async def ask(question: str, history: list[dict] | None = None, context: str | N
     except Exception:
         docs = []
 
-    if not docs:
-        try:
-            await ingest_local()
-            docs = await search_docs(rewritten, top_k=top_k)
-        except Exception:
-            docs = []
-
     provider = build_provider_for_question(rewritten)
     used = bool(docs)
     has_context = bool(context and str(context).strip())
@@ -75,7 +96,7 @@ async def ask(question: str, history: list[dict] | None = None, context: str | N
                 prompt += f"\n\nContext:\n{compress_context(context, 2000)}"
             prompt += "\n\nNote: No directly retrieved document evidence was found. If you can answer from general project knowledge, do so briefly and clearly label it as general knowledge."
 
-        text = await provider.generate(prompt)
+        text = await _generate_with_fallback(provider, prompt)
         return {
             "answer": text,
             "used_corpus": used,
@@ -99,13 +120,6 @@ async def stream(question: str, history: list[dict] | None = None, context: str 
     except Exception:
         docs = []
 
-    if not docs:
-        try:
-            await ingest_local()
-            docs = await search_docs(rewritten, top_k=top_k)
-        except Exception:
-            docs = []
-
     provider = build_provider_for_question(rewritten)
     try:
         if docs:
@@ -115,7 +129,7 @@ async def stream(question: str, history: list[dict] | None = None, context: str 
             prompt += f"\n\nContext:\n{compress_context(context or 'No corpus context was found.', 2000)}"
             prompt += "\n\nNote: No directly retrieved document evidence was found. If you can answer from general project knowledge, do so briefly and clearly label it as general knowledge."
 
-        async for chunk in provider.stream(prompt):
+        async for chunk in _stream_with_fallback(provider, prompt):
             yield chunk
     except Exception:
         result = await ask(cleaned, history, context, top_k=top_k)

@@ -33,10 +33,11 @@ app = create_app()
 
 @app.on_event("startup")
 async def startup_event():
+	print("Starting CorpusGuard backend startup tasks...")
 	try:
-		await ingest_local()
+		asyncio.create_task(_run_local_ingestion())
 	except Exception as exc:
-		print(f"Local corpus ingestion skipped: {exc}")
+		print(f"Failed to schedule local corpus ingestion: {exc}")
 
 	# optional corpus sync worker
 	enable = os.environ.get("ENABLE_CORPUS_SYNC", "false").lower() in ("1", "true", "yes")
@@ -47,4 +48,13 @@ async def startup_event():
 	if os.environ.get("ENABLE_EMBEDDING_WORKER", "false").lower() in ("1", "true", "yes"):
 		worker = EmbeddingWorker()
 		asyncio.create_task(worker.run(interval_seconds=int(os.environ.get("EMBEDDING_INTERVAL", "300"))))
+
+
+async def _run_local_ingestion() -> None:
+	print("Beginning asynchronous local corpus ingestion...")
+	try:
+		count = await ingest_local()
+		print(f"Local corpus ingestion completed: {count} chunks indexed")
+	except Exception as exc:
+		print(f"Local corpus ingestion failed: {exc}")
 
