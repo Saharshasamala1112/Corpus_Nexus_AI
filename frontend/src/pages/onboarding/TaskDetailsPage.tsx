@@ -110,10 +110,12 @@ function TaskDetailsPage() {
         }
 
 
-        saveTask(
-            currentTask.id,
-            image
-        );
+        if (currentTask) {
+            saveTask(
+                currentTask.id,
+                image
+            );
+        }
 
 
         alert(
