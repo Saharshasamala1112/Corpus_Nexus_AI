@@ -59,8 +59,8 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.18),transparent_38%),linear-gradient(135deg,_#09090b_0%,_#111827_100%)]">
+      <div className="w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-950/70 p-8 shadow-lg shadow-black/20">
         <h1 className="mb-2 text-center text-3xl font-bold text-slate-800">
           Reset Password
         </h1>

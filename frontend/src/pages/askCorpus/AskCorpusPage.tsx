@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import AnswerCard from "../../components/askcorpus/AnswerCard";
 import QuestionInput from "../../components/askcorpus/QuestionInput";
@@ -10,21 +10,48 @@ import LanguageChart from "../../components/corpusInsights/LanguageChart";
 import { getInsight } from "../../services/insightsService";
 
 const AskCorpusPage = () => {
+  const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [chart, setChart] = useState("none");
+  const answerRef = useRef<HTMLDivElement | null>(null);
 
-  const askQuestion = async (question: string) => {
+  const askQuestion = async (nextQuestion: string) => {
+    const trimmedQuestion = nextQuestion.trim();
+
+    if (!trimmedQuestion) {
+      return;
+    }
+
+    setQuestion(nextQuestion);
+    setLoading(true);
+    setError("");
+    setAnswer("");
+    setChart("none");
+
     try {
-      const response = await getInsight(question);
+      const response = await getInsight(trimmedQuestion);
 
       setAnswer(response.answer);
       setChart(response.chart);
+
+      requestAnimationFrame(() => {
+        answerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     } catch (error) {
       console.error("Failed to fetch insight:", error);
-
-      setAnswer("Unable to fetch insights at the moment.");
+      setAnswer("");
       setChart("none");
+      setError("Sorry, I couldn't fetch an answer right now. Please try again.");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleSuggestedSelect = (nextQuestion: string) => {
+    setQuestion(nextQuestion);
+    void askQuestion(nextQuestion);
   };
 
   return (
@@ -43,11 +70,24 @@ const AskCorpusPage = () => {
         </div>
       </div>
 
-      <QuestionInput onAsk={askQuestion} />
+      <QuestionInput
+        value={question}
+        onChange={setQuestion}
+        onAsk={askQuestion}
+        loading={loading}
+      />
 
-      <SuggestedQuestions onSelect={askQuestion} />
+      <SuggestedQuestions onSelect={handleSuggestedSelect} />
 
-      {answer && <AnswerCard answer={answer} />}
+      {error ? (
+        <div className="rounded-3xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-200">
+          {error}
+        </div>
+      ) : null}
+
+      <div ref={answerRef}>
+        {answer ? <AnswerCard answer={answer} /> : null}
+      </div>
 
       {chart === "mediaType" && (
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-6 shadow-lg shadow-black/20 sm:p-8">

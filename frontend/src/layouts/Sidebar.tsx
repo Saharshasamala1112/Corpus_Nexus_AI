@@ -7,9 +7,7 @@ import {
     Rocket,
     Search,
     Settings,
-    ShieldCheck,
     Sparkles,
-    UserRound,
 } from "lucide-react";
 
 import Logo from "../components/navigation/Logo";
@@ -32,12 +30,10 @@ const mainItems = [
 
     { to: "/sprintwise-ai", label: "SprintWise AI", icon: Rocket },
     { to: "/onboarding", label: "Onboarding", icon: Sparkles },
-    { to: "/corpusguard", label: "CorpusGuard", icon: ShieldCheck },
 ];
 
 const bottomItems = [
     { to: "/settings", label: "Settings", icon: Settings },
-    { to: "/profile", label: "Profile", icon: UserRound },
 ];
 
 function Sidebar({

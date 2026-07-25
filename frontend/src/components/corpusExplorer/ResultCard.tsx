@@ -1,6 +1,7 @@
 import { ArrowUpRight, Download, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { getLanguageClass, getMultilingualContent } from "@/lib/multilingual";
 import type { CorpusRecord } from "@/types/corpusExplorer";
 
 interface ResultCardProps {
@@ -21,10 +22,12 @@ export default function ResultCard({ record }: ResultCardProps) {
                         </span>
                     </div>
                     <h3 className="mt-3 text-lg font-semibold text-white">{record.title}</h3>
-                    <p className="mt-2 line-clamp-3 text-sm text-zinc-400">{record.description}</p>
+                    <p className={`mt-2 line-clamp-3 text-sm text-zinc-400 ${getLanguageClass(record.language)}`}>
+                        {getMultilingualContent(record)}
+                    </p>
                 </div>
                 <Link
-                    to={`/corpus-explorer/record/${record.id}`}
+                    to={`/corpus-explorer/record/${record.uid ?? record.id}`}
                     className="rounded-2xl border border-zinc-700 bg-zinc-900/90 p-2 text-zinc-300 transition hover:border-violet-500 hover:text-white"
                     aria-label={`Open ${record.title}`}
                 >
@@ -56,7 +59,7 @@ export default function ResultCard({ record }: ResultCardProps) {
                     {Object.entries(record.metadata ?? {}).slice(0, 4).map(([key, value]) => (
                         <div key={key} className="rounded-xl border border-zinc-800 bg-zinc-950/70 px-3 py-2">
                             <p className="text-[11px] uppercase tracking-wide text-zinc-500">{key}</p>
-                            <p className="mt-1 text-sm text-zinc-200">{String(value ?? "—")}</p>
+                            <p className={`mt-1 text-sm text-zinc-200 ${getLanguageClass(record.language)}`}>{String(value ?? "—")}</p>
                         </div>
                     ))}
                 </div>

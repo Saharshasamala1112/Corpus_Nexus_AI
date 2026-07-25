@@ -83,7 +83,7 @@ const LoginPage = () => {
                     placeholder="Enter your phone number"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full rounded-2xl border border-zinc-700 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 caret-blue-500 shadow-inner outline-none transition focus:border-violet-500"
+                    className="w-full rounded-2xl border border-zinc-700 bg-zinc-900/80 px-4 py-3 text-zinc-100 placeholder:text-zinc-500 caret-blue-500 shadow-inner outline-none transition focus:border-violet-500"
                     required
                   />
                 </div>
@@ -102,7 +102,7 @@ const LoginPage = () => {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-2xl border border-zinc-700 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 caret-blue-500 shadow-inner outline-none transition focus:border-violet-500"
+                    className="w-full rounded-2xl border border-zinc-700 bg-zinc-900/80 px-4 py-3 text-zinc-100 placeholder:text-zinc-500 caret-blue-500 shadow-inner outline-none transition focus:border-violet-500"
                     required
                   />
                 </div>

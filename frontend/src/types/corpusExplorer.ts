@@ -5,12 +5,20 @@ export interface DownloadLink {
 
 export interface CorpusRecord {
     id: string | number;
+    uid?: string;
     title: string;
     description: string;
     language: string;
     category: string;
     metadata: Record<string, string | number | boolean | null>;
     downloadLinks?: DownloadLink[];
+    // Multilingual content fields from backend
+    sentence?: string;
+    text?: string;
+    transcription?: string;
+    transcript?: string;
+    prompt?: string;
+    content?: string;
 }
 
 export interface LanguageItem {

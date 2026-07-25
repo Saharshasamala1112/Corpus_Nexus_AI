@@ -4,25 +4,26 @@ import { useParams } from "react-router-dom";
 
 import AIAssistant from "@/components/corpusExplorer/AIAssistant";
 import Loader from "@/components/corpusExplorer/Loader";
+import { getLanguageClass, getMultilingualContent } from "@/lib/multilingual";
 import { getRecord } from "@/services/corpusExplorer/corpus";
 import type { CorpusRecord } from "@/types/corpusExplorer";
 
 export default function RecordDetailsPage() {
-    const { id } = useParams();
+    const { uid } = useParams<{ uid: string }>();
     const [record, setRecord] = useState<CorpusRecord | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
         async function loadRecord() {
-            if (!id) {
+            if (!uid) {
                 setError("Missing record identifier");
                 setLoading(false);
                 return;
             }
 
             try {
-                const result = await getRecord(id);
+                const result = await getRecord(uid);
                 setRecord(result);
             } catch (err) {
                 setError(err instanceof Error ? err.message : "Unable to load record");
@@ -32,7 +33,7 @@ export default function RecordDetailsPage() {
         }
 
         void loadRecord();
-    }, [id]);
+    }, [uid]);
 
     if (loading) {
         return <Loader />;
@@ -58,7 +59,9 @@ export default function RecordDetailsPage() {
                     </span>
                 </div>
                 <h1 className="mt-4 text-3xl font-semibold text-white">{record.title}</h1>
-                <p className="mt-3 max-w-3xl text-base text-zinc-400">{record.description}</p>
+                <p className={`mt-3 max-w-3xl text-base text-zinc-400 ${getLanguageClass(record.language)}`}>
+                    {getMultilingualContent(record)}
+                </p>
             </section>
 
             <section className="grid gap-4 lg:grid-cols-2">
@@ -82,7 +85,7 @@ export default function RecordDetailsPage() {
                                 {Object.entries(record.metadata ?? {}).map(([key, value]) => (
                                     <div key={key} className="rounded-xl border border-zinc-800 bg-zinc-950/70 px-3 py-2">
                                         <p className="text-[11px] uppercase tracking-wide text-zinc-500">{key}</p>
-                                        <p className="mt-1 text-sm text-zinc-200">{String(value ?? "—")}</p>
+                                        <p className={`mt-1 text-sm text-zinc-200 ${getLanguageClass(record.language)}`}>{String(value ?? "—")}</p>
                                     </div>
                                 ))}
                             </div>
