@@ -1,11 +1,14 @@
+import { useEffect, useMemo, useState } from "react";
 import {
-    Activity,
     BrainCircuit,
+    CheckCircle2,
+    ChevronDown,
+    ChevronRight,
     FileText,
     Globe2,
-    Layers3,
-    ShieldCheck,
-    Sparkles,
+    PencilLine,
+    Plus,
+    Trash2,
     Users,
 } from "lucide-react";
 import {
@@ -24,118 +27,257 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 import { AssistantPanel } from "@/components/aiAssistant";
+import { useAuth } from "@/hooks/useauth";
+import { getCurrentUser, getInstitution } from "@/services/authService";
+import { getLeaderboard } from "@/services/leaderboardService";
+import { getLanguages } from "@/services/languageService";
+import { getRecords } from "@/services/recordsService";
+import type { CorpusRecord } from "@/types/corpusExplorer";
+import type { LucideIcon } from "lucide-react";
 
-const kpiCards = [
-    { label: "Ingested Records", value: "24.8K", subtitle: "+14.2% vs last week", icon: FileText, tone: "border-violet-500/30 bg-violet-500/10 text-violet-300" },
-    { label: "Active Operators", value: "186", subtitle: "+9 active today", icon: Users, tone: "border-sky-500/30 bg-sky-500/10 text-sky-300" },
-    { label: "Overall Corpus Health", value: "97.4%", subtitle: "Stable and improving", icon: ShieldCheck, tone: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" },
-    { label: "Indexed Languages", value: "42", subtitle: "Across 8 regions", icon: Globe2, tone: "border-amber-500/30 bg-amber-500/10 text-amber-300" },
-];
+interface DashboardStat {
+    label: string;
+    value: string;
+    subtitle: string;
+    icon: LucideIcon;
+    tone: string;
+}
 
-const chartData = [
-    { name: "Mon", value: 48 },
-    { name: "Tue", value: 64 },
-    { name: "Wed", value: 58 },
-    { name: "Thu", value: 81 },
-    { name: "Fri", value: 74 },
-    { name: "Sat", value: 91 },
-    { name: "Sun", value: 88 },
-];
+interface TodoTask {
+    id: string;
+    text: string;
+    completed: boolean;
+    createdAt: string;
+}
 
-const insights = [
-    { title: "Model drift watch", description: "Low variance detected in multilingual retrieval patterns.", time: "8 min ago", icon: BrainCircuit },
-    { title: "Policy confidence", description: "Guardrails are holding steady across 97% of active jobs.", time: "24 min ago", icon: Layers3 },
-    { title: "Operator overload", description: "Three queues are approaching review capacity thresholds.", time: "41 min ago", icon: Activity },
-];
+function deriveValue(record: Partial<CorpusRecord> | Record<string, unknown>, keys: string[]): string | null {
+    const source = record as Record<string, unknown>;
 
-const recentIngestions = [
-    { document: "Quarterly report v3", language: "English", operator: "Maya Chen", status: "Reviewed" },
-    { document: "Policy digest", language: "French", operator: "Liam Ortiz", status: "In Review" },
-    { document: "Product launch notes", language: "German", operator: "Sana Patel", status: "Synced" },
-    { document: "Customer support logs", language: "Japanese", operator: "Noah Reed", status: "Queued" },
-];
+    for (const key of keys) {
+        const value = source[key];
+        if (typeof value === "string" && value.trim()) {
+            return value.trim();
+        }
+        if (typeof value === "number") {
+            return String(value);
+        }
+    }
 
-const leaderboard = [
-    { name: "Maya Chen", audits: "184 audits", xp: "XP 94", progress: 84, initials: "MC" },
-    { name: "Liam Ortiz", audits: "171 audits", xp: "XP 91", progress: 78, initials: "LO" },
-    { name: "Sana Patel", audits: "162 audits", xp: "XP 89", progress: 72, initials: "SP" },
-];
+    return null;
+}
 
 function DashboardPage() {
+    const { user } = useAuth();
+    const [profileName, setProfileName] = useState(user?.username ?? "User");
+    const [institutionName, setInstitutionName] = useState("Loading...");
+    const [roleName, setRoleName] = useState("Intern");
+    const [currentTime, setCurrentTime] = useState(new Date());
+    const [records, setRecords] = useState<CorpusRecord[]>([]);
+    const [languages, setLanguages] = useState<string[]>([]);
+    const [contributors, setContributors] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [tasks, setTasks] = useState<TodoTask[]>([]);
+    const [taskInput, setTaskInput] = useState("");
+    const [todoOpen, setTodoOpen] = useState(true);
+    const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const timer = window.setInterval(() => setCurrentTime(new Date()), 60000);
+        return () => window.clearInterval(timer);
+    }, []);
+
+    useEffect(() => {
+        const storedTasks = window.localStorage.getItem("dashboard:tasks");
+        if (storedTasks) {
+            try {
+                const parsed = JSON.parse(storedTasks) as TodoTask[];
+                if (Array.isArray(parsed)) {
+                    setTasks(parsed);
+                }
+            } catch {
+                window.localStorage.removeItem("dashboard:tasks");
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        window.localStorage.setItem("dashboard:tasks", JSON.stringify(tasks));
+    }, [tasks]);
+
+    useEffect(() => {
+        async function loadDashboardData() {
+            try {
+                const [recordsData, languageData, leaderboardData, profileData] = await Promise.all([
+                    getRecords(0, 1000) as Promise<Partial<CorpusRecord>[]>,
+                    getLanguages(),
+                    getLeaderboard().catch(() => []),
+                    getCurrentUser().catch(() => null),
+                ]);
+
+                setRecords(recordsData as CorpusRecord[]);
+                setLanguages(languageData.map((item) => item.name));
+
+                const contributorValues = new Set<string>();
+                for (const record of recordsData as Partial<CorpusRecord>[]) {
+                    const contributor = deriveValue(record, ["contributor", "contributor_name", "user_name", "created_by", "speaker", "owner", "annotator"]);
+                    if (contributor) {
+                        contributorValues.add(contributor);
+                    }
+                }
+
+                const derivedContributors = leaderboardData.length > 0 ? leaderboardData.length : contributorValues.size;
+                setContributors(derivedContributors);
+
+                if (profileData) {
+                    setProfileName(profileData.username || user?.username || "User");
+                    const role = profileData.roles?.[0]?.name || "Intern";
+                    setRoleName(role);
+
+                    if (profileData.institution_id) {
+                        try {
+                            const institution = await getInstitution(profileData.institution_id);
+                            setInstitutionName(institution.college_name || institution.university_name || "Institution available");
+                        } catch {
+                            setInstitutionName("Institution pending");
+                        }
+                    } else {
+                        setInstitutionName("Institution not provided");
+                    }
+                }
+            } catch {
+                setInstitutionName("Institution unavailable");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        void loadDashboardData();
+    }, [user?.username]);
+
+    const chartData = useMemo(() => {
+        const counts = new Map<string, number>();
+
+        for (const record of records) {
+            const label = deriveValue(record as Partial<CorpusRecord>, ["language"]) || "Unknown";
+            if (label) {
+                counts.set(label, (counts.get(label) ?? 0) + 1);
+            }
+        }
+
+        return [...counts.entries()].sort(([, left], [, right]) => right - left).slice(0, 7).map(([name, value]) => ({ name, value }));
+    }, [records]);
+
+    const todoProgress = useMemo(() => {
+        if (!tasks.length) {
+            return 0;
+        }
+
+        const completed = tasks.filter((task) => task.completed).length;
+        return Math.round((completed / tasks.length) * 100);
+    }, [tasks]);
+
+    const stats: DashboardStat[] = useMemo(() => [
+        {
+            label: "Total Records",
+            value: records.length.toLocaleString(),
+            subtitle: loading ? "Loading corpus data" : "Live corpus inventory",
+            icon: FileText,
+            tone: "border-violet-500/30 bg-violet-500/10 text-violet-300",
+        },
+        {
+            label: "Contributors",
+            value: contributors.toLocaleString(),
+            subtitle: loading ? "Loading contributors" : "Active contributors",
+            icon: Users,
+            tone: "border-sky-500/30 bg-sky-500/10 text-sky-300",
+        },
+        {
+            label: "Languages",
+            value: languages.length.toLocaleString(),
+            subtitle: loading ? "Loading languages" : "Available languages",
+            icon: Globe2,
+            tone: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+        },
+    ], [contributors, languages.length, loading, records]);
+
+    function addTask() {
+        const trimmed = taskInput.trim();
+        if (!trimmed) {
+            return;
+        }
+
+        if (editingTaskId) {
+            setTasks((current) => current.map((task) => (task.id === editingTaskId ? { ...task, text: trimmed } : task)));
+            setEditingTaskId(null);
+        } else {
+            setTasks((current) => [{ id: crypto.randomUUID(), text: trimmed, completed: false, createdAt: new Date().toISOString() }, ...current]);
+        }
+
+        setTaskInput("");
+    }
+
+    function toggleTask(taskId: string) {
+        setTasks((current) => current.map((task) => (task.id === taskId ? { ...task, completed: !task.completed } : task)));
+    }
+
+    function startEditTask(task: TodoTask) {
+        setEditingTaskId(task.id);
+        setTaskInput(task.text);
+    }
+
+    function deleteTask(taskId: string) {
+        setTasks((current) => current.filter((task) => task.id !== taskId));
+        if (editingTaskId === taskId) {
+            setEditingTaskId(null);
+            setTaskInput("");
+        }
+    }
+
     return (
         <div className="space-y-6">
             <AssistantPanel />
-            <Card className="overflow-hidden border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 shadow-2xl shadow-black/20">
-                <CardContent className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.3fr_0.7fr] lg:p-10">
-                    <div className="space-y-5">
+
+            <section className="rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 p-6 shadow-2xl shadow-black/20 sm:p-8">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="max-w-2xl">
                         <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-sm font-medium text-violet-300">
-                            <Sparkles className="h-4 w-4" />
-                            Premium command center
+                            <BrainCircuit className="h-4 w-4" />
+                            Welcome to your workspace
                         </div>
-                        <div className="space-y-3">
-                            <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                                Keep every team aligned with one intelligent operating layer.
-                            </h1>
-                            <p className="max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
-                                Monitor knowledge health, automate insights, and stay ahead with a multi-surface AI workspace designed for enterprise execution.
-                            </p>
-                        </div>
-                        <div className="flex flex-wrap gap-3">
-                            <button className="rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500">
-                                Open briefing
-                            </button>
-                            <button className="rounded-2xl border border-zinc-700 bg-zinc-900/70 px-4 py-2.5 text-sm font-semibold text-zinc-200 transition hover:border-violet-500 hover:text-white">
-                                View health
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-5">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-zinc-400">Live status</p>
-                                <p className="mt-1 text-2xl font-semibold text-white">All systems healthy</p>
+                        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                            Welcome, {profileName} 👋
+                        </h1>
+                        <p className="mt-3 text-base leading-7 text-zinc-400">
+                            Corpus Nexus AI helps you search, understand, and act on multilingual corpus data with a clear and reliable workspace.
+                        </p>
+                        <div className="mt-5 grid gap-3 text-sm text-zinc-300 sm:grid-cols-2">
+                            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 px-4 py-3">
+                                <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Institution</p>
+                                <p className="mt-1 font-medium text-white">{institutionName}</p>
                             </div>
-                            <div className="rounded-2xl bg-emerald-500/15 p-3 text-emerald-400">
-                                <ShieldCheck className="h-5 w-5" />
-                            </div>
-                        </div>
-                        <div className="mt-6 space-y-4">
-                            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
-                                <div className="flex items-center justify-between text-sm text-zinc-400">
-                                    <span>Knowledge coverage</span>
-                                    <span className="font-semibold text-white">94%</span>
-                                </div>
-                                <div className="mt-3 h-2 rounded-full bg-zinc-800">
-                                    <div className="h-2 w-[94%] rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" />
-                                </div>
-                            </div>
-                            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
-                                <div className="flex items-center justify-between text-sm text-zinc-400">
-                                    <span>Model confidence</span>
-                                    <span className="font-semibold text-white">High</span>
-                                </div>
-                                <div className="mt-3 flex items-center gap-2 text-sm text-zinc-300">
-                                    <BrainCircuit className="h-4 w-4 text-violet-400" />
-                                    8 tuned agents in active rotation
-                                </div>
+                            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 px-4 py-3">
+                                <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Role</p>
+                                <p className="mt-1 font-medium text-white">{roleName}</p>
                             </div>
                         </div>
                     </div>
-                </CardContent>
-            </Card>
 
-            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                {kpiCards.map((card) => {
+                    <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-5 sm:min-w-[260px]">
+                        <p className="text-sm font-medium text-zinc-400">Current date & time</p>
+                        <p className="mt-3 text-xl font-semibold text-white">{currentTime.toLocaleString()}</p>
+                        <div className="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-200">
+                            <div className="flex items-center gap-2">
+                                <CheckCircle2 className="h-4 w-4" />
+                                Corpus data is synced for review.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {stats.map((card) => {
                     const Icon = card.icon;
                     return (
                         <Card key={card.label} className="group border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20 transition duration-200 hover:-translate-y-1 hover:border-violet-500/40">
@@ -156,16 +298,16 @@ function DashboardPage() {
                 })}
             </section>
 
-            <section className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
+            <section className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
                 <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
                     <CardHeader className="px-6 pb-2 pt-6">
-                        <CardTitle className="text-lg text-white">Today&apos;s Ingestion Activity</CardTitle>
-                        <CardDescription>Daily volume across the knowledge pipeline.</CardDescription>
+                        <CardTitle className="text-lg text-white">Today&apos;s Analytics</CardTitle>
+                        <CardDescription>Corpus activity shaped by the latest backend data.</CardDescription>
                     </CardHeader>
                     <CardContent className="p-6 pt-2">
                         <div className="h-72 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-3">
                             <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={chartData}>
+                                <LineChart data={chartData.length ? chartData : [{ name: "Records", value: 0 }]}> 
                                     <CartesianGrid vertical={false} stroke="#27272a" strokeDasharray="3 3" />
                                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 12 }} />
                                     <YAxis axisLine={false} tickLine={false} tick={{ fill: "#a1a1aa", fontSize: 12 }} />
@@ -179,97 +321,117 @@ function DashboardPage() {
 
                 <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
                     <CardHeader className="px-6 pb-2 pt-6">
-                        <CardTitle className="text-lg text-white">AI Insights Analyst</CardTitle>
-                        <CardDescription>Signals being surfaced for the current shift.</CardDescription>
+                        <CardTitle className="text-lg text-white">At a glance</CardTitle>
+                        <CardDescription>Useful corpus signals for the current view.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3 p-6 pt-2">
-                        {insights.map((item) => {
-                            const Icon = item.icon;
-                            return (
-                                <div key={item.title} className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
-                                    <div className="flex items-start gap-3">
-                                        <div className="rounded-2xl border border-violet-500/20 bg-violet-500/10 p-2 text-violet-300">
-                                            <Icon className="h-4 w-4" />
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex items-center justify-between gap-2">
-                                                <p className="text-sm font-semibold text-white">{item.title}</p>
-                                                <span className="text-xs text-zinc-500">{item.time}</span>
-                                            </div>
-                                            <p className="mt-1 text-sm text-zinc-400">{item.description}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </CardContent>
-                </Card>
-            </section>
-
-            <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-                <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
-                    <CardHeader className="px-6 pb-2 pt-6">
-                        <CardTitle className="text-lg text-white">Recent Ingestion</CardTitle>
-                        <CardDescription>Latest records flowing into the corpus.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-6 pt-2">
-                        <div className="overflow-hidden rounded-2xl border border-zinc-800">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Document</TableHead>
-                                        <TableHead>Language</TableHead>
-                                        <TableHead>Operator</TableHead>
-                                        <TableHead>Status</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {recentIngestions.map((entry) => (
-                                        <TableRow key={entry.document}>
-                                            <TableCell>{entry.document}</TableCell>
-                                            <TableCell>{entry.language}</TableCell>
-                                            <TableCell>{entry.operator}</TableCell>
-                                            <TableCell>
-                                                <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-300">
-                                                    {entry.status}
-                                                </span>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
+                            <p className="text-sm font-semibold text-white">Records in view</p>
+                            <p className="mt-1 text-sm text-zinc-400">{records.length.toLocaleString()} records are currently available for analysis.</p>
+                        </div>
+                        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
+                            <p className="text-sm font-semibold text-white">Language coverage</p>
+                            <p className="mt-1 text-sm text-zinc-400">{languages.length.toLocaleString()} languages are represented in the corpus.</p>
+                        </div>
+                        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
+                            <p className="text-sm font-semibold text-white">Contributor activity</p>
+                            <p className="mt-1 text-sm text-zinc-400">{contributors.toLocaleString()} contributors are reflected in the current data.</p>
                         </div>
                     </CardContent>
                 </Card>
+            </section>
 
-                <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
-                    <CardHeader className="px-6 pb-2 pt-6">
-                        <CardTitle className="text-lg text-white">Operator Leaderboard</CardTitle>
-                        <CardDescription>Top contributors this sprint.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3 p-6 pt-2">
-                        {leaderboard.map((person) => (
-                            <div key={person.name} className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 font-semibold text-white">
-                                        {person.initials}
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <div className="flex items-center justify-between gap-3">
-                                            <p className="text-sm font-semibold text-white">{person.name}</p>
-                                            <span className="text-sm font-medium text-violet-300">{person.xp}</span>
-                                        </div>
-                                        <p className="mt-1 text-sm text-zinc-400">{person.audits}</p>
-                                        <div className="mt-3 h-2 rounded-full bg-zinc-800">
-                                            <div className={`h-2 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500`} style={{ width: `${person.progress}%` }} />
-                                        </div>
-                                    </div>
+            <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
+                <CardHeader className="px-6 pb-2 pt-6">
+                    <div className="flex items-center justify-between gap-3">
+                        <div>
+                            <CardTitle className="text-lg text-white">My To-Do</CardTitle>
+                            <CardDescription>Keep track of the next actions for the day.</CardDescription>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setTodoOpen((current) => !current)}
+                            className="rounded-full border border-zinc-800 bg-zinc-900/70 p-2 text-zinc-300 transition hover:border-violet-500 hover:text-white"
+                        >
+                            {todoOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        </button>
+                    </div>
+                </CardHeader>
+                {todoOpen ? (
+                    <CardContent className="space-y-4 p-6 pt-2">
+                        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
+                            <div className="flex items-center justify-between gap-3">
+                                <div>
+                                    <p className="text-sm font-semibold text-white">Progress</p>
+                                    <p className="mt-1 text-sm text-zinc-400">{todoProgress}% complete</p>
+                                </div>
+                                <div className="h-2.5 w-32 rounded-full bg-zinc-800">
+                                    <div className="h-2.5 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" style={{ width: `${todoProgress}%` }} />
                                 </div>
                             </div>
-                        ))}
+                        </div>
+
+                        <div className="flex flex-col gap-3 sm:flex-row">
+                            <input
+                                value={taskInput}
+                                onChange={(event) => setTaskInput(event.target.value)}
+                                placeholder={editingTaskId ? "Update your task" : "Add a task"}
+                                className="flex-1 rounded-2xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-white outline-none transition focus:border-violet-500"
+                            />
+                            <button
+                                type="button"
+                                onClick={addTask}
+                                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
+                            >
+                                <Plus className="h-4 w-4" />
+                                {editingTaskId ? "Save" : "Add task"}
+                            </button>
+                        </div>
+
+                        <div className="space-y-3">
+                            {tasks.length === 0 ? (
+                                <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-900/70 p-4 text-sm text-zinc-400">
+                                    No tasks yet. Add one to keep your day organized.
+                                </div>
+                            ) : (
+                                tasks.map((task) => (
+                                    <div key={task.id} className="flex items-center justify-between gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-4">
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleTask(task.id)}
+                                                className={`rounded-full border p-1 ${task.completed ? "border-emerald-500 bg-emerald-500/15 text-emerald-300" : "border-zinc-700 text-zinc-500"}`}
+                                            >
+                                                <CheckCircle2 className="h-4 w-4" />
+                                            </button>
+                                            <div>
+                                                <p className={`text-sm font-medium ${task.completed ? "text-zinc-500 line-through" : "text-white"}`}>{task.text}</p>
+                                                <p className="text-xs text-zinc-500">{new Date(task.createdAt).toLocaleString()}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => startEditTask(task)}
+                                                className="rounded-full border border-zinc-800 bg-zinc-950/70 p-2 text-zinc-300 transition hover:border-violet-500 hover:text-white"
+                                            >
+                                                <PencilLine className="h-4 w-4" />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => deleteTask(task.id)}
+                                                className="rounded-full border border-zinc-800 bg-zinc-950/70 p-2 text-zinc-300 transition hover:border-rose-500 hover:text-white"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </CardContent>
-                </Card>
-            </section>
+                ) : null}
+            </Card>
         </div>
     );
 }

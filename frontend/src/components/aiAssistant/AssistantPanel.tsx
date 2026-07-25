@@ -4,15 +4,8 @@ import { Send, X, Loader, Paperclip, Mic, Download, Trash2, Pencil, RotateCw } f
 import RobotSvg from '@/assets/robot.svg';
 import { askAssistant, getAssistantSuggestions, streamAssistant, createConversationOnServer, createMessageOnServer, fetchConversations } from "@/services/assistantService";
 import type { AssistantConversation, AssistantMessage } from "@/types/assistant";
+import { useAuth } from "@/hooks/useauth";
 import ChatMessageList from "./chat/ChatMessageList";
-
-interface ServerConversationPayload {
-    id: string;
-    title?: string;
-    messages?: AssistantMessage[];
-    createdAt?: string;
-    updatedAt?: string;
-}
 
 function createMessage(content: string, role: "user" | "assistant", id: string): AssistantMessage {
     return {
@@ -25,6 +18,7 @@ function createMessage(content: string, role: "user" | "assistant", id: string):
 }
 
 export default function AssistantPanel() {
+    const { user } = useAuth();
     const [open, setOpen] = useState(false);
     const [question, setQuestion] = useState("");
     const [loading, setLoading] = useState(false);
@@ -57,10 +51,16 @@ export default function AssistantPanel() {
             try {
                 const serverConvs = await fetchConversations();
                 if (serverConvs && serverConvs.length > 0) {
-                    const normalized = serverConvs.map((conv: ServerConversationPayload) => ({
+                    const normalized = serverConvs.map((conv) => ({
                         id: conv.id,
                         title: conv.title || "Conversation",
-                        messages: conv.messages || [],
+                        messages: (conv.messages || []).map((message: { id: string; role: string; content: string; createdAt?: string }) => ({
+                            ...message,
+                            id: message.id,
+                            role: message.role as "user" | "assistant",
+                            content: message.content,
+                            createdAt: message.createdAt || new Date().toISOString(),
+                        } as AssistantMessage)),
                         createdAt: conv.createdAt || new Date().toISOString(),
                         updatedAt: conv.updatedAt || new Date().toISOString(),
                     })) as AssistantConversation[];
@@ -290,7 +290,7 @@ export default function AssistantPanel() {
                                 <img src={RobotSvg} alt="robot" className="h-20 w-20 object-contain" />
                             </div>
                             <div className="text-center">
-                                <h3 className="text-2xl font-semibold text-white">Hi, Saharsha <span className="inline-block">👋</span></h3>
+                                <h3 className="text-2xl font-semibold text-white">Hi, {user?.username || "there"} <span className="inline-block">👋</span></h3>
                                 <p className="mt-1 text-sm text-zinc-400">I'm your Enterprise AI Assistant — ask me anything about Corpus Nexus.</p>
                             </div>
                             <button type="button" onClick={() => setOpen(false)} className="absolute right-4 top-4 rounded-full p-2 text-zinc-400 hover:bg-zinc-800/40">
