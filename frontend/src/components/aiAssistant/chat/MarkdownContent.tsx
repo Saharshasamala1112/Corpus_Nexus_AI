@@ -35,7 +35,7 @@ function renderInline(text: string): ReactNode[] {
 
         if (match[1]) {
             parts.push(
-                <code key={`${match.index}-code`} className="rounded bg-white/10 px-1 py-0.5 font-mono text-cyan-200">
+                <code key={`${match.index}-code`} className="rounded bg-[var(--app-surface)]/10 px-1 py-0.5 font-mono text-[var(--app-accent)]">
                     {match[1].slice(1, -1)}
                 </code>,
             )
@@ -46,13 +46,13 @@ function renderInline(text: string): ReactNode[] {
                 </a>,
             )
         } else if (match[4]) {
-            parts.push(<strong key={`${match.index}-bold`} className="font-semibold text-white">{match[4]}</strong>)
+            parts.push(<strong key={`${match.index}-bold`} className="font-semibold text-[var(--app-strong)]">{match[4]}</strong>)
         } else if (match[5]) {
-            parts.push(<strong key={`${match.index}-bold`} className="font-semibold text-white">{match[5]}</strong>)
+            parts.push(<strong key={`${match.index}-bold`} className="font-semibold text-[var(--app-strong)]">{match[5]}</strong>)
         } else if (match[6]) {
-            parts.push(<em key={`${match.index}-italic`} className="italic text-zinc-200">{match[6]}</em>)
+            parts.push(<em key={`${match.index}-italic`} className="italic text-[var(--app-text)]">{match[6]}</em>)
         } else if (match[7]) {
-            parts.push(<em key={`${match.index}-italic`} className="italic text-zinc-200">{match[7]}</em>)
+            parts.push(<em key={`${match.index}-italic`} className="italic text-[var(--app-text)]">{match[7]}</em>)
         }
 
         lastIndex = regex.lastIndex
@@ -73,13 +73,13 @@ function renderParagraph(lines: string[]): ReactNode {
         </Fragment>
     ))
 
-    return <p className="mb-3 whitespace-pre-wrap break-words leading-7 text-sm text-zinc-200 [overflow-wrap:anywhere]">{content}</p>
+    return <p className="mb-3 whitespace-pre-wrap break-words leading-7 text-sm text-[var(--app-text)] [overflow-wrap:anywhere]">{content}</p>
 }
 
 function renderList(items: string[], ordered: boolean): ReactNode {
     const Tag = ordered ? 'ol' : 'ul'
     return (
-        <Tag className={`mb-3 ml-5 space-y-2 ${ordered ? 'list-decimal' : 'list-disc'} whitespace-pre-wrap break-words leading-7 text-sm text-zinc-200 [overflow-wrap:anywhere]`}>
+        <Tag className={`mb-3 ml-5 space-y-2 ${ordered ? 'list-decimal' : 'list-disc'} whitespace-pre-wrap break-words leading-7 text-sm text-[var(--app-text)] [overflow-wrap:anywhere]`}>
             {items.map((item, index) => (
                 <li key={`${item}-${index}`} className="pl-1">
                     {renderInline(item)}
@@ -125,13 +125,13 @@ export default function MarkdownContent({ content }: Props) {
             }
             const code = codeLines.join('\n')
             blocks.push(
-                <pre key={`code-${blocks.length}`} className="mt-2 overflow-x-auto rounded-2xl bg-zinc-950/90 p-4 text-xs text-zinc-100 ring-1 ring-white/10 shadow-lg">
-                    <div className="mb-2 flex items-center justify-between text-[11px] text-zinc-400">
+                <pre key={`code-${blocks.length}`} className="mt-2 overflow-x-auto rounded-2xl bg-[var(--app-surface)]/95 p-4 text-xs text-[var(--app-text)] ring-[var(--app-border)] shadow-[var(--shadow-lg)]">
+                    <div className="mb-2 flex items-center justify-between text-[11px] text-[var(--app-text-muted)]">
                         <div className="inline-flex items-center gap-2">
                             <span className="h-2 w-2 rounded-full bg-cyan-400/80" />
                             <span>{fence || 'code'}</span>
                         </div>
-                        <button type="button" onClick={() => void copyToClipboard(code)} className="rounded-md border border-white/10 px-2 py-1 text-[11px] text-zinc-300 hover:text-white">
+                        <button type="button" onClick={() => void copyToClipboard(code)} className="rounded-md border border-[var(--app-border)] px-2 py-1 text-[11px] text-[var(--app-text-muted)] hover:text-[var(--app-text)]">
                             Copy
                         </button>
                     </div>
@@ -147,7 +147,7 @@ export default function MarkdownContent({ content }: Props) {
             const headingText = match?.[2] ?? line
             const HeadingTag = `h${Math.min(level, 6)}` as keyof React.JSX.IntrinsicElements
             blocks.push(
-                React.createElement(HeadingTag, { key: `heading-${blocks.length}`, className: 'mb-3 font-semibold text-white' }, renderInline(headingText))
+                React.createElement(HeadingTag, { key: `heading-${blocks.length}`, className: 'mb-3 font-semibold text-[var(--app-strong)]' }, renderInline(headingText))
             )
             index += 1
             continue
@@ -184,7 +184,7 @@ export default function MarkdownContent({ content }: Props) {
     }
 
     return (
-        <div className="prose prose-sm max-w-full overflow-hidden break-words text-zinc-200 [overflow-wrap:anywhere]">
+        <div className="prose prose-sm max-w-full overflow-hidden break-words text-[var(--app-text)] [overflow-wrap:anywhere]">
             {blocks}
         </div>
     )

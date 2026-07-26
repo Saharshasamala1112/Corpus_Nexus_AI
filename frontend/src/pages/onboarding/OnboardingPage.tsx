@@ -29,16 +29,16 @@ function OnboardingPage() {
             : Math.round((completedTasks / tasks.length) * 100);
 
     return (
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-10 shadow-2xl shadow-black/20">
+        <div className="rounded-3xl border border-[var(--app-border)] bg-[var(--app-surface)] p-10 shadow-[var(--shadow-lg)] dark:border-zinc-800 dark:bg-zinc-950/70 dark:shadow-black/20">
             <p className="text-sm font-medium uppercase tracking-[0.35em] text-violet-400">
                 Onboarding
             </p>
 
-            <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+            <h1 className="mt-4 text-3xl font-semibold tracking-tight text-[var(--app-strong)] dark:text-white">
                 Onboarding Companion
             </h1>
 
-            <p className="mt-3 max-w-2xl text-base text-zinc-400">
+            <p className="mt-3 max-w-2xl text-base text-[var(--app-text-muted)] dark:text-zinc-400">
                 Complete the required onboarding tasks to prepare your development
                 environment and begin contributing to the project.
             </p>
@@ -51,14 +51,14 @@ function OnboardingPage() {
                     progress={progress}
                 />
 
-                <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-6">
+                <div className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface-secondary)] p-6 dark:border-zinc-800 dark:bg-zinc-900/70">
                     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                         <div>
-                            <h2 className="text-lg font-semibold text-white">
+                            <h2 className="text-lg font-semibold text-[var(--app-strong)] dark:text-white">
                                 Checklist
                             </h2>
 
-                            <p className="mt-1 text-sm text-zinc-400">
+                            <p className="mt-1 text-sm text-[var(--app-text-muted)] dark:text-zinc-400">
                                 Work through the setup tasks to prepare your workspace.
                             </p>
                         </div>

@@ -49,22 +49,22 @@ export default function SprintPromptForm({
     return (
         <section
             className={cn(
-                "rounded-2xl border border-white/10 bg-slate-950/70 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur sm:p-6",
+                "rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-5 shadow-[var(--shadow-sm)] backdrop-blur sm:p-6 dark:border-white/10 dark:bg-slate-950/70 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.03)]",
                 className
             )}
         >
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-2xl">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-sm font-medium text-cyan-200">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-[var(--app-accent)]/20 bg-[var(--app-accent-soft)] px-3 py-1 text-sm font-medium text-[var(--app-accent)] dark:border-cyan-400/20 dark:bg-cyan-500/10 dark:text-cyan-200">
                         <Sparkles className="h-4 w-4" />
                         Sprint AI Prompt
                     </div>
 
-                    <h3 className="mt-4 text-xl font-semibold tracking-tight text-white">
+                    <h3 className="mt-4 text-xl font-semibold tracking-tight text-[var(--app-strong)] dark:text-white">
                         Generate a focused sprint plan in seconds.
                     </h3>
 
-                    <p className="mt-2 text-sm leading-6 text-slate-400">
+                    <p className="mt-2 text-sm leading-6 text-[var(--app-text-muted)] dark:text-slate-400">
                         Capture the essentials for your next AI-powered sprint
                         brief and shape a polished execution plan for the team.
                     </p>
@@ -81,7 +81,7 @@ export default function SprintPromptForm({
                 <div className="space-y-2">
                     <label
                         htmlFor="project-name"
-                        className="text-sm font-medium text-slate-200"
+                        className="text-sm font-medium text-[var(--app-text)] dark:text-white"
                     >
                         Project Name
                     </label>
@@ -92,14 +92,14 @@ export default function SprintPromptForm({
                         value={projectName}
                         onChange={(e) => setProjectName(e.target.value)}
                         placeholder="Corpus Nexus AI"
-                        className="bg-slate-900/80"
+                        className="bg-[var(--app-surface-secondary)] text-[var(--app-strong)] placeholder:text-[var(--app-text-soft)] dark:bg-slate-900/80 dark:text-slate-100"
                     />
                 </div>
 
                 <div className="space-y-2">
                     <label
                         htmlFor="team-size"
-                        className="text-sm font-medium text-slate-200"
+                        className="text-sm font-medium text-[var(--app-text)] dark:text-white"
                     >
                         Team Size
                     </label>
@@ -110,14 +110,14 @@ export default function SprintPromptForm({
                         min={1}
                         value={teamSize}
                         onChange={(e) => setTeamSize(Number(e.target.value))}
-                        className="bg-slate-900/80"
+                        className="bg-[var(--app-surface-secondary)] text-[var(--app-strong)] placeholder:text-[var(--app-text-soft)] dark:bg-slate-900/80 dark:text-slate-100"
                     />
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
                     <label
                         htmlFor="sprint-goal"
-                        className="text-sm font-medium text-slate-200"
+                        className="text-sm font-medium text-[var(--app-text)] dark:text-white"
                     >
                         Sprint Goal
                     </label>
@@ -128,14 +128,14 @@ export default function SprintPromptForm({
                         value={sprintGoal}
                         onChange={(e) => setSprintGoal(e.target.value)}
                         placeholder="Ship a refined onboarding flow and publish the new sprint dashboard"
-                        className="bg-slate-900/80"
+                        className="bg-[var(--app-surface-secondary)] text-[var(--app-strong)] placeholder:text-[var(--app-text-soft)] dark:bg-slate-900/80 dark:text-slate-100"
                     />
                 </div>
 
                 <div className="space-y-2">
                     <label
                         htmlFor="sprint-duration"
-                        className="text-sm font-medium text-slate-200"
+                        className="text-sm font-medium text-[var(--app-text)] dark:text-white"
                     >
                         Sprint Duration (weeks)
                     </label>
@@ -148,14 +148,14 @@ export default function SprintPromptForm({
                         onChange={(e) =>
                             setSprintDuration(Number(e.target.value))
                         }
-                        className="bg-slate-900/80"
+                        className="bg-[var(--app-surface-secondary)] text-[var(--app-strong)] placeholder:text-[var(--app-text-soft)] dark:bg-slate-900/80 dark:text-slate-100"
                     />
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
                     <label
                         htmlFor="additional-context"
-                        className="text-sm font-medium text-slate-200"
+                        className="text-sm font-medium text-[var(--app-text)] dark:text-white"
                     >
                         Additional Context
                     </label>
@@ -168,7 +168,7 @@ export default function SprintPromptForm({
                             setAdditionalContext(e.target.value)
                         }
                         placeholder="Add details about milestones, constraints, stakeholders, dependencies, or release expectations."
-                        className="w-full rounded-lg border border-white/10 bg-slate-900/80 px-3 py-3 text-sm text-slate-100 shadow-sm outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-400/40 focus:ring-2 focus:ring-cyan-400/20"
+                        className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-surface-secondary)] px-3 py-3 text-sm text-[var(--app-strong)] shadow-sm outline-none transition-colors placeholder:text-[var(--app-text-soft)] focus:border-[var(--app-accent)]/40 focus:ring-2 focus:ring-[var(--app-accent)]/20 dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-cyan-400/40 dark:focus:ring-cyan-400/20"
                     />
                 </div>
 
