@@ -23,16 +23,16 @@ export default function PageHeader({
     return (
         <section
             className={cn(
-                "flex flex-col gap-4 rounded-2xl border border-white/10 bg-slate-950/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:p-6",
+                "flex flex-col gap-4 rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-4 shadow-[var(--shadow-md)] backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:p-6",
                 className
             )}
         >
             <div className="min-w-0">
-                <h2 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
+                <h2 className="text-xl font-semibold tracking-tight text-[var(--app-strong)] sm:text-2xl">
                     {title}
                 </h2>
                 {description ? (
-                    <p className="mt-1 text-sm leading-6 text-slate-400">
+                    <p className="mt-1 text-sm leading-6 text-[var(--app-text-muted)]">
                         {description}
                     </p>
                 ) : null}

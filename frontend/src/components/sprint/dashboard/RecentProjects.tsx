@@ -14,21 +14,21 @@ export default function RecentProjects({ className }: RecentProjectsProps) {
     return (
         <section className={cn("w-full", className)}>
             <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold tracking-tight text-white">
+                <h3 className="text-lg font-semibold tracking-tight text-[var(--app-strong)]">
                     Recent Projects
                 </h3>
             </div>
 
-            <div className="rounded-2xl border border-dashed border-white/10 bg-slate-950/70 p-10 text-center shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-300">
+            <div className="rounded-2xl border border-dashed border-[var(--app-border)] bg-[var(--app-surface)] p-10 text-center shadow-[var(--shadow-sm)]">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--app-accent-soft)] text-[var(--app-accent)]">
                     <FolderKanban className="h-8 w-8" />
                 </div>
 
-                <h4 className="mt-6 text-xl font-semibold text-white">
+                <h4 className="mt-6 text-xl font-semibold text-[var(--app-strong)]">
                     No projects yet
                 </h4>
 
-                <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-400">
+                <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-[var(--app-text-muted)]">
                     Your recently created projects will appear here. Create your
                     first project to start planning AI-powered sprints and
                     collaborating with your team.

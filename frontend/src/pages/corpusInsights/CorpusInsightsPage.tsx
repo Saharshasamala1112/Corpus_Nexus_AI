@@ -39,20 +39,20 @@ function CorpusInsightsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 p-6 shadow-2xl shadow-black/20 sm:p-8 lg:p-10">
-        <p className="text-sm font-medium uppercase tracking-[0.35em] text-violet-400">
+      <div className="overflow-hidden rounded-3xl border border-[var(--app-border)] bg-[linear-gradient(135deg,var(--app-surface)_0%,var(--app-surface-secondary)_55%,var(--app-bg)_100%)] p-6 shadow-[0_24px_70px_var(--app-accent-soft)] sm:p-8 lg:p-10">
+        <p className="text-sm font-medium uppercase tracking-[0.35em] text-[var(--app-accent)]">
           Corpus Insights
         </p>
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-[var(--app-strong)] sm:text-4xl">
           Live analytics for your corpus workspace.
         </h1>
-        <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-400 sm:text-lg">
+        <p className="mt-3 max-w-2xl text-base leading-7 text-[var(--app-text-muted)] sm:text-lg">
           Monitor corpus growth, language coverage, media distribution, and contributor activity from one page.
         </p>
       </div>
 
       {loading ? (
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-8 text-center text-zinc-400 shadow-lg shadow-black/20">
+        <div className="rounded-3xl border border-[var(--app-border)] bg-[var(--app-surface)]/80 p-8 text-center text-[var(--app-text-muted)] shadow-[0_16px_40px_var(--app-accent-soft)]">
           Loading analytics...
         </div>
       ) : (
@@ -64,20 +64,20 @@ function CorpusInsightsPage() {
           </section>
 
           <section className="grid gap-6 xl:grid-cols-2">
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-sm">
+            <div className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-6 shadow-[0_12px_32px_rgba(15,23,42,0.05)]">
               <div className="mb-5">
-                <h2 className="text-lg font-semibold text-white">Language Analytics</h2>
-                <p className="mt-1 text-sm text-slate-400">
+                <h2 className="text-lg font-semibold text-[var(--app-strong)]">Language Analytics</h2>
+                <p className="mt-1 text-sm text-[var(--app-text-muted)]">
                   Explore the distribution of recordings across languages.
                 </p>
               </div>
               <LanguageChart />
             </div>
 
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-sm">
+            <div className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-6 shadow-[0_12px_32px_rgba(15,23,42,0.05)]">
               <div className="mb-5">
-                <h2 className="text-lg font-semibold text-white">Media Type Analytics</h2>
-                <p className="mt-1 text-sm text-slate-400">
+                <h2 className="text-lg font-semibold text-[var(--app-strong)]">Media Type Analytics</h2>
+                <p className="mt-1 text-sm text-[var(--app-text-muted)]">
                   Review the representation of audio, video, image, text, and document recordings.
                 </p>
               </div>
@@ -85,10 +85,10 @@ function CorpusInsightsPage() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-sm sm:p-8">
+          <section className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-6 shadow-[0_12px_32px_rgba(15,23,42,0.05)] sm:p-8">
             <div className="mb-6">
-              <h2 className="text-lg font-semibold text-white">Top Contributors</h2>
-              <p className="mt-1 text-sm text-slate-400">
+              <h2 className="text-lg font-semibold text-[var(--app-strong)]">Top Contributors</h2>
+              <p className="mt-1 text-sm text-[var(--app-text-muted)]">
                 See the highest-ranked contributors in the current leaderboard.
               </p>
             </div>

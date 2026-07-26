@@ -25,11 +25,11 @@ const QuestionInput = ({ value, onChange, onAsk, loading = false }: QuestionInpu
   };
 
   return (
-    <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-6 shadow-lg shadow-black/20 sm:p-8">
+    <div className="rounded-3xl border border-[var(--app-border)] bg-[var(--app-surface)] p-6 shadow-[var(--shadow-md)] sm:p-8">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-white">Ask a question</h2>
-          <p className="mt-1 text-sm text-zinc-400">
+          <h2 className="text-lg font-semibold text-[var(--app-strong)]">Ask a question</h2>
+          <p className="mt-1 text-sm text-[var(--app-text-muted)]">
             Explore the corpus with natural language insights.
           </p>
         </div>
@@ -41,17 +41,17 @@ const QuestionInput = ({ value, onChange, onAsk, loading = false }: QuestionInpu
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Ask anything about the Corpus Platform..."
-        className="mt-5 w-full rounded-2xl border border-zinc-800 bg-zinc-900/70 px-4 py-3 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-violet-500"
+        className="mt-5 w-full rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface-secondary)] px-4 py-3 text-sm text-[var(--app-text)] outline-none transition placeholder:text-[var(--app-text-soft)] focus:border-[var(--app-accent)]"
       />
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-[var(--app-text-soft)]">
           Try asking for the top languages, media breakdown, or contributor rankings.
         </p>
         <button
           onClick={handleSubmit}
           disabled={loading || !value.trim()}
-          className="rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-violet-400"
+          className="rounded-2xl bg-[var(--app-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--app-surface)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? (
             <span className="flex items-center gap-2">

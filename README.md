@@ -289,8 +289,8 @@ The Logout option provides a secure way to end the current session and protect u
 <p align="center">
   <img src="frontend/src/assets/screenshots/Logout.png" alt="Logout" width="35%">
 </p>
----
 
+---
 # 🛠️ Technology Stack
 
 ## Frontend

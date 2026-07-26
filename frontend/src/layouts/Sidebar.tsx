@@ -44,15 +44,13 @@ function Sidebar({
 }: SidebarProps) {
     return (
         <aside
-            className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-zinc-800 bg-[#09090b] transition-all duration-200 ${
-                collapsed ? "w-[72px]" : "w-[260px]"
-            } ${
-                mobileOpen
+            className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[var(--app-border)] bg-[var(--app-bg)] transition-all duration-200 ${collapsed ? "w-[72px]" : "w-[260px]"
+                } ${mobileOpen
                     ? "translate-x-0"
                     : "-translate-x-full lg:translate-x-0"
-            }`}
+                }`}
         >
-            <div className="flex h-[72px] items-center justify-between border-b border-zinc-800 px-4">
+            <div className="flex h-[72px] items-center justify-between border-b border-[var(--app-border)] px-4">
                 <div className="flex min-w-0 items-center">
                     <Logo collapsed={collapsed} />
                 </div>
@@ -60,13 +58,12 @@ function Sidebar({
                 <button
                     type="button"
                     aria-label="Collapse sidebar"
-                    className="hidden rounded-xl border border-zinc-800 bg-zinc-900/70 p-2 text-zinc-400 transition hover:border-violet-500 hover:text-white lg:inline-flex"
+                    className="hidden rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] p-2 text-[var(--app-text-muted)] transition hover:border-[var(--app-accent)] hover:text-[var(--app-text)] lg:inline-flex"
                     onClick={onToggleCollapse}
                 >
                     <ChevronLeft
-                        className={`h-4 w-4 transition ${
-                            collapsed ? "rotate-180" : "rotate-0"
-                        }`}
+                        className={`h-4 w-4 transition ${collapsed ? "rotate-180" : "rotate-0"
+                            }`}
                     />
                 </button>
             </div>
@@ -83,7 +80,7 @@ function Sidebar({
                 ))}
             </nav>
 
-            <div className="space-y-1 border-t border-zinc-800 px-3 py-5">
+            <div className="space-y-1 border-t border-[var(--app-border)] px-3 py-5">
                 {bottomItems.map((item) => (
                     <NavItem
                         key={item.to}
@@ -97,7 +94,7 @@ function Sidebar({
 
             <button
                 type="button"
-                className="mx-3 mb-4 flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/70 px-3 py-3 text-left text-sm text-zinc-400 transition hover:border-violet-500 hover:text-white lg:hidden"
+                className="mx-3 mb-4 flex items-center gap-3 rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-3 text-left text-sm text-[var(--app-text-muted)] transition hover:border-[var(--app-accent)] hover:text-[var(--app-text)] lg:hidden"
                 onClick={onCloseMobile}
             >
                 <PanelLeftClose className="h-4 w-4" />

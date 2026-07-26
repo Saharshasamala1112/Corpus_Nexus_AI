@@ -40,7 +40,7 @@ const AnalyticsPage = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="p-8 text-lg">
+        <div className="p-8 text-lg text-[var(--app-text-muted)]">
           Loading analytics...
         </div>
       </MainLayout>
@@ -51,11 +51,11 @@ const AnalyticsPage = () => {
     <MainLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-4xl font-bold text-slate-800">
+          <h1 className="text-4xl font-bold text-[var(--app-strong)]">
             Analytics
           </h1>
 
-          <p className="mt-2 text-gray-500">
+          <p className="mt-2 text-[var(--app-text-muted)]">
             Live analytics from the Indic Corpus Platform.
           </p>
         </div>
@@ -77,12 +77,12 @@ const AnalyticsPage = () => {
           />
         </div>
 
-        <div className="rounded-xl border border-border/60 bg-card p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-semibold">
+        <div className="rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] p-6 shadow-[0_12px_32px_rgba(15,23,42,0.05)]">
+          <h2 className="mb-4 text-xl font-semibold text-[var(--app-strong)]">
             Dataset Summary
           </h2>
 
-          <ul className="list-disc space-y-2 pl-6 text-slate-700">
+          <ul className="list-disc space-y-2 pl-6 text-[var(--app-text)]">
             <li>
               Total Records: {stats.totalRecords.toLocaleString()}
             </li>
@@ -94,8 +94,6 @@ const AnalyticsPage = () => {
             <li>
               Active Contributors: {contributors.toLocaleString()}
             </li>
-
-
           </ul>
         </div>
       </div>

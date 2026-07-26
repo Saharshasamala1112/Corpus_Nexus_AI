@@ -30,7 +30,7 @@ export default function SprintNavigation({ className }: SprintNavigationProps) {
     return (
         <nav
             className={cn(
-                "rounded-2xl border border-white/10 bg-slate-950/70 p-2 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur",
+                "rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-2 shadow-[var(--shadow-sm)] backdrop-blur dark:border-white/10 dark:bg-slate-950/70 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.03)]",
                 className
             )}
         >
@@ -47,8 +47,8 @@ export default function SprintNavigation({ className }: SprintNavigationProps) {
                                 cn(
                                     "flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition-all duration-200",
                                     isActive
-                                        ? "border-cyan-400/25 bg-cyan-500/15 text-cyan-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-                                        : "border-transparent bg-transparent text-slate-300 hover:border-white/10 hover:bg-white/5 hover:text-white"
+                                        ? "border-[var(--app-accent)]/25 bg-[var(--app-accent-soft)] text-[var(--app-accent)] shadow-[inset_0_1px_0_rgba(109,40,217,0.15)] dark:border-cyan-400/25 dark:bg-cyan-500/15 dark:text-cyan-200 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                                        : "border-transparent bg-transparent text-[var(--app-text-soft)] hover:border-[var(--app-border)] hover:bg-[var(--app-surface-secondary)] hover:text-[var(--app-strong)] dark:text-slate-300 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white"
                                 )
                             }
                         >

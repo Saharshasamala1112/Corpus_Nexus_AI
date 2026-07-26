@@ -8,7 +8,7 @@ import ActivityFeed from "@/components/sprint/dashboard/ActivityFeed";
 
 export default function SprintPage() {
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 bg-[var(--app-bg)] text-[var(--app-text)]">
             <PageHeader
                 title="SprintWise AI"
                 description="Plan, manage, and generate AI-powered sprints for your engineering teams."

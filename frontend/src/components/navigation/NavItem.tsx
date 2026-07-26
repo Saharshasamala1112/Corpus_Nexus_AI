@@ -17,15 +17,15 @@ function NavItem({ to, label, icon: Icon, collapsed = false }: NavItemProps) {
                 cn(
                     "group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200",
                     isActive
-                        ? "bg-violet-600 text-white shadow-lg shadow-violet-950/40"
-                        : "text-zinc-400 hover:bg-zinc-900/70 hover:text-zinc-100",
+                        ? "bg-[var(--app-accent)] text-[var(--app-strong)] shadow-lg shadow-[color:var(--app-accent-soft)]"
+                        : "text-[var(--app-text-muted)] hover:bg-[var(--app-surface-secondary)] hover:text-[var(--app-text)]",
                     collapsed && "justify-center px-2"
                 )
             }
         >
             {({ isActive }) => (
                 <>
-                    <Icon className={cn("h-5 w-5", isActive ? "text-white" : "text-zinc-400 group-hover:text-zinc-100")} />
+                    <Icon className={cn("h-5 w-5", isActive ? "text-[var(--app-strong)]" : "text-[var(--app-text-muted)] group-hover:text-[var(--app-text)]")} />
                     {!collapsed ? <span>{label}</span> : null}
                 </>
             )}

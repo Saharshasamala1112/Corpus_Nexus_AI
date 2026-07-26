@@ -14,20 +14,20 @@ type StatsCardProps = {
 
 const palette = {
     cyan: {
-        icon: "bg-cyan-500/15 text-cyan-300",
-        badge: "bg-cyan-500/10 text-cyan-200",
+        icon: "bg-[var(--app-accent-soft)] text-[var(--app-accent)]",
+        badge: "bg-[var(--app-accent-soft)] text-[var(--app-accent)]",
     },
     violet: {
-        icon: "bg-violet-500/15 text-violet-300",
-        badge: "bg-violet-500/10 text-violet-200",
+        icon: "bg-[var(--app-accent-soft)] text-[var(--app-accent)]",
+        badge: "bg-[var(--app-accent-soft)] text-[var(--app-accent)]",
     },
     emerald: {
-        icon: "bg-emerald-500/15 text-emerald-300",
-        badge: "bg-emerald-500/10 text-emerald-200",
+        icon: "bg-[var(--app-accent-soft)] text-[var(--app-accent)]",
+        badge: "bg-[var(--app-accent-soft)] text-[var(--app-accent)]",
     },
     amber: {
-        icon: "bg-amber-500/15 text-amber-300",
-        badge: "bg-amber-500/10 text-amber-200",
+        icon: "bg-[var(--app-accent-soft)] text-[var(--app-accent)]",
+        badge: "bg-[var(--app-accent-soft)] text-[var(--app-accent)]",
     },
 } as const;
 
@@ -45,14 +45,14 @@ export default function StatsCard({
     return (
         <article
             className={cn(
-                "group rounded-xl border border-white/10 bg-slate-950/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-400/20 hover:shadow-lg hover:shadow-cyan-500/10 sm:p-5",
+                "group rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] p-4 shadow-[var(--shadow-sm)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--app-accent)]/20 hover:shadow-[var(--shadow-md)] sm:p-5",
                 className
             )}
         >
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                    <p className="text-sm text-slate-400">{title}</p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                    <p className="text-sm text-[var(--app-text-muted)]">{title}</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight text-[var(--app-strong)] sm:text-3xl">
                         {value}
                     </p>
                 </div>
@@ -66,7 +66,7 @@ export default function StatsCard({
 
             <div className="mt-4 flex items-center justify-between gap-3">
                 {subtitle ? (
-                    <p className="text-sm text-slate-500">{subtitle}</p>
+                    <p className="text-sm text-[var(--app-text-soft)]">{subtitle}</p>
                 ) : null}
 
                 {trend ? (
