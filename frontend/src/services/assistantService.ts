@@ -227,16 +227,25 @@ export async function* streamAssistant(
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
+        const events = buffer.split("\n\n");
+        buffer = events.pop() || "";
 
-        for (const line of lines) {
-            if (!line) continue;
-            const payloadLine = line.startsWith("data: ") ? line.slice(6).trim() : line.trim();
-            if (!payloadLine) continue;
-            if (payloadLine === "[DONE]") return;
+        for (const event of events) {
+            if (!event) continue;
+
+            const payloadLines: string[] = [];
+            for (const line of event.split("\n")) {
+                if (!line.startsWith("data:")) continue;
+                const payloadLine = line.length > 5 && line[5] === " " ? line.slice(6) : line.slice(5);
+                payloadLines.push(payloadLine);
+            }
+
+            const payload = payloadLines.join("\n");
+            if (!payload) continue;
+            if (payload === "[DONE]") return;
+
             try {
-                const obj = JSON.parse(payloadLine);
+                const obj = JSON.parse(payload);
                 if (typeof obj === "string") {
                     yield obj;
                 } else if (obj.delta) {
@@ -246,10 +255,10 @@ export async function* streamAssistant(
                 } else if (obj.text) {
                     yield obj.text;
                 } else {
-                    yield payloadLine;
+                    yield payload;
                 }
             } catch {
-                yield payloadLine;
+                yield payload;
             }
         }
     }

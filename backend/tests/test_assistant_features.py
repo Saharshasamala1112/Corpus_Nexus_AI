@@ -4,16 +4,15 @@ import unittest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from app.services.llm import LocalProvider, OllamaProvider, get_fallback_provider, select_model_for_question
+from app.services.assistant_service import _clean_response_text
+from app.services.llm import LocalProvider, OllamaProvider, get_fallback_provider
 from app.services.vector_store import InMemoryVectorStore
 
 
 class AssistantFeaturesTestCase(unittest.TestCase):
-    def test_select_model_for_question_prefers_technical_model(self):
-        self.assertEqual(select_model_for_question("How do I deploy this application?"), "qwen2.5")
-
-    def test_select_model_for_question_prefers_code_model(self):
-        self.assertEqual(select_model_for_question("What is the bug in this python function?"), "mistral")
+    def test_clean_response_text_preserves_leading_spaces_and_newlines(self):
+        text = "To\n deploy\n the\n Swecha"
+        self.assertEqual(_clean_response_text(text), text)
 
     def test_get_fallback_provider_returns_local_for_ollama(self):
         provider = OllamaProvider(model="qwen2.5")
@@ -22,6 +21,7 @@ class AssistantFeaturesTestCase(unittest.TestCase):
 
     def test_prompt_builder_includes_confidence_instruction(self):
         from app.services.prompt_builder import SYSTEM_PROMPT
+
         self.assertIn("confidence score", SYSTEM_PROMPT.lower())
         self.assertIn("Confidence: 0.85", SYSTEM_PROMPT)
 
@@ -29,8 +29,14 @@ class AssistantFeaturesTestCase(unittest.TestCase):
         store = InMemoryVectorStore()
 
         async def run_test():
-            await store.upsert("doc-1", "Docker deployment guide", metadata={"source": "docs", "type": "guide"})
-            await store.upsert("doc-2", "API usage notes", metadata={"source": "api", "type": "guide"})
+            await store.upsert(
+                "doc-1",
+                "Docker deployment guide",
+                metadata={"source": "docs", "type": "guide"},
+            )
+            await store.upsert(
+                "doc-2", "API usage notes", metadata={"source": "api", "type": "guide"}
+            )
             docs = await store.search("deployment", top_k=5, filters={"source": "docs"})
             return docs
 
@@ -42,7 +48,10 @@ class AssistantFeaturesTestCase(unittest.TestCase):
 
     def test_local_provider_uses_transformers_pipeline_if_available(self):
         provider = LocalProvider(model="gpt2")
-        if provider._pipeline is None and provider.__class__.__name__ == "LocalProvider":
+        if (
+            provider._pipeline is None
+            and provider.__class__.__name__ == "LocalProvider"
+        ):
             self.assertTrue(True)
         else:
             self.assertIsInstance(provider, LocalProvider)

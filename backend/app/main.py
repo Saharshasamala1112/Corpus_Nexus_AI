@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.assistant import router as assistant_router
 from app.api.dashboard import router as dashboard_router
 from app.api.members import router as member_router
 from app.api.projects import router as project_router
@@ -26,6 +27,7 @@ app.include_router(member_router)
 app.include_router(sprint_router)
 app.include_router(dashboard_router)
 app.include_router(upload_router)
+app.include_router(assistant_router)
 
 
 @app.get("/")

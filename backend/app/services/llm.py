@@ -12,61 +12,6 @@ except Exception:
     pipeline = None
 
 
-MODEL_ROUTING_KEYWORDS = {
-    "qwen2.5": [
-        "deploy",
-        "docker",
-        "kubernetes",
-        "api",
-        "database",
-        "schema",
-        "architecture",
-        "service",
-        "infrastructure",
-        "ops",
-        "ci",
-        "cd",
-    ],
-    "llama3.2": [
-        "explain",
-        "summarize",
-        "general",
-        "overview",
-        "project",
-        "documentation",
-        "purpose",
-        "summary",
-        "why",
-        "what is",
-    ],
-    "mistral": [
-        "code",
-        "debug",
-        "python",
-        "typescript",
-        "javascript",
-        "error",
-        "exception",
-        "stack trace",
-        "fix",
-        "refactor",
-        "lint",
-        "test",
-    ],
-    "deepseek-r1": [
-        "reason",
-        "analyze",
-        "design",
-        "architecture",
-        "algorithm",
-        "performance",
-        "scaling",
-        "security",
-        "tradeoff",
-        "strategy",
-    ],
-}
-
 DEFAULT_OLLAMA_BASE = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
 DEFAULT_OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
 DEFAULT_LOCAL_MODEL = os.environ.get("LOCAL_MODEL", "gpt2")
@@ -90,13 +35,20 @@ class OllamaProvider(LLMProvider):
     ):
         self.base_url = (base_url or DEFAULT_OLLAMA_BASE).rstrip("/")
         self.model = model or DEFAULT_OLLAMA_MODEL
-        self.options = {"num_predict": int(os.environ.get("OLLAMA_NUM_PREDICT", num_predict or 700))}
+        self.options = {
+            "num_predict": int(os.environ.get("OLLAMA_NUM_PREDICT", num_predict or 700))
+        }
 
     async def generate(self, prompt: str) -> str:
         async with httpx.AsyncClient(timeout=180.0) as client:
             resp = await client.post(
                 f"{self.base_url}/api/generate",
-                json={"model": self.model, "prompt": prompt, "stream": False, "options": self.options},
+                json={
+                    "model": self.model,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": self.options,
+                },
             )
             resp.raise_for_status()
             data = resp.json()
@@ -105,7 +57,10 @@ class OllamaProvider(LLMProvider):
                     return data["response"]
                 if "results" in data:
                     return "".join(
-                        [r.get("output", "") or r.get("response", "") for r in data.get("results", [])]
+                        [
+                            r.get("output", "") or r.get("response", "")
+                            for r in data.get("results", [])
+                        ]
                     )
                 if "output" in data:
                     return data["output"]
@@ -116,7 +71,12 @@ class OllamaProvider(LLMProvider):
             async with client.stream(
                 "POST",
                 f"{self.base_url}/api/generate",
-                json={"model": self.model, "prompt": prompt, "stream": True, "options": self.options},
+                json={
+                    "model": self.model,
+                    "prompt": prompt,
+                    "stream": True,
+                    "options": self.options,
+                },
             ) as resp:
                 resp.raise_for_status()
                 async for chunk in resp.aiter_text():
@@ -125,25 +85,46 @@ class OllamaProvider(LLMProvider):
                     for line in chunk.split("\n"):
                         if not line:
                             continue
-                        clean = line.strip()
+                        clean = line
                         if clean.startswith("data:"):
-                            clean = clean[len("data:"):].strip()
-                        if clean:
-                            yield clean
+                            clean = clean[len("data:") :]
+                            if clean.startswith(" "):
+                                clean = clean[1:]
+                        if not clean:
+                            continue
+                        try:
+                            data = json.loads(clean)
+                        except json.JSONDecodeError:
+                            continue
+                        if not isinstance(data, dict):
+                            continue
+                        if data.get("done"):
+                            continue
+                        response = data.get("response")
+                        if response and response != "":
+                            yield response
 
 
 class LocalProvider(LLMProvider):
     def __init__(self, model: str | None = None, max_new_tokens: int | None = None):
         self.model = model or DEFAULT_LOCAL_MODEL
-        self.max_new_tokens = int(os.environ.get("LOCAL_MODEL_MAX_TOKENS", max_new_tokens or 256))
+        self.max_new_tokens = int(
+            os.environ.get("LOCAL_MODEL_MAX_TOKENS", max_new_tokens or 256)
+        )
         self._pipeline = None
 
     def _ensure_pipeline(self) -> None:
         if self._pipeline is not None:
             return
         if pipeline is None:
-            raise RuntimeError("Local model provider requires the transformers package.")
-        device = 0 if os.environ.get("USE_CUDA", "false").lower() in ("1", "true", "yes") else -1
+            raise RuntimeError(
+                "Local model provider requires the transformers package."
+            )
+        device = (
+            0
+            if os.environ.get("USE_CUDA", "false").lower() in ("1", "true", "yes")
+            else -1
+        )
         self._pipeline = pipeline(
             "text-generation",
             model=self.model,
@@ -173,26 +154,6 @@ class LocalProvider(LLMProvider):
             yield text
 
 
-def select_model_for_question(question: str, configured: str | None = None) -> str:
-    if configured:
-        return configured
-    text = (question or "").lower()
-
-    # Prioritize explicit code and debugging queries over generic phrasing.
-    if any(keyword in text for keyword in MODEL_ROUTING_KEYWORDS["mistral"]):
-        return "mistral"
-    if any(keyword in text for keyword in MODEL_ROUTING_KEYWORDS["qwen2.5"]):
-        return "qwen2.5"
-    if any(keyword in text for keyword in MODEL_ROUTING_KEYWORDS["deepseek-r1"]):
-        return "deepseek-r1"
-
-    for model, keywords in MODEL_ROUTING_KEYWORDS.items():
-        if any(keyword in text for keyword in keywords):
-            return model
-
-    return DEFAULT_OLLAMA_MODEL
-
-
 def get_fallback_provider(primary: LLMProvider) -> LLMProvider:
     if isinstance(primary, OllamaProvider):
         return LocalProvider(model=os.environ.get("LOCAL_MODEL"))
@@ -214,5 +175,4 @@ def build_provider_for_question(question: str) -> LLMProvider:
         return LocalProvider(model=os.environ.get("LOCAL_MODEL"))
     if provider_name == "auto" and pipeline is not None:
         return LocalProvider(model=os.environ.get("LOCAL_MODEL"))
-    return OllamaProvider(model=select_model_for_question(question))
-
+    return OllamaProvider(model=os.environ.get("OLLAMA_MODEL", DEFAULT_OLLAMA_MODEL))

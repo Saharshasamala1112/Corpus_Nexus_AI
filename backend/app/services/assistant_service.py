@@ -1,4 +1,9 @@
+import logging
+import re
+import traceback
 from typing import AsyncGenerator
+
+logger = logging.getLogger(__name__)
 
 from app.services.llm import (
     LLMProvider,
@@ -8,29 +13,67 @@ from app.services.llm import (
 )
 from app.services.vector_store import search_docs
 from app.services.prompt_builder import build_retrieval_prompt
-from app.services.rag_pipeline import build_query_variants, compress_context, detect_prompt_injection, sanitize_question
+from app.services.rag_pipeline import (
+    build_query_variants,
+    compress_context,
+    detect_prompt_injection,
+    sanitize_question,
+)
+
+
+def _clean_response_text(text: str) -> str:
+    if not text:
+        return ""
+
+    patterns = [
+        r"\bgeneral knowledge:\s*",
+        r"\bstreaming response\.\.\.\s*",
+        r"\bsince no direct evidence\b",
+        r"\bno directly retrieved document evidence\b",
+        r"\breview the documentation\b",
+        r"\bwithout direct evidence\b",
+        r"\bi must rely on general knowledge\b",
+        r"\bconfidence\s*:\s*\d+(?:\.\d+)?\b",
+        r"\bretrieval status\b",
+        r"\bretrieved documents\b",
+        r"\bcontext availability\b",
+    ]
+
+    cleaned = text
+    for pattern in patterns:
+        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+
+    return cleaned
 
 
 async def _generate_with_fallback(provider: LLMProvider, prompt: str) -> str:
     try:
-        return await provider.generate(prompt)
-    except Exception:
+        return _clean_response_text(await provider.generate(prompt))
+    except Exception as e:
+        logger.exception("Assistant request failed")
+        traceback.print_exc()
         fallback = get_fallback_provider(provider)
         if fallback is provider:
             raise
-        return await fallback.generate(prompt)
+        return _clean_response_text(await fallback.generate(prompt))
 
 
-async def _stream_with_fallback(provider: LLMProvider, prompt: str) -> AsyncGenerator[str, None]:
+async def _stream_with_fallback(
+    provider: LLMProvider, prompt: str
+) -> AsyncGenerator[str, None]:
     try:
         async for chunk in provider.stream(prompt):
-            yield chunk
+            cleaned = _clean_response_text(chunk)
+            if cleaned:
+                yield cleaned
         return
-    except Exception:
+    except Exception as e:
+        logger.exception("Assistant request failed")
+        traceback.print_exc()
         fallback = get_fallback_provider(provider)
         if fallback is provider:
             raise
-        text = await fallback.generate(prompt)
+        text = _clean_response_text(await fallback.generate(prompt))
         if text:
             yield text
 
@@ -63,11 +106,18 @@ async def rewrite_query(question: str, history: list[dict] | None = None) -> str
     try:
         rewritten = await provider.generate(prompt)
         return sanitize_question(rewritten.strip() or cleaned)
-    except Exception:
+    except Exception as e:
+        logger.exception("Assistant request failed")
+        traceback.print_exc()
         return cleaned or question
 
 
-async def ask(question: str, history: list[dict] | None = None, context: str | None = None, top_k: int = 5) -> dict:
+async def ask(
+    question: str,
+    history: list[dict] | None = None,
+    context: str | None = None,
+    top_k: int = 5,
+) -> dict:
     cleaned = sanitize_question(question)
     if detect_prompt_injection(cleaned):
         return {
@@ -81,7 +131,9 @@ async def ask(question: str, history: list[dict] | None = None, context: str | N
     query_variants = build_query_variants(rewritten)
     try:
         docs = await search_docs(rewritten, top_k=top_k)
-    except Exception:
+    except Exception as e:
+        logger.exception("Assistant request failed")
+        traceback.print_exc()
         docs = []
 
     provider = build_provider_for_question(rewritten)
@@ -94,7 +146,6 @@ async def ask(question: str, history: list[dict] | None = None, context: str | N
             prompt = build_retrieval_prompt(rewritten, [], history)
             if has_context:
                 prompt += f"\n\nContext:\n{compress_context(context, 2000)}"
-            prompt += "\n\nNote: No directly retrieved document evidence was found. If you can answer from general project knowledge, do so briefly and clearly label it as general knowledge."
 
         text = await _generate_with_fallback(provider, prompt)
         return {
@@ -104,11 +155,23 @@ async def ask(question: str, history: list[dict] | None = None, context: str | N
             "confidence": _compute_confidence(used, len(docs), has_context),
             "query_variants": query_variants,
         }
-    except Exception:
-        return {"answer": "The assistant is temporarily unavailable (no local LLM).", "used_corpus": used, "source_count": len(docs), "confidence": 0.0}
+    except Exception as e:
+        logger.exception("Assistant request failed")
+        traceback.print_exc()
+        return {
+            "answer": "The assistant is temporarily unavailable (no local LLM).",
+            "used_corpus": used,
+            "source_count": len(docs),
+            "confidence": 0.0,
+        }
 
 
-async def stream(question: str, history: list[dict] | None = None, context: str | None = None, top_k: int = 5) -> AsyncGenerator[str, None]:
+async def stream(
+    question: str,
+    history: list[dict] | None = None,
+    context: str | None = None,
+    top_k: int = 5,
+) -> AsyncGenerator[str, None]:
     cleaned = sanitize_question(question)
     if detect_prompt_injection(cleaned):
         yield "I can help with project, repository, documentation, and engineering questions. Please provide a safe, direct question and I will answer it using the best available project context."
@@ -117,7 +180,9 @@ async def stream(question: str, history: list[dict] | None = None, context: str 
     rewritten = await rewrite_query(cleaned, history)
     try:
         docs = await search_docs(rewritten, top_k=top_k)
-    except Exception:
+    except Exception as e:
+        logger.exception("Assistant request failed")
+        traceback.print_exc()
         docs = []
 
     provider = build_provider_for_question(rewritten)
@@ -127,10 +192,11 @@ async def stream(question: str, history: list[dict] | None = None, context: str 
         else:
             prompt = build_retrieval_prompt(rewritten, [], history)
             prompt += f"\n\nContext:\n{compress_context(context or 'No corpus context was found.', 2000)}"
-            prompt += "\n\nNote: No directly retrieved document evidence was found. If you can answer from general project knowledge, do so briefly and clearly label it as general knowledge."
 
         async for chunk in _stream_with_fallback(provider, prompt):
             yield chunk
-    except Exception:
+    except Exception as e:
+        logger.exception("Assistant request failed")
+        traceback.print_exc()
         result = await ask(cleaned, history, context, top_k=top_k)
         yield result.get("answer")
