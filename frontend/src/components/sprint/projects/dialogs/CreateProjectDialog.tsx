@@ -59,15 +59,15 @@ export default function CreateProjectDialog({
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-            <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-slate-950 p-6 shadow-xl">
-                <h2 className="text-xl font-semibold text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color:var(--app-overlay)] p-4">
+            <div className="w-full max-w-lg rounded-2xl border border-[color:var(--app-border)] bg-[color:var(--app-surface)] p-6 shadow-xl">
+                <h2 className="text-xl font-semibold text-[color:var(--app-text)]">
                     {mode === "edit"
                         ? "Edit Project"
                         : "Create Project"}
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-sm text-[color:var(--app-text-muted)]">
                     {mode === "edit"
                         ? "Update your SprintWise project."
                         : "Create a new SprintWise project."}
@@ -75,7 +75,7 @@ export default function CreateProjectDialog({
 
                 <div className="mt-6 space-y-4">
                     <div>
-                        <label className="mb-2 block text-sm text-slate-300">
+                        <label className="mb-2 block text-sm text-[color:var(--app-text-muted)]">
                             Project Name
                         </label>
 
@@ -84,12 +84,12 @@ export default function CreateProjectDialog({
                             onChange={(e) =>
                                 setName(e.target.value)
                             }
-                            className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-white outline-none"
+                            className="w-full rounded-lg border border-[color:var(--app-border)] bg-[color:var(--app-surface-muted)] px-3 py-2 text-[color:var(--app-text)] outline-none"
                         />
                     </div>
 
                     <div>
-                        <label className="mb-2 block text-sm text-slate-300">
+                        <label className="mb-2 block text-sm text-[color:var(--app-text-muted)]">
                             Description
                         </label>
 
@@ -99,13 +99,13 @@ export default function CreateProjectDialog({
                             onChange={(e) =>
                                 setDescription(e.target.value)
                             }
-                            className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-white outline-none"
+                            className="w-full rounded-lg border border-[color:var(--app-border)] bg-[color:var(--app-surface-muted)] px-3 py-2 text-[color:var(--app-text)] outline-none"
                         />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="mb-2 block text-sm text-slate-300">
+                            <label className="mb-2 block text-sm text-[color:var(--app-text-muted)]">
                                 Sprint Duration (Days)
                             </label>
 
@@ -119,12 +119,12 @@ export default function CreateProjectDialog({
                                         Number(e.target.value)
                                     )
                                 }
-                                className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-white outline-none"
+                                className="w-full rounded-lg border border-[color:var(--app-border)] bg-[color:var(--app-surface-muted)] px-3 py-2 text-[color:var(--app-text)] outline-none"
                             />
                         </div>
 
                         <div>
-                            <label className="mb-2 block text-sm text-slate-300">
+                            <label className="mb-2 block text-sm text-[color:var(--app-text-muted)]">
                                 Team Size
                             </label>
 
@@ -137,7 +137,7 @@ export default function CreateProjectDialog({
                                         Number(e.target.value)
                                     )
                                 }
-                                className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-white outline-none"
+                                className="w-full rounded-lg border border-[color:var(--app-border)] bg-[color:var(--app-surface-muted)] px-3 py-2 text-[color:var(--app-text)] outline-none"
                             />
                         </div>
                     </div>

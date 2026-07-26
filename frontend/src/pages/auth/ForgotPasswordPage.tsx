@@ -59,13 +59,13 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.18),transparent_38%),linear-gradient(135deg,_#09090b_0%,_#111827_100%)]">
-      <div className="w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-950/70 p-8 shadow-lg shadow-black/20">
-        <h1 className="mb-2 text-center text-3xl font-bold text-slate-800">
+    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.18),transparent_38%),linear-gradient(135deg,_var(--app-surface)_0%,_var(--app-surface-secondary)_100%)]">
+      <div className="w-full max-w-md rounded-xl border-[var(--app-border)] bg-[var(--app-surface-secondary)] p-8 shadow-[var(--shadow-md)]">
+        <h1 className="mb-2 text-center text-3xl font-bold text-[var(--app-strong)]">
           Reset Password
         </h1>
 
-        <p className="mb-8 text-center text-slate-500">
+        <p className="mb-8 text-center text-[var(--app-text-muted)]">
           {step === "phone"
             ? "Enter your phone number to receive an OTP."
             : "Enter the OTP sent to your phone."}
@@ -84,7 +84,7 @@ const ForgotPasswordPage = () => {
             <div className="mb-5">
               <label
                 htmlFor="phone"
-                className="mb-2 block text-sm font-medium text-slate-700"
+                className="mb-2 block text-sm font-medium text-[var(--app-text-muted)]"
               >
                 Phone Number
               </label>
@@ -94,7 +94,7 @@ const ForgotPasswordPage = () => {
                 placeholder="Enter your phone number"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full rounded-md border border-slate-300 px-4 py-3 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-md border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-3 text-[var(--app-text)] placeholder:text-[var(--app-text-muted)] focus:border-blue-500 focus:outline-none"
                 required
               />
             </div>
@@ -102,7 +102,7 @@ const ForgotPasswordPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-md bg-blue-600 py-3 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+              className="w-full rounded-md bg-blue-600 py-3 font-medium text-[var(--app-surface)] transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
             >
               {loading ? "Sending OTP..." : "Send OTP"}
             </button>
@@ -112,7 +112,7 @@ const ForgotPasswordPage = () => {
             <div className="mb-5">
               <label
                 htmlFor="otp"
-                className="mb-2 block text-sm font-medium text-slate-700"
+                className="mb-2 block text-sm font-medium text-[var(--app-text-muted)]"
               >
                 OTP Code
               </label>
@@ -122,7 +122,7 @@ const ForgotPasswordPage = () => {
                 placeholder="Enter OTP"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                className="w-full rounded-md border border-slate-300 px-4 py-3 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-md border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-3 text-[var(--app-text)] placeholder:text-[var(--app-text-muted)] focus:border-blue-500 focus:outline-none"
                 required
               />
             </div>
@@ -130,7 +130,7 @@ const ForgotPasswordPage = () => {
             <div className="mb-5">
               <label
                 htmlFor="newPassword"
-                className="mb-2 block text-sm font-medium text-slate-700"
+                className="mb-2 block text-sm font-medium text-[var(--app-text-muted)]"
               >
                 New Password
               </label>
@@ -140,7 +140,7 @@ const ForgotPasswordPage = () => {
                 placeholder="Enter new password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full rounded-md border border-slate-300 px-4 py-3 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-md border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-3 text-[var(--app-text)] placeholder:text-[var(--app-text-muted)] focus:border-blue-500 focus:outline-none"
                 required
               />
             </div>
@@ -148,7 +148,7 @@ const ForgotPasswordPage = () => {
             <div className="mb-5">
               <label
                 htmlFor="confirmPassword"
-                className="mb-2 block text-sm font-medium text-slate-700"
+                className="mb-2 block text-sm font-medium text-[var(--app-text-muted)]"
               >
                 Confirm Password
               </label>
@@ -158,7 +158,7 @@ const ForgotPasswordPage = () => {
                 placeholder="Confirm new password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-md border border-slate-300 px-4 py-3 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-md border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-3 text-[var(--app-text)] placeholder:text-[var(--app-text-muted)] focus:border-blue-500 focus:outline-none"
                 required
               />
             </div>
@@ -166,14 +166,14 @@ const ForgotPasswordPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-md bg-blue-600 py-3 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+              className="w-full rounded-md bg-blue-600 py-3 font-medium text-[var(--app-surface)] transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
             >
               {loading ? "Resetting..." : "Reset Password"}
             </button>
           </form>
         )}
 
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-[var(--app-text-muted)]">
           <Link
             to="/login"
             className="font-medium text-blue-600 hover:text-blue-800"

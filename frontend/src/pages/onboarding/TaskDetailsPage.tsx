@@ -37,8 +37,8 @@ function TaskDetailsPage() {
 
     if (!currentTask) {
         return (
-            <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-10">
-                <h2 className="text-2xl font-semibold text-white">
+            <div className="rounded-3xl border border-[var(--app-border)] bg-[var(--app-surface)] p-10 dark:border-zinc-800 dark:bg-zinc-950/70">
+                <h2 className="text-2xl font-semibold text-[var(--app-strong)] dark:text-white">
                     Task not found
                 </h2>
             </div>
@@ -130,7 +130,7 @@ function TaskDetailsPage() {
 
     return (
 
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-10 shadow-2xl shadow-black/20">
+        <div className="rounded-3xl border border-[var(--app-border)] bg-[var(--app-surface)] p-10 shadow-2xl shadow-[var(--shadow-lg)] dark:border-zinc-800 dark:bg-zinc-950/70 dark:shadow-black/20">
 
 
             <Link
@@ -148,13 +148,13 @@ function TaskDetailsPage() {
 
 
 
-            <h1 className="mt-4 text-3xl font-semibold text-white">
+            <h1 className="mt-4 text-3xl font-semibold text-[var(--app-strong)] dark:text-white">
                 {currentTask.title}
             </h1>
 
 
 
-            <p className="mt-6 max-w-3xl text-base leading-8 text-zinc-400">
+            <p className="mt-6 max-w-3xl text-base leading-8 text-[var(--app-text-muted)] dark:text-zinc-400">
                 {currentTask.description}
             </p>
 
@@ -177,7 +177,7 @@ function TaskDetailsPage() {
 
                     <div className="mt-8">
 
-                        <label className="mb-2 block text-sm font-medium text-white">
+                        <label className="mb-2 block text-sm font-medium text-[var(--app-strong)] dark:text-white">
                             Upload Screenshot (Required)
                         </label>
 
@@ -187,7 +187,7 @@ function TaskDetailsPage() {
                             accept="image/*"
                             onChange={handleImageChange}
                             disabled={uploading}
-                            className="block w-full rounded-lg border border-zinc-700 bg-zinc-900 p-3 text-sm text-zinc-300"
+                            className="block w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-surface-secondary)] p-3 text-sm text-[var(--app-text)] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
                         />
 
 
@@ -211,7 +211,7 @@ function TaskDetailsPage() {
                             onClick={() =>
                                 setSelectedImage(image)
                             }
-                            className="mt-6 max-h-72 cursor-pointer rounded-xl border border-zinc-800"
+                            className="mt-6 max-h-72 cursor-pointer rounded-xl border border-[var(--app-border)] dark:border-zinc-800"
                         />
 
                     )}
@@ -221,7 +221,7 @@ function TaskDetailsPage() {
                     <button
                         onClick={handleComplete}
                         disabled={uploading}
-                        className="mt-8 rounded-full bg-violet-600 px-6 py-3 font-medium text-white hover:bg-violet-500 disabled:opacity-50"
+                        className="mt-8 rounded-full bg-violet-600 px-6 py-3 font-medium text-[var(--app-surface)] hover:bg-violet-500 disabled:opacity-50"
                     >
                         Mark as Completed
                     </button>
@@ -252,7 +252,7 @@ function TaskDetailsPage() {
                         onClick={() =>
                             setSelectedImage(image)
                         }
-                        className="mt-6 max-h-72 cursor-pointer rounded-xl border border-zinc-800"
+                        className="mt-6 max-h-72 cursor-pointer rounded-xl border border-[var(--app-border)] dark:border-zinc-800"
                     />
 
 
@@ -269,7 +269,7 @@ function TaskDetailsPage() {
                     onClick={() =>
                         setSelectedImage(null)
                     }
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--app-strong)]/90 dark:bg-black/90"
                 >
 
                     <img
