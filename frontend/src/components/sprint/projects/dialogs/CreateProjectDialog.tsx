@@ -60,14 +60,14 @@ export default function CreateProjectDialog({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color:var(--app-overlay)] p-4">
-            <div className="w-full max-w-lg rounded-2xl border border-[color:var(--app-border)] bg-[color:var(--app-surface)] p-6 shadow-xl">
-                <h2 className="text-xl font-semibold text-[color:var(--app-text)]">
+            <div className="w-full max-w-lg rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-6 shadow-[var(--shadow-lg)]">
+                <h2 className="text-xl font-semibold text-[var(--app-strong)]">
                     {mode === "edit"
                         ? "Edit Project"
                         : "Create Project"}
                 </h2>
 
-                <p className="mt-1 text-sm text-[color:var(--app-text-muted)]">
+                <p className="mt-1 text-sm text-[var(--app-text-muted)]">
                     {mode === "edit"
                         ? "Update your SprintWise project."
                         : "Create a new SprintWise project."}
@@ -75,7 +75,7 @@ export default function CreateProjectDialog({
 
                 <div className="mt-6 space-y-4">
                     <div>
-                        <label className="mb-2 block text-sm text-[color:var(--app-text-muted)]">
+                        <label className="mb-2 block text-sm text-[var(--app-text-muted)]">
                             Project Name
                         </label>
 
@@ -84,12 +84,13 @@ export default function CreateProjectDialog({
                             onChange={(e) =>
                                 setName(e.target.value)
                             }
-                            className="w-full rounded-lg border border-[color:var(--app-border)] bg-[color:var(--app-surface-muted)] px-3 py-2 text-[color:var(--app-text)] outline-none"
+                            placeholder="Enter project name"
+                            className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-surface-secondary)] px-3 py-2 text-[var(--app-text)] outline-none placeholder:text-[var(--app-text-soft)] transition-colors focus:border-[var(--app-accent)] focus:ring-2 focus:ring-[var(--app-accent-soft)]"
                         />
                     </div>
 
                     <div>
-                        <label className="mb-2 block text-sm text-[color:var(--app-text-muted)]">
+                        <label className="mb-2 block text-sm text-[var(--app-text-muted)]">
                             Description
                         </label>
 
@@ -99,13 +100,14 @@ export default function CreateProjectDialog({
                             onChange={(e) =>
                                 setDescription(e.target.value)
                             }
-                            className="w-full rounded-lg border border-[color:var(--app-border)] bg-[color:var(--app-surface-muted)] px-3 py-2 text-[color:var(--app-text)] outline-none"
+                            placeholder="Add a short project description"
+                            className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-surface-secondary)] px-3 py-2 text-[var(--app-text)] outline-none placeholder:text-[var(--app-text-soft)] transition-colors focus:border-[var(--app-accent)] focus:ring-2 focus:ring-[var(--app-accent-soft)]"
                         />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="mb-2 block text-sm text-[color:var(--app-text-muted)]">
+                            <label className="mb-2 block text-sm text-[var(--app-text-muted)]">
                                 Sprint Duration (Days)
                             </label>
 
@@ -119,12 +121,12 @@ export default function CreateProjectDialog({
                                         Number(e.target.value)
                                     )
                                 }
-                                className="w-full rounded-lg border border-[color:var(--app-border)] bg-[color:var(--app-surface-muted)] px-3 py-2 text-[color:var(--app-text)] outline-none"
+                                className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-surface-secondary)] px-3 py-2 text-[var(--app-text)] outline-none transition-colors focus:border-[var(--app-accent)] focus:ring-2 focus:ring-[var(--app-accent-soft)]"
                             />
                         </div>
 
                         <div>
-                            <label className="mb-2 block text-sm text-[color:var(--app-text-muted)]">
+                            <label className="mb-2 block text-sm text-[var(--app-text-muted)]">
                                 Team Size
                             </label>
 
@@ -137,7 +139,7 @@ export default function CreateProjectDialog({
                                         Number(e.target.value)
                                     )
                                 }
-                                className="w-full rounded-lg border border-[color:var(--app-border)] bg-[color:var(--app-surface-muted)] px-3 py-2 text-[color:var(--app-text)] outline-none"
+                                className="w-full rounded-lg border border-[var(--app-border)] bg-[var(--app-surface-secondary)] px-3 py-2 text-[var(--app-text)] outline-none transition-colors focus:border-[var(--app-accent)] focus:ring-2 focus:ring-[var(--app-accent-soft)]"
                             />
                         </div>
                     </div>
@@ -147,11 +149,15 @@ export default function CreateProjectDialog({
                     <Button
                         variant="outline"
                         onClick={onClose}
+                        className="border-[var(--app-border)] bg-[var(--app-surface)] text-[var(--app-text)] hover:bg-[var(--app-surface-secondary)]"
                     >
                         Cancel
                     </Button>
 
-                    <Button onClick={handleSubmit}>
+                    <Button
+                        onClick={handleSubmit}
+                        className="bg-[var(--app-accent)] text-[var(--app-surface)] hover:bg-[var(--app-accent)]/90"
+                    >
                         {mode === "edit"
                             ? "Save Changes"
                             : "Create Project"}

@@ -44,14 +44,14 @@ export default function SearchPage() {
 
     return (
         <div className="space-y-6">
-            <div className="rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 p-6 shadow-lg shadow-black/20">
+            <div className="rounded-3xl border border-[var(--app-border)] bg-[linear-gradient(135deg,var(--app-surface)_0%,var(--app-surface-secondary)_55%,var(--app-bg)_100%)] p-6 shadow-[var(--shadow-md)]">
                 <div className="flex items-center gap-3">
                     <div className="rounded-2xl border border-violet-500/30 bg-violet-500/10 p-2 text-violet-300">
                         <Search className="h-5 w-5" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-semibold text-white">Search corpus</h1>
-                        <p className="text-sm text-zinc-400">Find records across languages, categories, and metadata.</p>
+                        <h1 className="text-2xl font-semibold text-[var(--app-strong)]">Search corpus</h1>
+                        <p className="text-sm text-[var(--app-text-muted)]">Find records across languages, categories, and metadata.</p>
                     </div>
                 </div>
             </div>
