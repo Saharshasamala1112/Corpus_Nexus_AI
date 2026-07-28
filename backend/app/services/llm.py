@@ -2,6 +2,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 from typing import AsyncGenerator
 
 import httpx
@@ -16,6 +17,27 @@ DEFAULT_OLLAMA_BASE = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434"
 DEFAULT_OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
 DEFAULT_LOCAL_MODEL = os.environ.get("LOCAL_MODEL", "gpt2")
 DEFAULT_LLM_PROVIDER = (os.environ.get("LLM_PROVIDER") or "ollama").lower()
+
+
+def _strip_reasoning_sections(text: str) -> str:
+    """Remove reasoning traces from model output while preserving the model's original spacing."""
+    if not text:
+        return ""
+
+    cleaned = text
+    # Some reasoning-capable models emit explicit <think> blocks.
+    cleaned = re.sub(
+        r"<think>.*?</think>", "", cleaned, flags=re.DOTALL | re.IGNORECASE
+    )
+
+    # Some models also prefix reasoning with labels such as "Thinking:" or "Reasoning:".
+    # Remove those lines without trimming the surrounding whitespace that the model emitted.
+    cleaned = re.sub(
+        r"(?im)^\s*(thinking|reasoning|analysis|plan)\s*[:\-].*$", "", cleaned
+    )
+    cleaned = re.sub(r"(?im)^\s*(thinking|reasoning|analysis|plan)\s*$", "", cleaned)
+
+    return cleaned
 
 
 class LLMProvider:
@@ -35,35 +57,60 @@ class OllamaProvider(LLMProvider):
     ):
         self.base_url = (base_url or DEFAULT_OLLAMA_BASE).rstrip("/")
         self.model = model or DEFAULT_OLLAMA_MODEL
+
+        # RAG assistants usually work best with lower temperature and a mild repeat penalty,
+        # which keeps answers more factual and less prone to repetitive or drifted wording.
         self.options = {
-            "num_predict": int(os.environ.get("OLLAMA_NUM_PREDICT", num_predict or 700))
+            "num_predict": int(
+                os.environ.get("OLLAMA_NUM_PREDICT", str(num_predict or 700))
+            ),
+            "temperature": float(os.environ.get("OLLAMA_TEMPERATURE", "0.2")),
+            "top_p": float(os.environ.get("OLLAMA_TOP_P", "0.9")),
+            "repeat_penalty": float(os.environ.get("OLLAMA_REPEAT_PENALTY", "1.1")),
         }
+
+    def _should_disable_reasoning(self) -> bool:
+        model_name = (self.model or "").lower()
+        reasoning_markers = ("qwen3", "qwen", "deepseek", "qwq", "reasoning")
+        return any(marker in model_name for marker in reasoning_markers)
+
+    def _build_request_payload(self, prompt: str, stream: bool) -> dict:
+        payload = {
+            "model": self.model,
+            "prompt": prompt,
+            "stream": stream,
+            "options": self.options,
+        }
+
+        # For reasoning-capable models such as Qwen 3, disable internal thinking so Ollama
+        # returns the final answer only and does not expose chain-of-thought text.
+        if self._should_disable_reasoning():
+            payload["think"] = False
+
+        return payload
 
     async def generate(self, prompt: str) -> str:
         async with httpx.AsyncClient(timeout=180.0) as client:
             resp = await client.post(
                 f"{self.base_url}/api/generate",
-                json={
-                    "model": self.model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": self.options,
-                },
+                json=self._build_request_payload(prompt, stream=False),
             )
             resp.raise_for_status()
             data = resp.json()
             if isinstance(data, dict):
                 if "response" in data:
-                    return data["response"]
+                    return _strip_reasoning_sections(data["response"])
                 if "results" in data:
-                    return "".join(
-                        [
-                            r.get("output", "") or r.get("response", "")
-                            for r in data.get("results", [])
-                        ]
+                    return _strip_reasoning_sections(
+                        "".join(
+                            [
+                                r.get("output", "") or r.get("response", "")
+                                for r in data.get("results", [])
+                            ]
+                        )
                     )
                 if "output" in data:
-                    return data["output"]
+                    return _strip_reasoning_sections(data["output"])
             return json.dumps(data)
 
     async def stream(self, prompt: str) -> AsyncGenerator[str, None]:
@@ -71,12 +118,7 @@ class OllamaProvider(LLMProvider):
             async with client.stream(
                 "POST",
                 f"{self.base_url}/api/generate",
-                json={
-                    "model": self.model,
-                    "prompt": prompt,
-                    "stream": True,
-                    "options": self.options,
-                },
+                json=self._build_request_payload(prompt, stream=True),
             ) as resp:
                 resp.raise_for_status()
                 async for chunk in resp.aiter_text():
@@ -102,7 +144,9 @@ class OllamaProvider(LLMProvider):
                             continue
                         response = data.get("response")
                         if response and response != "":
-                            yield response
+                            cleaned = _strip_reasoning_sections(response)
+                            if cleaned:
+                                yield cleaned
 
 
 class LocalProvider(LLMProvider):
