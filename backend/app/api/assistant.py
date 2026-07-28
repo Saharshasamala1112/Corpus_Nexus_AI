@@ -6,6 +6,7 @@ from time import time
 from app.services.assistant_service import ask, stream
 from app.services.vector_store import vector_store, search_docs
 from app.services.local_indexer import ingest_local
+from app.services.repo_indexer import index_all_repos
 from app.services.prompt_builder import build_retrieval_prompt
 from app.services.llm import get_default_provider
 from app.services.conversation_repo import conversation_repo
@@ -124,6 +125,15 @@ async def assistant_ingest_local(payload: dict | None = None):
     if payload:
         base = payload.get('base_path')
     count = await ingest_local(base)
+    return JSONResponse(content={'indexed': count})
+
+
+@router.post('/assistant/ingest-repos')
+async def assistant_ingest_repos(payload: dict | None = None):
+    paths = None
+    if payload and payload.get('repo_paths'):
+        paths = payload['repo_paths']
+    count = await index_all_repos(paths)
     return JSONResponse(content={'indexed': count})
 
 
