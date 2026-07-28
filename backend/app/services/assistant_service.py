@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 from app.services.llm import (
     LLMProvider,
+    _strip_reasoning_sections,
     build_provider_for_question,
     get_default_provider,
     get_fallback_provider,
@@ -21,22 +22,45 @@ from app.services.rag_pipeline import (
 )
 
 
+def _is_greeting(message: str) -> bool:
+    if not message:
+        return False
+
+    normalized = re.sub(r"[^a-z0-9]+", " ", message.lower()).strip()
+    greetings = {
+        "hi",
+        "hello",
+        "hey",
+        "hey there",
+        "good morning",
+        "good afternoon",
+        "good evening",
+        "greetings",
+    }
+    return (
+        normalized in greetings
+        or normalized.startswith("hello")
+        or normalized.startswith("hi")
+    )
+
+
 def _clean_response_text(text: str) -> str:
     if not text:
         return ""
 
+    text = _strip_reasoning_sections(text)
+
     patterns = [
-        r"\bgeneral knowledge:\s*",
         r"\bstreaming response\.\.\.\s*",
         r"\bsince no direct evidence\b",
         r"\bno directly retrieved document evidence\b",
         r"\breview the documentation\b",
         r"\bwithout direct evidence\b",
-        r"\bi must rely on general knowledge\b",
         r"\bconfidence\s*:\s*\d+(?:\.\d+)?\b",
         r"\bretrieval status\b",
         r"\bretrieved documents\b",
         r"\bcontext availability\b",
+        r"(?im)^\s*(user|assistant|retrieved documents|answer|context)\s*:\s*",
     ]
 
     cleaned = text
@@ -140,12 +164,16 @@ async def ask(
     used = bool(docs)
     has_context = bool(context and str(context).strip())
     try:
+        is_initial_greeting = not history and _is_greeting(cleaned)
         if used:
             prompt = build_retrieval_prompt(rewritten, docs, history)
         else:
             prompt = build_retrieval_prompt(rewritten, [], history)
             if has_context:
                 prompt += f"\n\nContext:\n{compress_context(context, 2000)}"
+
+        if is_initial_greeting:
+            prompt += "\n\nWhen the user sends a greeting such as 'hi' or 'hello', respond with a brief greeting and offer help. Do not add a greeting to other questions."
 
         text = await _generate_with_fallback(provider, prompt)
         return {
@@ -187,11 +215,15 @@ async def stream(
 
     provider = build_provider_for_question(rewritten)
     try:
+        is_initial_greeting = not history and _is_greeting(cleaned)
         if docs:
             prompt = build_retrieval_prompt(rewritten, docs, history)
         else:
             prompt = build_retrieval_prompt(rewritten, [], history)
             prompt += f"\n\nContext:\n{compress_context(context or 'No corpus context was found.', 2000)}"
+
+        if is_initial_greeting:
+            prompt += "\n\nWhen the user sends a greeting such as 'hi' or 'hello', respond with a brief greeting and offer help. Do not add a greeting to other questions."
 
         async for chunk in _stream_with_fallback(provider, prompt):
             yield chunk

@@ -5,7 +5,12 @@ import unittest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.services.assistant_service import _clean_response_text
-from app.services.llm import LocalProvider, OllamaProvider, get_fallback_provider
+from app.services.llm import (
+    LocalProvider,
+    OllamaProvider,
+    _strip_reasoning_sections,
+    get_fallback_provider,
+)
 from app.services.vector_store import InMemoryVectorStore
 
 
@@ -19,11 +24,26 @@ class AssistantFeaturesTestCase(unittest.TestCase):
         fallback = get_fallback_provider(provider)
         self.assertIsInstance(fallback, LocalProvider)
 
-    def test_prompt_builder_includes_confidence_instruction(self):
-        from app.services.prompt_builder import SYSTEM_PROMPT
+    def test_strip_reasoning_sections_preserves_whitespace(self):
+        text = "Hello!\n\nThinking: this is internal reasoning.\n\nHow can I help you today?"
+        cleaned = _strip_reasoning_sections(text)
 
-        self.assertIn("confidence score", SYSTEM_PROMPT.lower())
-        self.assertIn("Confidence: 0.85", SYSTEM_PROMPT)
+        self.assertIn("Hello!\n\n", cleaned)
+        self.assertIn("How can I help you today?", cleaned)
+        self.assertNotIn("Thinking:", cleaned)
+
+    def test_retrieval_prompt_guides_general_knowledge_fallback(self):
+        from app.services.prompt_builder import build_retrieval_prompt
+
+        prompt = build_retrieval_prompt(
+            "How should I deploy this service?", [], max_context_chars=2000
+        )
+        lowered = prompt.lower()
+
+        self.assertIn("corpus", lowered)
+        self.assertIn("general knowledge", lowered)
+        self.assertIn("without explaining the fallback", lowered)
+        self.assertIn("never invent", lowered)
 
     def test_in_memory_vector_store_supports_metadata_filters(self):
         store = InMemoryVectorStore()
