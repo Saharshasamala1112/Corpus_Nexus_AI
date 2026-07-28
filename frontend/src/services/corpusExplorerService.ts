@@ -52,6 +52,10 @@ export const getCorpusExplorerProfile = async (): Promise<CorpusProfile> => {
 
 export const searchCorpusExplorerRecords = async (query: string): Promise<CorpusRecord[]> => {
   const records = await getCorpusRecords(0, 1000);
+
+console.log("===== FIRST RECORD =====");
+console.log(JSON.stringify(records[0], null, 2));
+console.log("========================");
   const normalizedQuery = query.trim().toLowerCase();
 
   const explorerRecords: CorpusRecord[] = (records as ExplorerBackendRecord[]).map((record) => {
