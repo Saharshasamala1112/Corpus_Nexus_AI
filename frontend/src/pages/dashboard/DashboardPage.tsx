@@ -107,13 +107,32 @@ function DashboardPage() {
 
     useEffect(() => {
         async function loadDashboardData() {
+            console.log("========== DASHBOARD DEBUG ==========");
+            console.log("Dashboard mounted");
+            console.log("User:", user);
+            console.log("Token exists:", !!localStorage.getItem("access_token"));
+
             try {
+                console.log("Calling dashboard APIs...");
+
                 const [recordsData, languageData, leaderboardData, profileData] = await Promise.all([
                     getRecords(0, 1000) as Promise<Partial<CorpusRecord>[]>,
                     getLanguages(),
-                    getLeaderboard().catch(() => []),
-                    getCurrentUser().catch(() => null),
+                    getLeaderboard().catch((err) => {
+                        console.error("Leaderboard failed", err);
+                        return [];
+                    }),
+                    getCurrentUser().catch((err) => {
+                        console.error("Current user failed", err);
+                        return null;
+                    }),
                 ]);
+
+                console.log("Promise.all completed");
+                console.log("recordsData", recordsData);
+                console.log("languageData", languageData);
+                console.log("leaderboardData", leaderboardData);
+                console.log("profileData", profileData);
 
                 setRecords(recordsData as CorpusRecord[]);
                 setLanguages(languageData.map((item) => item.name));
@@ -121,33 +140,44 @@ function DashboardPage() {
                 const contributorValues = new Set<string>();
                 for (const record of recordsData as Partial<CorpusRecord>[]) {
                     const contributor = deriveValue(record, ["contributor", "contributor_name", "user_name", "created_by", "speaker", "owner", "annotator"]);
-                    if (contributor) {
-                        contributorValues.add(contributor);
-                    }
+                    if (contributor) contributorValues.add(contributor);
                 }
 
-                const derivedContributors = leaderboardData.length > 0 ? leaderboardData.length : contributorValues.size;
+                const derivedContributors =
+                    leaderboardData.length > 0 ? leaderboardData.length : contributorValues.size;
+
                 setContributors(derivedContributors);
 
                 if (profileData) {
                     setProfileName(profileData.username || user?.username || "User");
-                    const role = profileData.roles?.[0]?.name || "Intern";
-                    setRoleName(role);
+                    setRoleName(profileData.roles?.[0]?.name || "Intern");
 
                     if (profileData.institution_id) {
                         try {
+                            console.log("Fetching institution", profileData.institution_id);
                             const institution = await getInstitution(profileData.institution_id);
-                            setInstitutionName(institution.college_name || institution.university_name || "Institution available");
-                        } catch {
+                            console.log("Institution", institution);
+
+                            setInstitutionName(
+                                institution.college_name ||
+                                institution.university_name ||
+                                "Institution available"
+                            );
+                        } catch (err) {
+                            console.error("Institution fetch failed", err);
                             setInstitutionName("Institution pending");
                         }
                     } else {
                         setInstitutionName("Institution not provided");
                     }
                 }
-            } catch {
+
+                console.log("Dashboard loaded successfully");
+            } catch (err) {
+                console.error("Dashboard loading failed", err);
                 setInstitutionName("Institution unavailable");
             } finally {
+                console.log("Dashboard finished");
                 setLoading(false);
             }
         }
