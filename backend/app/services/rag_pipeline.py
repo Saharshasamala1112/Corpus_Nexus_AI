@@ -1,7 +1,13 @@
 from __future__ import annotations
 
+import asyncio
+import hashlib
+import os
 import re
 from typing import Any
+
+from app.services.corpus_client import CorpusClient
+from app.services.vector_store import search_docs
 
 
 def normalize_text(text: str) -> str:
@@ -103,3 +109,73 @@ def compress_context(text: str, max_chars: int = 2000) -> str:
     if len(text) <= max_chars:
         return text
     return text[: max_chars - 3].rstrip() + "..."
+
+
+def _content_hash(text: str) -> str:
+    return hashlib.md5(text.encode("utf-8")).hexdigest()
+
+
+def _rank_docs(docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    scored: list[tuple[float, dict[str, Any]]] = []
+    for d in docs:
+        text = str(d.get("text", "") or "")
+        score = d.get("score", 0.0) or 0.0
+        if not score:
+            metadata = d.get("metadata") or {}
+            source = metadata.get("source") or metadata.get("path") or ""
+            boost = 0.15 if "repo" in metadata else 0.05
+            score = boost + (min(len(text), 2000) / 2000) * 0.1
+        scored.append((score, d))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [d for _, d in scored]
+
+
+async def retrieve_context(query: str, top_k: int = 5) -> list[dict[str, Any]]:
+    seen_hashes: set[str] = set()
+    combined: list[dict[str, Any]] = []
+
+    vector_docs = await search_docs(query, top_k=top_k)
+    for d in vector_docs:
+        h = _content_hash(str(d.get("text", "")))
+        if h not in seen_hashes:
+            seen_hashes.add(h)
+            combined.append(d)
+
+    try:
+        client = CorpusClient()
+        records = await client.get("/api/v1/records", token=os.environ.get("CORPUS_API_TOKEN"))
+        if isinstance(records, list):
+            for rec in records:
+                title = str(rec.get("title", "") or "")
+                desc = str(rec.get("description", "") or "")
+                content = str(rec.get("content", "") or "")
+                text = f"{title}\n{desc}\n{content}".strip()
+                if not text:
+                    continue
+                q = query.lower()
+                if q in text.lower():
+                    h = _content_hash(text)
+                    if h not in seen_hashes:
+                        seen_hashes.add(h)
+                        combined.append({
+                            "id": f"corpus:{rec.get('uid', '')}",
+                            "text": text[:1500],
+                            "metadata": {"source": f"corpus:{rec.get('uid', '')}", "type": "corpus"},
+                            "score": 0.5,
+                        })
+    except Exception:
+        pass
+
+    ranked = _rank_docs(combined)
+    total_chars = 0
+    result: list[dict[str, Any]] = []
+    for d in ranked:
+        text_len = len(str(d.get("text", "")))
+        if total_chars + text_len > 4000:
+            break
+        result.append(d)
+        total_chars += text_len
+        if len(result) >= top_k:
+            break
+
+    return result

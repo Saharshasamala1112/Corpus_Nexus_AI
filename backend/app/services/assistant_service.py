@@ -12,11 +12,12 @@ from app.services.llm import (
     get_default_provider,
     get_fallback_provider,
 )
-from app.services.vector_store import search_docs
 from app.services.prompt_builder import build_retrieval_prompt
 from app.services.rag_pipeline import (
     build_query_variants,
     compress_context,
+    retrieve_context,
+    build_query_variants,
     detect_prompt_injection,
     sanitize_question,
 )
@@ -68,6 +69,7 @@ def _clean_response_text(text: str) -> str:
         cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
 
     return cleaned
+NO_INFO_MESSAGE = "No relevant information was found in the company knowledge base."
 
 
 async def _generate_with_fallback(provider: LLMProvider, prompt: str) -> str:
@@ -100,15 +102,6 @@ async def _stream_with_fallback(
         text = _clean_response_text(await fallback.generate(prompt))
         if text:
             yield text
-
-
-def _compute_confidence(found: bool, source_count: int, has_context: bool) -> float:
-    if source_count <= 0:
-        return 0.55 if has_context else 0.0
-    base = 0.65 + min(source_count, 5) * 0.06
-    if found:
-        return min(0.98, base)
-    return min(0.8, 0.55 + min(source_count, 3) * 0.05)
 
 
 async def rewrite_query(question: str, history: list[dict] | None = None) -> str:
@@ -153,16 +146,25 @@ async def ask(
 
     rewritten = await rewrite_query(cleaned, history)
     query_variants = build_query_variants(rewritten)
+
     try:
         docs = await search_docs(rewritten, top_k=top_k)
     except Exception as e:
         logger.exception("Assistant request failed")
         traceback.print_exc()
+        docs = await retrieve_context(rewritten, top_k=top_k)
+    except Exception:
         docs = []
 
+    if not docs:
+        return {
+            "answer": NO_INFO_MESSAGE,
+            "used_corpus": False,
+            "source_count": 0,
+            "confidence": 0.0,
+        }
+
     provider = build_provider_for_question(rewritten)
-    used = bool(docs)
-    has_context = bool(context and str(context).strip())
     try:
         is_initial_greeting = not history and _is_greeting(cleaned)
         if used:
@@ -175,12 +177,13 @@ async def ask(
         if is_initial_greeting:
             prompt += "\n\nWhen the user sends a greeting such as 'hi' or 'hello', respond with a brief greeting and offer help. Do not add a greeting to other questions."
 
+        prompt = build_retrieval_prompt(rewritten, docs, history)
         text = await _generate_with_fallback(provider, prompt)
         return {
             "answer": text,
-            "used_corpus": used,
+            "used_corpus": True,
             "source_count": len(docs),
-            "confidence": _compute_confidence(used, len(docs), has_context),
+            "confidence": min(0.95, 0.5 + len(docs) * 0.08),
             "query_variants": query_variants,
         }
     except Exception as e:
@@ -189,6 +192,10 @@ async def ask(
         return {
             "answer": "The assistant is temporarily unavailable (no local LLM).",
             "used_corpus": used,
+    except Exception:
+        return {
+            "answer": "The assistant is temporarily unavailable.",
+            "used_corpus": True,
             "source_count": len(docs),
             "confidence": 0.0,
         }
@@ -206,12 +213,19 @@ async def stream(
         return
 
     rewritten = await rewrite_query(cleaned, history)
+
     try:
         docs = await search_docs(rewritten, top_k=top_k)
     except Exception as e:
         logger.exception("Assistant request failed")
         traceback.print_exc()
+        docs = await retrieve_context(rewritten, top_k=top_k)
+    except Exception:
         docs = []
+
+    if not docs:
+        yield NO_INFO_MESSAGE
+        return
 
     provider = build_provider_for_question(rewritten)
     try:
@@ -225,6 +239,7 @@ async def stream(
         if is_initial_greeting:
             prompt += "\n\nWhen the user sends a greeting such as 'hi' or 'hello', respond with a brief greeting and offer help. Do not add a greeting to other questions."
 
+        prompt = build_retrieval_prompt(rewritten, docs, history)
         async for chunk in _stream_with_fallback(provider, prompt):
             yield chunk
     except Exception as e:
