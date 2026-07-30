@@ -8,6 +8,7 @@ from typing import Any
 
 from app.services.corpus_client import CorpusClient
 from app.services.vector_store import search_docs
+from app.services.query_utils import build_query_variants
 
 
 def normalize_text(text: str) -> str:
