@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Layers3 } from "lucide-react";
+import { Layers3, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import CategoryCard from "@/components/corpusExplorer/CategoryCard";
 import EmptyState from "@/components/corpusExplorer/EmptyState";
@@ -11,6 +12,8 @@ export default function CategoriesPage() {
     const [categories, setCategories] = useState<CategoryItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function loadCategories() {
@@ -41,7 +44,16 @@ export default function CategoriesPage() {
 
     return (
         <div className="space-y-6">
-            <div className="rounded-3xl border border-[var(--app-border)] bg-[linear-gradient(135deg,var(--app-surface)_0%,var(--app-surface-secondary)_55%,var(--app-bg)_100%)] p-6 shadow-[var(--shadow-md)]">
+            <div className="flex items-center gap-4 rounded-3xl border border-[var(--app-border)] bg-[linear-gradient(135deg,var(--app-surface)_0%,var(--app-surface-secondary)_55%,var(--app-bg)_100%)] p-6 shadow-[var(--shadow-md)]">
+                <button
+                    type="button"
+                    onClick={() => navigate("/corpus-explorer")}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-violet-500/30 bg-violet-500/10 px-3 py-2 text-sm font-semibold text-violet-100 transition hover:bg-violet-500/20 hover:text-white"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                </button>
+
                 <div className="flex items-center gap-3">
                     <div className="rounded-2xl border border-violet-500/30 bg-violet-500/10 p-2 text-violet-300">
                         <Layers3 className="h-5 w-5" />
