@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import EmptyState from "@/components/corpusExplorer/EmptyState";
-import FilterPanel from "@/components/corpusExplorer/FilterPanel";
 import Loader from "@/components/corpusExplorer/Loader";
 import ResultCard from "@/components/corpusExplorer/ResultCard";
 import SearchBar from "@/components/corpusExplorer/SearchBar";
@@ -10,9 +10,8 @@ import { searchCorpusExplorerRecords } from "@/services/corpusExplorerService";
 import type { CorpusRecord } from "@/types/corpusExplorer";
 
 export default function SearchPage() {
+    const navigate = useNavigate();
     const [query, setQuery] = useState("");
-    const [selectedLanguage, setSelectedLanguage] = useState("All");
-    const [selectedCategory, setSelectedCategory] = useState("All");
     const [records, setRecords] = useState<CorpusRecord[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -35,23 +34,29 @@ export default function SearchPage() {
         void loadRecords("*");
     }, [loadRecords]);
 
-    const filteredRecords = records.filter((record) => {
-        const matchesLanguage = selectedLanguage === "All" || record.language === selectedLanguage;
-        const matchesCategory = selectedCategory === "All" || record.category === selectedCategory;
-
-        return matchesLanguage && matchesCategory;
-    });
+    const filteredRecords = records;
 
     return (
         <div className="space-y-6">
-            <div className="rounded-3xl border border-[var(--app-border)] bg-[linear-gradient(135deg,var(--app-surface)_0%,var(--app-surface-secondary)_55%,var(--app-bg)_100%)] p-6 shadow-[var(--shadow-md)]">
-                <div className="flex items-center gap-3">
-                    <div className="rounded-2xl border border-violet-500/30 bg-violet-500/10 p-2 text-violet-300">
-                        <Search className="h-5 w-5" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl font-semibold text-[var(--app-strong)]">Search corpus</h1>
-                        <p className="text-sm text-[var(--app-text-muted)]">Find records across languages, categories, and metadata.</p>
+            <div className="flex items-center justify-between gap-4 rounded-3xl border border-[var(--app-border)] bg-[linear-gradient(135deg,var(--app-surface)_0%,var(--app-surface-secondary)_55%,var(--app-bg)_100%)] p-6 shadow-[var(--shadow-md)]">
+                <button
+                    type="button"
+                    onClick={() => navigate("/corpus-explorer")}
+                    className="inline-flex items-center gap-2 rounded-2xl border border-violet-500/30 bg-violet-500/10 px-3 py-2 text-sm font-semibold text-violet-100 transition hover:bg-violet-500/20 hover:text-white"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                </button>
+
+                <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                        <div className="rounded-2xl border border-violet-500/30 bg-violet-500/10 p-2 text-violet-300">
+                            <Search className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-semibold text-[var(--app-strong)]">Search corpus</h1>
+                            <p className="text-sm text-[var(--app-text-muted)]">Find records across languages, categories, and metadata.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -62,13 +67,6 @@ export default function SearchPage() {
                     onChange={setQuery}
                     onSubmit={() => void loadRecords(query || "*")}
                     loading={loading}
-                />
-
-                <FilterPanel
-                    selectedLanguage={selectedLanguage}
-                    selectedCategory={selectedCategory}
-                    onLanguageChange={setSelectedLanguage}
-                    onCategoryChange={setSelectedCategory}
                 />
             </section>
 
