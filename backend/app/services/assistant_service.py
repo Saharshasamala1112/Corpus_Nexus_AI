@@ -192,6 +192,7 @@ async def ask(
         return {
             "answer": "The assistant is temporarily unavailable (no local LLM).",
             "used_corpus": used,
+        }
     except Exception:
         return {
             "answer": "The assistant is temporarily unavailable.",
