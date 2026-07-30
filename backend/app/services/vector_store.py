@@ -6,7 +6,7 @@ import re
 from typing import Any, List
 
 from app.services.embeddings import embed_texts
-from app.services.rag_pipeline import build_query_variants
+from app.services.query_utils import build_query_variants
 
 
 def _tokenize(text: str) -> list[str]:

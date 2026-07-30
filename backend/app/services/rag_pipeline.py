@@ -8,6 +8,7 @@ from typing import Any
 
 from app.services.corpus_client import CorpusClient
 from app.services.vector_store import search_docs
+from app.services.query_utils import build_query_variants
 
 
 def normalize_text(text: str) -> str:
@@ -16,35 +17,6 @@ def normalize_text(text: str) -> str:
 
 def tokenize(text: str) -> list[str]:
     return re.findall(r"\w+", (text or "").lower())
-
-
-def build_query_variants(question: str) -> list[str]:
-    variants = []
-    cleaned = normalize_text(question)
-    if cleaned:
-        variants.append(cleaned)
-
-    tokens = [token for token in tokenize(cleaned) if len(token) > 2]
-    if tokens:
-        variants.append(" ".join(tokens[:8]))
-
-    lowered = cleaned.lower()
-    if any(
-        keyword in lowered for keyword in ["deploy", "docker", "kubernetes", "service"]
-    ):
-        variants.append("deployment docker infrastructure")
-    if any(keyword in lowered for keyword in ["api", "endpoint", "schema", "database"]):
-        variants.append("api schema database")
-    if any(keyword in lowered for keyword in ["git", "repository", "branch", "commit"]):
-        variants.append("repository git workflow")
-
-    seen: set[str] = set()
-    unique: list[str] = []
-    for variant in variants:
-        if variant and variant.lower() not in seen:
-            seen.add(variant.lower())
-            unique.append(variant)
-    return unique
 
 
 def sanitize_question(question: str) -> str:
