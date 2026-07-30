@@ -54,12 +54,12 @@ export default function ProjectCard({
                 }
             }}
             className={cn(
-                "group cursor-pointer rounded-xl border border-white/10 bg-slate-950/70 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-400/20 hover:shadow-lg hover:shadow-cyan-500/10 focus:outline-none focus:ring-2 focus:ring-cyan-400/50",
+                "group cursor-pointer rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] p-4 shadow-[var(--shadow-sm)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--app-accent)]/20 hover:shadow-lg hover:shadow-[var(--shadow-md)] focus:outline-none focus:ring-2 focus:ring-[var(--app-accent)]/50 dark:border-white/10 dark:bg-slate-950/70 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.03)] dark:hover:border-cyan-400/20 dark:hover:shadow-cyan-500/10 dark:focus:ring-cyan-400/50",
                 className
             )}
         >
             <div className="flex items-start justify-between gap-3">
-                <div className="rounded-lg bg-cyan-500/15 p-2.5 text-cyan-300">
+                <div className="rounded-lg bg-[var(--app-accent-soft)] p-2.5 text-[var(--app-accent)] dark:bg-cyan-500/15 dark:text-cyan-300">
                     <FolderKanban className="h-5 w-5" />
                 </div>
 
@@ -74,16 +74,16 @@ export default function ProjectCard({
             </div>
 
             <div className="mt-4">
-                <h3 className="text-base font-semibold text-white">
+                <h3 className="text-base font-semibold text-[var(--app-strong)] dark:text-white">
                     {project.name}
                 </h3>
 
-                <p className="mt-2 text-sm leading-6 text-slate-400 line-clamp-3">
+                <p className="mt-2 text-sm leading-6 text-[var(--app-text-muted)] dark:text-slate-400 line-clamp-3">
                     {project.description}
                 </p>
             </div>
 
-            <div className="mt-4 flex items-center gap-4 text-sm text-slate-400">
+            <div className="mt-4 flex items-center gap-4 text-sm text-[var(--app-text-soft)] dark:text-slate-400">
                 <div className="flex items-center gap-1.5">
                     <Users className="h-4 w-4" />
                     <span>{memberCount}</span>
@@ -95,7 +95,7 @@ export default function ProjectCard({
                 </div>
             </div>
 
-            <div className="mt-5 border-t border-white/10 pt-3">
+            <div className="mt-5 border-t border-[var(--app-border)] pt-3 dark:border-white/10">
                 <div className="flex items-center justify-between">
                     <span className="text-sm text-slate-500">
                         Last updated {lastUpdated}
@@ -108,7 +108,7 @@ export default function ProjectCard({
                                 e.stopPropagation();
                                 onEdit?.(project);
                             }}
-                            className="rounded-md p-2 text-slate-400 transition hover:bg-slate-800 hover:text-cyan-300"
+                            className="rounded-md p-2 text-[var(--app-text-soft)] transition hover:bg-[var(--app-surface-secondary)] hover:text-[var(--app-accent)] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-cyan-300"
                             title="Edit Project"
                         >
                             <Pencil className="h-4 w-4" />
@@ -120,13 +120,13 @@ export default function ProjectCard({
                                 e.stopPropagation();
                                 onDelete?.(project);
                             }}
-                            className="rounded-md p-2 text-slate-400 transition hover:bg-slate-800 hover:text-red-400"
+                            className="rounded-md p-2 text-[var(--app-text-soft)] transition hover:bg-[var(--app-surface-secondary)] hover:text-red-400 dark:text-slate-400 dark:hover:bg-slate-800"
                             title="Delete Project"
                         >
                             <Trash2 className="h-4 w-4" />
                         </button>
 
-                        <div className="flex items-center gap-2 text-slate-500 transition-colors group-hover:text-cyan-300">
+                        <div className="flex items-center gap-2 text-[var(--app-text-soft)] transition-colors group-hover:text-[var(--app-accent)] dark:text-slate-500 dark:group-hover:text-cyan-300">
                             <span className="text-sm font-medium">
                                 View
                             </span>

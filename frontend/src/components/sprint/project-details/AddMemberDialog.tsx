@@ -40,12 +40,12 @@ export default function AddMemberDialog({
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--app-surface)]/60">
             <form
                 onSubmit={handleSubmit}
-                className="w-full max-w-md rounded-xl bg-slate-900 p-6"
+                className="w-full max-w-md rounded-xl bg-[var(--app-surface)] p-6"
             >
-                <h2 className="text-xl font-semibold text-white">
+                <h2 className="text-xl font-semibold text-[var(--app-strong)]">
                     Add Team Member
                 </h2>
 
@@ -59,7 +59,7 @@ export default function AddMemberDialog({
                                 name: e.target.value,
                             })
                         }
-                        className="w-full rounded-lg border border-slate-700 bg-slate-800 p-3 text-white"
+                        className="w-full rounded-lg border-[var(--app-border)] bg-[var(--app-surface-secondary)] p-3 text-[var(--app-text)] outline-none focus:border-violet-500"
                         required
                     />
 
@@ -72,7 +72,7 @@ export default function AddMemberDialog({
                                 role: e.target.value,
                             })
                         }
-                        className="w-full rounded-lg border border-slate-700 bg-slate-800 p-3 text-white"
+                        className="w-full rounded-lg border-[var(--app-border)] bg-[var(--app-surface-secondary)] p-3 text-[var(--app-text)] outline-none focus:border-violet-500"
                         required
                     />
 
@@ -85,7 +85,7 @@ export default function AddMemberDialog({
                                 skill: e.target.value,
                             })
                         }
-                        className="w-full rounded-lg border border-slate-700 bg-slate-800 p-3 text-white"
+                        className="w-full rounded-lg border-[var(--app-border)] bg-[var(--app-surface-secondary)] p-3 text-[var(--app-text)] outline-none focus:border-violet-500"
                         required
                     />
 
@@ -101,7 +101,7 @@ export default function AddMemberDialog({
                                 availability: Number(e.target.value),
                             })
                         }
-                        className="w-full rounded-lg border border-slate-700 bg-slate-800 p-3 text-white"
+                        className="w-full rounded-lg border-[var(--app-border)] bg-[var(--app-surface-secondary)] p-3 text-[var(--app-text)] outline-none focus:border-violet-500"
                         required
                     />
                 </div>
@@ -110,14 +110,14 @@ export default function AddMemberDialog({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="rounded-lg border border-slate-700 px-4 py-2 text-white"
+                        className="rounded-lg border-[var(--app-border)] px-4 py-2 text-[var(--app-text)] transition hover:text-[var(--app-strong)]"
                     >
                         Cancel
                     </button>
 
                     <button
                         type="submit"
-                        className="rounded-lg bg-cyan-500 px-4 py-2 font-medium text-slate-950"
+                        className="rounded-lg bg-cyan-500 px-4 py-2 font-medium text-[var(--app-surface)]"
                     >
                         Save Member
                     </button>

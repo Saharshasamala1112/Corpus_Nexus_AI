@@ -170,6 +170,127 @@ The assistant is available as a **floating chatbot icon at the bottom-right corn
 
 ---
 
+# 📸 Platform Screenshots
+
+## 🏠 Dashboard
+
+The Dashboard serves as the central hub of **Corpus Nexus AI**, providing platform navigation, quick access to all modules, and an overview of key platform statistics.
+
+<p align="center">
+  <img src="frontend/src/assets/screenshots/Dashboard-1.png" alt="Dashboard" width="48%">
+  <img src="frontend/src/assets/screenshots/Dashboard-2.png" alt="Dashboard Statistics" width="48%">
+</p>
+
+---
+
+## 📊 Corpus Insights
+
+Corpus Insights provides interactive analytics and visualizations, including corpus statistics, language distribution, media distribution, and leaderboard information.
+
+<p align="center">
+  <img src="frontend/src/assets/screenshots/Corpus-Insights-1.png" alt="Corpus Insights" width="48%">
+  <img src="frontend/src/assets/screenshots/Corpus-Insights-2.png" alt="Corpus Insights Dashboard" width="48%">
+</p>
+
+---
+
+## 💬 Ask Corpus
+
+Ask Corpus enables users to interact with the corpus using natural language. Powered by Retrieval-Augmented Generation (RAG), BM25 retrieval, and Ollama (Llama 3.2), it delivers contextual and intelligent responses.
+
+<p align="center">
+  <img src="frontend/src/assets/screenshots/Ask-Corpus-1.png" alt="Ask Corpus" width="48%">
+  <img src="frontend/src/assets/screenshots/Ask-Corpus-2.png" alt="Ask Corpus Response" width="48%">
+</p>
+
+---
+
+## 🔍 Corpus Explorer
+
+Corpus Explorer allows users to browse, search, and explore corpus datasets through an intuitive and user-friendly interface.
+
+<p align="center">
+  <img src="frontend/src/assets/screenshots/Corpus-Explorer-1.png" alt="Corpus Explorer" width="48%">
+  <img src="frontend/src/assets/screenshots/Corpus-Explorer-2.png" alt="Corpus Explorer Search" width="48%">
+</p>
+
+<p align="center">
+  <img src="frontend/src/assets/screenshots/Corpus-Explorer-3.png" alt="Corpus Explorer Details" width="48%">
+  <img src="frontend/src/assets/screenshots/Corpus-Explorer-4.png" alt="Corpus Explorer Resources" width="48%">
+</p>
+
+---
+
+## 🚀 SprintWise AI
+
+SprintWise AI provides intelligent project management capabilities including project creation, team management, sprint planning, sprint generation, and project analytics.
+
+<p align="center">
+  <img src="frontend/src/assets/screenshots/SprintWise-AI-1.png" alt="SprintWise AI Dashboard" width="48%">
+  <img src="frontend/src/assets/screenshots/SprintWise-AI-2.png" alt="SprintWise AI Projects" width="48%">
+</p>
+
+<p align="center">
+  <img src="frontend/src/assets/screenshots/SprintWise-AI-3.png" alt="SprintWise AI Teams" width="48%">
+  <img src="frontend/src/assets/screenshots/SprintWise-AI-4.png" alt="SprintWise AI Sprints" width="48%">
+</p>
+
+<p align="center">
+  <img src="frontend/src/assets/screenshots/SprintWise-AI-5.png" alt="SprintWise AI Analytics" width="48%">
+  <img src="frontend/src/assets/screenshots/SprintWise-AI-6.png" alt="SprintWise AI Project Details" width="48%">
+</p>
+
+<p align="center">
+  <img src="frontend/src/assets/screenshots/SprintWise-AI-7.png" alt="SprintWise AI Team Management" width="48%">
+  <img src="frontend/src/assets/screenshots/SprintWise-AI-8.png" alt="SprintWise AI Features" width="48%">
+</p>
+
+---
+
+## 📋 Intern Onboarding
+
+The Intern Onboarding module streamlines the onboarding workflow with task tracking, progress monitoring, screenshot uploads, and secure file storage using MinIO.
+
+<p align="center">
+  <img src="frontend/src/assets/screenshots/Onboarding-1.png" alt="Intern Onboarding" width="48%">
+  <img src="frontend/src/assets/screenshots/Onboarding-2.png" alt="Onboarding Progress" width="48%">
+</p>
+
+<p align="center">
+  <img src="frontend/src/assets/screenshots/Onboarding-3.png" alt="Onboarding Upload" width="48%">
+</p>
+
+---
+
+## 🤖 CorpusGuard AI
+
+CorpusGuard AI is the repository-aware intelligent assistant available throughout the platform. It integrates Ollama (Llama 3.2), Retrieval-Augmented Generation (RAG), BM25 retrieval, and conversation history to provide contextual answers from both local documents and the integrated Swecha Corpus.
+
+<p align="center">
+  <img src="frontend/src/assets/screenshots/CorpusGuard-AI.png" alt="CorpusGuard AI" width="75%">
+</p>
+
+---
+
+## ⚙️ Settings
+
+Users can configure application preferences and personalize their experience through the Settings module.
+
+<p align="center">
+  <img src="frontend/src/assets/screenshots/Settings.png" alt="Settings" width="60%">
+</p>
+
+---
+
+## 🚪 Logout
+
+The Logout option provides a secure way to end the current session and protect user access.
+
+<p align="center">
+  <img src="frontend/src/assets/screenshots/Logout.png" alt="Logout" width="35%">
+</p>
+
+---
 # 🛠️ Technology Stack
 
 ## Frontend

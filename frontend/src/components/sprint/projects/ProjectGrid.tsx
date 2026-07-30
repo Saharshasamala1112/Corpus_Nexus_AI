@@ -21,16 +21,16 @@ export default function ProjectGrid({
         return (
             <section
                 className={cn(
-                    "flex min-h-[320px] items-center justify-center rounded-xl border border-dashed border-slate-700 bg-slate-950/40",
+                    "flex min-h-[320px] items-center justify-center rounded-xl border border-dashed border-[var(--app-border)] bg-[var(--app-surface)]",
                     className
                 )}
             >
                 <div className="space-y-2 text-center">
-                    <h3 className="text-lg font-semibold text-slate-200">
+                    <h3 className="text-lg font-semibold text-[var(--app-strong)] dark:text-slate-200">
                         No Projects Yet
                     </h3>
 
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-[var(--app-text-muted)] dark:text-slate-400">
                         Create your first project to start planning sprints.
                     </p>
                 </div>

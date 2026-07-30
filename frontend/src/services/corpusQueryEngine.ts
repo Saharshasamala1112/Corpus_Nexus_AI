@@ -347,9 +347,8 @@ export async function resolveCorpusQuery(question: string): Promise<CorpusQueryR
             return {
                 isCorpusQuestion: true,
                 intent,
-                answer: "No matching corpus records were found.",
                 sourceCount: 0,
-                confidence: 0.4,
+                confidence: 0.0,
             };
         }
 

@@ -56,15 +56,15 @@ const AskCorpusPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 p-6 shadow-2xl shadow-black/20 sm:p-8 lg:p-10">
+      <div className="overflow-hidden rounded-3xl border border-[var(--app-border)] bg-[linear-gradient(135deg,var(--app-surface)_0%,var(--app-surface-secondary)_55%,var(--app-bg)_100%)] p-6 shadow-[0_24px_70px_var(--app-accent-soft)] sm:p-8 lg:p-10">
         <div className="max-w-3xl">
-          <p className="text-sm font-medium uppercase tracking-[0.35em] text-violet-400">
+          <p className="text-sm font-medium uppercase tracking-[0.35em] text-[var(--app-accent)]">
             Ask Corpus
           </p>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-[var(--app-strong)] sm:text-4xl">
             Explore the corpus with natural language.
           </h1>
-          <p className="mt-3 text-base leading-7 text-zinc-400 sm:text-lg">
+          <p className="mt-3 text-base leading-7 text-[var(--app-text-muted)] sm:text-lg">
             Ask questions about recordings, languages, media types, and contributors while staying inside the shared Corpus Nexus experience.
           </p>
         </div>
@@ -80,7 +80,7 @@ const AskCorpusPage = () => {
       <SuggestedQuestions onSelect={handleSuggestedSelect} />
 
       {error ? (
-        <div className="rounded-3xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-200">
+        <div className="rounded-3xl border border-[color:var(--app-accent-soft)] bg-[color:var(--app-accent-soft)] p-4 text-sm text-[var(--app-accent)]">
           {error}
         </div>
       ) : null}
@@ -90,12 +90,12 @@ const AskCorpusPage = () => {
       </div>
 
       {chart === "mediaType" && (
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-6 shadow-lg shadow-black/20 sm:p-8">
+        <div className="rounded-3xl border border-[var(--app-border)] bg-[var(--app-surface)] p-6 shadow-[0_12px_32px_rgba(15,23,42,0.05)] sm:p-8">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-white">
+            <h2 className="text-xl font-semibold text-[var(--app-strong)]">
               Recordings by Media Type
             </h2>
-            <p className="mt-1 text-sm text-zinc-400">
+            <p className="mt-1 text-sm text-[var(--app-text-muted)]">
               Distribution of recordings across the available media formats.
             </p>
           </div>
@@ -105,12 +105,12 @@ const AskCorpusPage = () => {
       )}
 
       {chart === "language" && (
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-6 shadow-lg shadow-black/20 sm:p-8">
+        <div className="rounded-3xl border border-[var(--app-border)] bg-[var(--app-surface)] p-6 shadow-[0_12px_32px_rgba(15,23,42,0.05)] sm:p-8">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-white">
+            <h2 className="text-xl font-semibold text-[var(--app-strong)]">
               Top Languages by Record Count
             </h2>
-            <p className="mt-1 text-sm text-zinc-400">
+            <p className="mt-1 text-sm text-[var(--app-text-muted)]">
               The most represented languages in the current dataset.
             </p>
           </div>

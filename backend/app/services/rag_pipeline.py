@@ -29,7 +29,9 @@ def build_query_variants(question: str) -> list[str]:
         variants.append(" ".join(tokens[:8]))
 
     lowered = cleaned.lower()
-    if any(keyword in lowered for keyword in ["deploy", "docker", "kubernetes", "service"]):
+    if any(
+        keyword in lowered for keyword in ["deploy", "docker", "kubernetes", "service"]
+    ):
         variants.append("deployment docker infrastructure")
     if any(keyword in lowered for keyword in ["api", "endpoint", "schema", "database"]):
         variants.append("api schema database")
@@ -52,17 +54,29 @@ def sanitize_question(question: str) -> str:
     blocked = ["ignore previous instructions", "system prompt", "act as", "you are"]
     lowered = cleaned.lower()
     if any(pattern in lowered for pattern in blocked):
-        cleaned = re.sub(r"(?i)(ignore previous instructions|system prompt|act as|you are)\s*", "", cleaned)
+        cleaned = re.sub(
+            r"(?i)(ignore previous instructions|system prompt|act as|you are)\s*",
+            "",
+            cleaned,
+        )
     return normalize_text(cleaned)
 
 
 def detect_prompt_injection(question: str) -> bool:
     lowered = (question or "").lower()
-    suspicious = ["ignore previous", "system prompt", "developer message", "bypass", "reveal secret"]
+    suspicious = [
+        "ignore previous",
+        "system prompt",
+        "developer message",
+        "bypass",
+        "reveal secret",
+    ]
     return any(marker in lowered for marker in suspicious)
 
 
-def build_context_payload(docs: list[dict[str, Any]], max_context_chars: int = 4000) -> str:
+def build_context_payload(
+    docs: list[dict[str, Any]], max_context_chars: int = 4000
+) -> str:
     if not docs:
         return ""
 
@@ -73,7 +87,12 @@ def build_context_payload(docs: list[dict[str, Any]], max_context_chars: int = 4
         if not text:
             continue
         metadata = doc.get("metadata") or {}
-        source = metadata.get("source") or metadata.get("path") or metadata.get("type") or "corpus"
+        source = (
+            metadata.get("source")
+            or metadata.get("path")
+            or metadata.get("type")
+            or "corpus"
+        )
         snippet = text
         if len(snippet) + total > max_context_chars:
             snippet = snippet[: max(0, max_context_chars - total - 80)] + "..."

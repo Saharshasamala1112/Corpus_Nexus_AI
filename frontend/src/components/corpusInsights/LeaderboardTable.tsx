@@ -26,17 +26,17 @@ const LeaderboardTable = () => {
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 text-sm text-slate-400 shadow-sm">
+      <div className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)]/80 p-6 text-sm text-[var(--app-text-muted)] shadow-[0_12px_32px_rgba(15,23,42,0.05)]">
         Loading leaderboard...
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/80 shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] shadow-[0_12px_32px_rgba(15,23,42,0.05)]">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[320px]">
-          <thead className="bg-slate-950/80 text-left text-sm text-slate-400">
+          <thead className="bg-[var(--app-surface-secondary)] text-left text-sm text-[var(--app-text-muted)]">
             <tr>
               <th className="px-6 py-4 font-medium">Rank</th>
               <th className="px-6 py-4 font-medium">User</th>
@@ -48,11 +48,11 @@ const LeaderboardTable = () => {
             {leaderboard.map((user) => (
               <tr
                 key={user.user_id}
-                className="border-t border-slate-800/80 text-sm text-slate-300 transition hover:bg-slate-800/60"
+                className="border-t border-[var(--app-border)] text-sm text-[var(--app-text)] transition hover:bg-[var(--app-surface-secondary)]/80"
               >
                 <td className="px-6 py-4">{user.rank}</td>
 
-                <td className="px-6 py-4 font-medium text-white">
+                <td className="px-6 py-4 font-medium text-[var(--app-strong)]">
                   {user.user_name}
                 </td>
 

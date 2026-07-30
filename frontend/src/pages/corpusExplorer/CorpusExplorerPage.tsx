@@ -30,42 +30,42 @@ export default function CorpusExplorerPage() {
 
     return (
         <div className="space-y-6">
-            <div className="rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 p-6 shadow-2xl shadow-black/20 sm:p-8">
-                <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-sm font-medium text-violet-300">
+            <div className="rounded-3xl border border-[var(--app-border)] bg-[linear-gradient(135deg,var(--app-surface)_0%,var(--app-surface-secondary)_55%,var(--app-bg)_100%)] p-6 shadow-[var(--shadow-lg)] sm:p-8">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[var(--app-accent-soft)] bg-[var(--app-accent-soft)] px-3 py-1 text-sm font-medium text-[var(--app-accent)]">
                     <FileSearch className="h-4 w-4" />
                     Corpus Explorer
                 </div>
-                <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                <h1 className="mt-4 text-3xl font-semibold tracking-tight text-[var(--app-strong)] sm:text-4xl">
                     Explore your corpus with speed and control.
                 </h1>
-                <p className="mt-3 max-w-3xl text-base text-zinc-400">
+                <p className="mt-3 max-w-3xl text-base text-[var(--app-text-muted)]">
                     Search records, browse by language or category, and open the AI-powered context layer for any selected document.
                 </p>
             </div>
 
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
+                <Card className="border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--shadow-md)]">
                     <CardContent className="p-5">
-                        <p className="text-sm text-zinc-400">Available records</p>
-                        <p className="mt-3 text-3xl font-semibold text-white">{loading ? "—" : summary.totalRecords}</p>
+                        <p className="text-sm text-[var(--app-text-muted)]">Available records</p>
+                        <p className="mt-3 text-3xl font-semibold text-[var(--app-strong)]">{loading ? "—" : summary.totalRecords}</p>
                     </CardContent>
                 </Card>
-                <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
+                <Card className="border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--shadow-md)]">
                     <CardContent className="p-5">
-                        <p className="text-sm text-zinc-400">Languages</p>
-                        <p className="mt-3 text-3xl font-semibold text-white">{loading ? "—" : summary.totalLanguages}</p>
+                        <p className="text-sm text-[var(--app-text-muted)]">Languages</p>
+                        <p className="mt-3 text-3xl font-semibold text-[var(--app-strong)]">{loading ? "—" : summary.totalLanguages}</p>
                     </CardContent>
                 </Card>
-                <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
+                <Card className="border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--shadow-md)]">
                     <CardContent className="p-5">
-                        <p className="text-sm text-zinc-400">Categories</p>
-                        <p className="mt-3 text-3xl font-semibold text-white">{loading ? "—" : summary.totalCategories}</p>
+                        <p className="text-sm text-[var(--app-text-muted)]">Categories</p>
+                        <p className="mt-3 text-3xl font-semibold text-[var(--app-strong)]">{loading ? "—" : summary.totalCategories}</p>
                     </CardContent>
-                 </Card>
-                <Card className="border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20">
+                </Card>
+                <Card className="border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--shadow-md)]">
                     <CardContent className="p-5">
-                        <p className="text-sm text-zinc-400">Profile</p>
-                        <p className="mt-3 text-2xl font-semibold text-white">{loading ? "—" : summary.profileName}</p>
+                        <p className="text-sm text-[var(--app-text-muted)]">Profile</p>
+                        <p className="mt-3 text-2xl font-semibold text-[var(--app-strong)]">{loading ? "—" : summary.profileName}</p>
                     </CardContent>
                 </Card>
             </section>
@@ -83,19 +83,19 @@ export default function CorpusExplorerPage() {
                     return (
                         <Card
                             key={card.title}
-                            className="group overflow-hidden border-zinc-800 bg-zinc-950/70 shadow-lg shadow-black/20 transition duration-200 hover:-translate-y-1 hover:border-violet-500/40"
+                            className="group overflow-hidden border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--shadow-md)] transition duration-200 hover:-translate-y-1 hover:border-[var(--app-accent)]/40"
                         >
                             <CardContent className="flex h-full flex-col justify-between p-5">
                                 <div>
-                                    <div className="inline-flex rounded-2xl border border-violet-500/30 bg-violet-500/10 p-3 text-violet-300">
+                                    <div className="inline-flex rounded-2xl border border-[var(--app-accent-soft)] bg-[var(--app-accent-soft)] p-3 text-[var(--app-accent)]">
                                         <Icon className="h-5 w-5" />
                                     </div>
-                                    <h2 className="mt-4 text-lg font-semibold text-white">{card.title}</h2>
-                                    <p className="mt-2 text-sm text-zinc-400">{card.description}</p>
+                                    <h2 className="mt-4 text-lg font-semibold text-[var(--app-strong)]">{card.title}</h2>
+                                    <p className="mt-2 text-sm text-[var(--app-text-muted)]">{card.description}</p>
                                 </div>
                                 <Link
                                     to={card.to}
-                                    className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-violet-300 transition hover:text-violet-200"
+                                    className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--app-accent)] transition hover:text-[var(--app-strong)]"
                                 >
                                     Open module
                                     <ArrowRight className="h-4 w-4" />

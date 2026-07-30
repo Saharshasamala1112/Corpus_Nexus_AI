@@ -172,10 +172,10 @@ export default function AssistantPanel() {
                         prev.map((c) =>
                             c.id === nextConversation.id
                                 ? {
-                                      ...c,
-                                      messages: c.messages.map((m) => (m.id === assistantId ? { ...m, content: accumulated, isStreaming: true } : m)),
-                                      updatedAt: new Date().toISOString(),
-                                  }
+                                    ...c,
+                                    messages: c.messages.map((m) => (m.id === assistantId ? { ...m, content: accumulated, isStreaming: true } : m)),
+                                    updatedAt: new Date().toISOString(),
+                                }
                                 : c,
                         ),
                     );
@@ -271,7 +271,7 @@ export default function AssistantPanel() {
                 className="fixed bottom-6 right-6 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 p-0 shadow-[0_12px_30px_rgba(37,99,235,0.28)] transform-gpu transition hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-400/30"
             >
                 <span className="absolute -inset-0.5 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 opacity-30 blur-md animate-pulse" aria-hidden />
-                <span className="relative flex h-12 w-12 items-center justify-center rounded-full bg-black/60 ring-1 ring-white/10 overflow-hidden">
+                <span className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[var(--app-surface)]/60 ring-[var(--app-border)] overflow-hidden">
                     <img src={RobotSvg} alt="assistant" className="h-10 w-10 object-contain" />
                 </span>
             </button>
@@ -283,28 +283,28 @@ export default function AssistantPanel() {
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: 420, opacity: 0 }}
                         transition={{ type: "spring", stiffness: 260, damping: 24 }}
-                        className="fixed right-4 top-4 z-50 flex h-[calc(100vh-2rem)] w-[min(92vw,480px)] flex-col overflow-hidden rounded-[18px] border border-zinc-800 bg-gradient-to-b from-black/70 to-zinc-900/70 shadow-2xl shadow-black/50"
+                        className="fixed right-4 top-4 z-50 flex h-[calc(100vh-2rem)] w-[min(92vw,480px)] flex-col overflow-hidden rounded-[18px] border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--shadow-lg)]"
                     >
                         <div className="px-6 pt-6">
-                            <div className="mx-auto mb-3 flex h-28 w-28 items-center justify-center rounded-2xl bg-gradient-to-br from-[#07182a]/60 to-[#02101a]/60 p-3 shadow-2xl">
+                            <div className="mx-auto mb-3 flex h-28 w-28 items-center justify-center rounded-2xl bg-[var(--app-surface-secondary)] p-3 shadow-[var(--shadow-md)]">
                                 <img src={RobotSvg} alt="robot" className="h-20 w-20 object-contain" />
                             </div>
                             <div className="text-center">
-                                <h3 className="text-2xl font-semibold text-white">Hi, {user?.username || "there"} <span className="inline-block">👋</span></h3>
-                                <p className="mt-1 text-sm text-zinc-400">I'm your Enterprise AI Assistant — ask me anything about Corpus Nexus.</p>
+                                <h3 className="text-2xl font-semibold text-[var(--app-strong)]">Hi, {user?.username || "there"} <span className="inline-block">👋</span></h3>
+                                <p className="mt-1 text-sm text-[var(--app-text-muted)]">I'm your Enterprise AI Assistant — ask me anything about Corpus Nexus.</p>
                             </div>
-                            <button type="button" onClick={() => setOpen(false)} className="absolute right-4 top-4 rounded-full p-2 text-zinc-400 hover:bg-zinc-800/40">
+                            <button type="button" onClick={() => setOpen(false)} className="absolute right-4 top-4 rounded-full p-2 text-[var(--app-text-muted)] hover:bg-[var(--app-surface-secondary)]/60">
                                 <X className="h-4 w-4" />
                             </button>
                         </div>
 
                         <div className="flex-1 overflow-y-auto px-4 py-4">
                             {activeConversation ? (
-                                <div className="mb-4 rounded-3xl border border-zinc-800 bg-zinc-950/80 p-4 text-sm text-zinc-200 shadow-inner">
+                                <div className="mb-4 rounded-3xl border-[var(--app-border)] bg-[var(--app-surface-secondary)] p-4 text-sm text-[var(--app-text)] shadow-inner">
                                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
-                                            <div className="text-sm font-semibold text-white">{activeConversation.title || 'Active conversation'}</div>
-                                            <div className="mt-1 text-xs text-zinc-500">
+                                            <div className="text-sm font-semibold text-[var(--app-strong)]">{activeConversation.title || 'Active conversation'}</div>
+                                            <div className="mt-1 text-xs text-[var(--app-text-muted)]">
                                                 {activeConversation.messages.length} message{activeConversation.messages.length === 1 ? '' : 's'} · updated {new Date(activeConversation.updatedAt).toLocaleString()}
                                             </div>
                                         </div>
@@ -315,20 +315,20 @@ export default function AssistantPanel() {
                                                     setActiveConversationId(null)
                                                     setQuestion("")
                                                 }}
-                                                className="inline-flex items-center rounded-full border border-zinc-800 bg-zinc-900/70 px-3 py-2 text-xs text-zinc-200 transition hover:border-cyan-500 hover:text-white"
+                                                className="inline-flex items-center rounded-full border-[var(--app-border)] bg-[var(--app-surface-secondary)]/70 px-3 py-2 text-xs text-[var(--app-text)] transition hover:border-cyan-500 hover:text-[var(--app-strong)]"
                                             >
                                                 New chat
                                             </button>
-                                            <button type="button" onClick={handleRegenerate} className="inline-flex items-center rounded-full border border-zinc-800 bg-zinc-900/70 p-2 text-zinc-200 transition hover:border-cyan-500 hover:text-white" aria-label="Regenerate response">
+                                            <button type="button" onClick={handleRegenerate} className="inline-flex items-center rounded-full border-[var(--app-border)] bg-[var(--app-surface-secondary)]/70 p-2 text-[var(--app-text)] transition hover:border-cyan-500 hover:text-[var(--app-strong)]" aria-label="Regenerate response">
                                                 <RotateCw className="h-3.5 w-3.5" />
                                             </button>
-                                            <button type="button" onClick={handleRenameConversation} className="inline-flex items-center rounded-full border border-zinc-800 bg-zinc-900/70 p-2 text-zinc-200 transition hover:border-cyan-500 hover:text-white" aria-label="Rename conversation">
+                                            <button type="button" onClick={handleRenameConversation} className="inline-flex items-center rounded-full border-[var(--app-border)] bg-[var(--app-surface-secondary)]/70 p-2 text-[var(--app-text)] transition hover:border-cyan-500 hover:text-[var(--app-strong)]" aria-label="Rename conversation">
                                                 <Pencil className="h-3.5 w-3.5" />
                                             </button>
-                                            <button type="button" onClick={handleExportConversation} className="inline-flex items-center rounded-full border border-zinc-800 bg-zinc-900/70 p-2 text-zinc-200 transition hover:border-cyan-500 hover:text-white" aria-label="Export conversation">
+                                            <button type="button" onClick={handleExportConversation} className="inline-flex items-center rounded-full border-[var(--app-border)] bg-[var(--app-surface-secondary)]/70 p-2 text-[var(--app-text)] transition hover:border-cyan-500 hover:text-[var(--app-strong)]" aria-label="Export conversation">
                                                 <Download className="h-3.5 w-3.5" />
                                             </button>
-                                            <button type="button" onClick={handleDeleteConversation} className="inline-flex items-center rounded-full border border-zinc-800 bg-zinc-900/70 p-2 text-zinc-200 transition hover:border-red-500 hover:text-white" aria-label="Delete conversation">
+                                            <button type="button" onClick={handleDeleteConversation} className="inline-flex items-center rounded-full border-[var(--app-border)] bg-[var(--app-surface-secondary)]/70 p-2 text-[var(--app-text)] transition hover:border-red-500 hover:text-[var(--app-strong)]" aria-label="Delete conversation">
                                                 <Trash2 className="h-3.5 w-3.5" />
                                             </button>
                                         </div>
@@ -337,10 +337,10 @@ export default function AssistantPanel() {
                             ) : null}
                             {!activeConversation || activeConversation.messages.length === 0 ? (
                                 <div className="space-y-4">
-                                    <div className="rounded-xl border border-zinc-800 bg-gradient-to-br from-[#031428]/80 to-[#071726]/70 p-4 text-sm text-zinc-200 shadow-inner">
-                                        <div className="mb-3 text-sm text-zinc-400">QUICK QUESTIONS</div>
+                                    <div className="rounded-xl border-[var(--app-border)] bg-[var(--app-surface-secondary)] p-4 text-sm text-[var(--app-text)] shadow-inner">
+                                        <div className="mb-3 text-sm text-[var(--app-text-muted)]">QUICK QUESTIONS</div>
                                         <div className="grid grid-cols-2 gap-3">
-                                            {(suggestions.length ? suggestions.slice(0,6) : [
+                                            {(suggestions.length ? suggestions.slice(0, 6) : [
                                                 'Explain Backend Architecture',
                                                 'Explain Authentication',
                                                 'Show PostgreSQL Schema',
@@ -354,13 +354,12 @@ export default function AssistantPanel() {
                                                     onClick={() => setQuestion(s)}
                                                     whileHover={{ scale: 1.02 }}
                                                     whileTap={{ scale: 0.98 }}
-                                                    className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-3 text-left text-sm text-zinc-200 transition-shadow focus:outline-none"
-                                                    style={{ boxShadow: 'inset 0 -6px 24px rgba(2,6,23,0.6)' }}
+                                                    className="flex items-center gap-3 rounded-lg border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-3 text-left text-sm text-[var(--app-text)] shadow-[var(--shadow-sm)] transition focus:outline-none"
                                                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setQuestion(s); } }}
                                                     tabIndex={0}
                                                     aria-label={`Quick question: ${s}`}
                                                 >
-                                                    <div className="h-8 w-8 flex-shrink-0 rounded-md bg-gradient-to-br from-blue-600 to-cyan-500 p-1 text-white flex items-center justify-center">{['🎯','🔒','📘','🐳','🚀','📁'][idx]}</div>
+                                                    <div className="h-8 w-8 flex-shrink-0 rounded-md bg-gradient-to-br from-blue-600 to-cyan-500 p-1 text-[var(--app-surface)] flex items-center justify-center">{['🎯', '🔒', '📘', '🐳', '🚀', '📁'][idx]}</div>
                                                     <div className="flex-1 text-xs">{s}</div>
                                                 </motion.button>
                                             ))}
@@ -374,8 +373,8 @@ export default function AssistantPanel() {
                             )}
                         </div>
 
-                        <div className="border-t border-zinc-800 p-3">
-                            <div className="flex items-center gap-2 rounded-2xl border border-zinc-800 bg-gradient-to-br from-black/60 to-zinc-900/60 p-2">
+                        <div className="border-t border-[var(--app-border)] p-3">
+                            <div className="flex items-center gap-2 rounded-2xl border-[var(--app-border)] bg-[var(--app-surface)] p-2">
                                 <textarea
                                     ref={inputRef}
                                     rows={1}
@@ -388,7 +387,7 @@ export default function AssistantPanel() {
                                         }
                                     }}
                                     placeholder="Ask anything about your project or general AI..."
-                                    className="min-h-12 max-h-40 w-full resize-none border-0 bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-zinc-500"
+                                    className="min-h-12 max-h-40 w-full resize-none border-0 bg-transparent px-3 py-2 text-sm text-[var(--app-text)] outline-none placeholder:text-[var(--app-text-muted)]"
                                     aria-label="Assistant input"
                                 />
                                 <div className="flex items-center gap-2">
@@ -406,7 +405,7 @@ export default function AssistantPanel() {
                                             // ignore upload failures
                                         }
                                     }} />
-                                    <label htmlFor="assistant-file-input" className="rounded-full p-2 text-zinc-300 hover:text-white cursor-pointer" aria-label="Attach file">
+                                    <label htmlFor="assistant-file-input" className="rounded-full p-2 text-[var(--app-text-muted)] hover:text-[var(--app-text)] cursor-pointer" aria-label="Attach file">
                                         <Paperclip className="h-4 w-4" />
                                     </label>
                                     <button type="button" onClick={async () => {
@@ -429,15 +428,15 @@ export default function AssistantPanel() {
                                         } catch {
                                             // ignore recording failures
                                         }
-                                    }} className="rounded-full p-2 text-zinc-300 hover:text-white" aria-label="Record voice">
+                                    }} className="rounded-full p-2 text-[var(--app-text-muted)] hover:text-[var(--app-text)]" aria-label="Record voice">
                                         <Mic className="h-4 w-4" />
                                     </button>
                                     {streaming ? (
-                                        <button type="button" onClick={handleStopStream} className="rounded-full bg-red-600 p-2 text-white" aria-label="Stop streaming response">
+                                        <button type="button" onClick={handleStopStream} className="rounded-full bg-red-600 p-2 text-[var(--app-surface)]" aria-label="Stop streaming response">
                                             <X className="h-4 w-4" />
                                         </button>
                                     ) : (
-                                        <button type="button" onClick={() => void handleSend()} disabled={loading || !question.trim()} className="inline-flex items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 p-2 text-white disabled:opacity-60">
+                                        <button type="button" onClick={() => void handleSend()} disabled={loading || !question.trim()} className="inline-flex items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 p-2 text-[var(--app-surface)] disabled:opacity-60">
                                             {loading ? <Loader className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                                         </button>
                                     )}
